@@ -15,6 +15,10 @@ import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 
 import { colours, globalStyles } from '../components/style';
 
+//keyboardavoidingwrapper
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
+
+
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
   const [show, setShow] = useState(false);
@@ -28,9 +32,10 @@ export default function Signup({ navigation }) {
   };
 
   return (
+    <KeyboardAvoidingWrapper>
     <View style={globalStyles.container}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      {/* <ScrollView contentContainerStyle={{ flexGrow: 1 }}> */}
         <View style={globalStyles.inner}>
           <Image
             source={require('../assets/logo_not.jpg')}
@@ -215,7 +220,8 @@ export default function Signup({ navigation }) {
             )}
           </Formik>
         </View>
-      </ScrollView>
+      {/* </ScrollView> */}
     </View>
+    </KeyboardAvoidingWrapper>
   );
 }
