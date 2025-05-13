@@ -1,135 +1,147 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-
-// formik
 import { Formik } from 'formik';
-
-//icons
-import { Octicons, Ionicons} from '@expo/vector-icons';
-
-//navigation
-import { useNavigation } from '@react-navigation/native';
-
-//google icon
-import { FontAwesome } from '@expo/vector-icons';
+import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import {
-    StyledContainer,
-    InnerContainer,
-    PageLogo,
-    PageTitle,
-    SubTitle,
-    StyledFormArea,
-    LeftIcon,
-    StyledInputLabel,
-    StyledTextInput,
-    RightIcon,
-    colours,
-    StyledButton,
-    ButtonText,
-    MsgBox,
-    Line,
-    ExtraText,
-    ExtraView,
-    TextLink,
-    TextLinkContent
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
 
-} from '../components/style';
+import { colours, globalStyles } from '../components/style';
 
-import { View, TouchableOpacity} from 'react-native';
+export default function Login({ navigation }) {
+  const [hidePassword, setHidePassword] = useState(true);
+  const { white } = colours;
 
+  return (
+    <View style={globalStyles.container}>
+      <StatusBar style="dark" />
 
+      <View style={globalStyles.inner}>
+        {/* Logo */}
+        <Image
+          source={require('../assets/logo_not.jpg')}
+          style={globalStyles.logo}
+          resizeMode="cover"
+        />
 
+        {/* Titles */}
+        <Text style={globalStyles.title}>HandyGo</Text>
+        <Text style={globalStyles.subtitle}>Account Login</Text>
 
-const { primary_darkestblue, dark_grey, white } = colours;
+        <Formik
+          initialValues={{ email: '', password: '' }}
+          onSubmit={(values) => {
+            console.log(values);
+            navigation.navigate('Welcome');
+          }}
+        >
+          {({ handleChange, handleBlur, handleSubmit, values }) => (
+            <>
+              {/* Email Field */}
+              <View style={globalStyles.inputWrapper}>
+                <Text style={globalStyles.inputLabel}>Email Address</Text>
+                <View style={globalStyles.inputRow}>
+                  <Octicons
+                    name="mail"
+                    size={20}
+                    color={white}
+                    style={globalStyles.inputIcon}
+                  />
+                  <TextInput
+                    style={globalStyles.textInput}
+                    placeholder="Enter Your Email Here"
+                    placeholderTextColor={white}
+                    onChangeText={handleChange('email')}
+                    onBlur={handleBlur('email')}
+                    value={values.email}
+                    keyboardType="email-address"
+                  />
+                </View>
+              </View>
 
-// import { InnerContainer, PageLogo, PageTittle } from '../components/style';
-const Login = ({navigation}) =>{
-    const [hidePassword, setHidePassword] = useState(true);
-    return (
-        <StyledContainer>
-            <StatusBar style = "dark"></StatusBar>
-            <InnerContainer>
-                <PageLogo resizeMode="cover" 
-                source={require('../assets/logo_not.jpg')}></PageLogo>
-                <PageTitle>HandyGo</PageTitle>
-                <SubTitle>Account Login</SubTitle>
+              {/* Password Field */}
+              <View style={globalStyles.inputWrapper}>
+                <Text style={globalStyles.inputLabel}>Password</Text>
+                <View style={globalStyles.inputRow}>
+                  <Octicons
+                    name="lock"
+                    size={20}
+                    color={white}
+                    style={globalStyles.inputIcon}
+                  />
+                  <TextInput
+                    style={globalStyles.textInput}
+                    placeholder="••••••"
+                    placeholderTextColor={white}
+                    secureTextEntry={hidePassword}
+                    onChangeText={handleChange('password')}
+                    onBlur={handleBlur('password')}
+                    value={values.password}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setHidePassword(!hidePassword)}
+                    style={globalStyles.rightIconRow}
+                  >
+                    <Ionicons
+                      name={hidePassword ? 'eye-off' : 'eye'}
+                      size={20}
+                      color={white}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
 
-                <Formik
-                    initialValues= {{email: '', password: ''}}
-                    onSubmit={(values) =>{
-                        console.log(values);
-                        navigation.navigate('Welcome');
-                    }}
-                >
-                    {({handleChange, handleBlur, handleSubmit, values }) => 
-                    <StyledFormArea>
-                        <MyTextInput 
-                            label="Email Address"
-                            icon = "mail"
-                            placeholder="john123@gmail.com"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('email')}
-                            onBlur={handleBlur('email')}
-                            value= {values.email}
-                            keyboardType='email-address'
-        
-                        />
-                        <MyTextInput
-                            label="Password"
-                            icon = "lock"
-                            placeholder="* * * * *"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('password')}
-                            onBlur={handleBlur('password')}
-                            value= {values.password}
-                            secureTextEntry = {hidePassword}
-                            isPassword={true}
-                            hidePassword={hidePassword}
-                            setHidePassword={setHidePassword}
+              {/* Login Button */}
+              <TouchableOpacity
+                style={globalStyles.button}
+                onPress={handleSubmit}
+              >
+                <Text style={globalStyles.buttonText}>Login</Text>
+              </TouchableOpacity>
 
-                        />
-                        <MsgBox>...</MsgBox>
-                        <StyledButton onPress={handleSubmit}>
-                            <ButtonText>Login</ButtonText>
-                        </StyledButton>
-                        <Line />
-                        <StyledButton onPress={handleSubmit}>
-                    
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-                            <FontAwesome name="google" size={20} color={white} style={{ marginRight: 10 }} />
-                            <ButtonText>Sign In with Google</ButtonText>
-                        </View>
-                        </StyledButton>
-                        <ExtraView>
-                            <ExtraText>Don't have an account already?</ExtraText>
-                            <TextLink onPress ={() => navigation.navigate('Signup')}>
-                                <TextLinkContent>Sign Up</TextLinkContent>
-                            </TextLink> 
-                        </ExtraView>
-                        </StyledFormArea>}
+              {/* Divider */}
+              <View style={globalStyles.line} />
 
-                </Formik>
+              {/* Google Button */}
+              <TouchableOpacity
+                style={globalStyles.button}
+                onPress={handleSubmit}
+              >
+                <View style={globalStyles.googleButtonContent}>
+                  <FontAwesome
+                    name="google"
+                    size={20}
+                    color={white}
+                    style={{ marginRight: 10 }}
+                  />
+                  <Text style={globalStyles.buttonText}>Sign In with Google</Text>
+                </View>
+              </TouchableOpacity>
 
-            </InnerContainer>
-        </StyledContainer>
-    );
+              {/* Sign Up Link */}
+              <View style={globalStyles.extraView}>
+                <Text style={globalStyles.extraText}>
+                  Don't have an account already?
+                </Text>
+                <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+                  <Text style={globalStyles.linkText}>Sign Up</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </Formik>
+      </View>
+    </View>
+  );
 }
 
-const MyTextInput = ({label, icon, isPassword, hidePassword, setHidePassword, ...props}) =>{
-    return (
-        <View>
-        <LeftIcon>
-            <Octicons name={icon} size={30} color={white} />
-        </LeftIcon>
-        <StyledInputLabel>{label}</StyledInputLabel>
-        <StyledTextInput{...props} />
-        {isPassword && (
-            <RightIcon onPress={() => setHidePassword(!hidePassword)}>
-            <Ionicons name={hidePassword ? 'eye-off':'eye'} size={20} color={white} />
-          </RightIcon>
-            )}
-        </View>
-    );
-};
 
-export default Login;
+
+
+        
+
+        

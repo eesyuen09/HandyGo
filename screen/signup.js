@@ -1,240 +1,221 @@
-import React, {use, useState} from 'react';
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { ScrollView } from 'react-native';
-
-// formik
-import { Formik } from 'formik';
-
-//icons
-import { Octicons, Ionicons, createIconSetFromIcoMoon} from '@expo/vector-icons';
-
-
 import {
-    StyledContainer,
-    InnerContainer,
-    PageLogo,
-    PageTitle,
-    SubTitle,
-    StyledFormArea,
-    LeftIcon,
-    StyledInputLabel,
-    StyledTextInput,
-    RightIcon,
-    colours,
-    StyledButton,
-    ButtonText,
-    MsgBox,
-    Line,
-    ExtraText,
-    ExtraView,
-    TextLink,
-    TextLinkContent
-
-} from '../components/style';
-
-import { View, TouchableOpacity} from 'react-native';
-
-
-
-//colours
-const { primary_darkestblue, dark_grey, white } = colours;
-
-//datetimepicker
+  ScrollView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import Constants from 'expo-constants';
+import { Formik } from 'formik';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 
-// import { InnerContainer, PageLogo, PageTittle } from '../components/style';
-const Signup = ({navigation}) =>{
-    const [hidePassword, setHidePassword] = useState(true);
-    const [show, setShow] = useState(false);
-    const[date, setDate] = useState(new Date(2000, 0, 1));
-    const isDate = false;
+import { colours, globalStyles } from '../components/style';
 
-    //actual date to be sent
-    const [dob, setDob] = useState();
+export default function Signup({ navigation }) {
+  const [hidePassword, setHidePassword] = useState(true);
+  const [show, setShow] = useState(false);
+  const [date, setDate] = useState(new Date(2000, 0, 1));
+  const [dob, setDob] = useState();
 
-    const onChange = (event, selectedDate) => {
-        const currentDate = selectedDate || date;
-        setShow(false);
-        setDate(currentDate);
-        setDob(currentDate)
-    };
-    
-    function showDatePicker(){
-        setShow(true);
-    };
-    return (
-        <StyledContainer>
-            <StatusBar style = "dark"></StatusBar>
-            <ScrollView contentContainerStyle={{ flexGrow: 1}}>
-            <InnerContainer>
-                <PageLogo resizeMode="cover" 
-                source={require('../assets/logo_not.jpg')}></PageLogo>
-                <PageTitle>HandyGo</PageTitle>
-                <SubTitle>Account Sign Up</SubTitle>
-                {show && (
-                    <DateTimePicker
-                    testID="dateTimePicker"
-                    value={date}
-                    mode='date'
-                    is24Hour={true}
-                    onChange={onChange}
-                    />
-                )}
-
-
-                <Formik
-                    initialValues= {{fullName: '', email:'', dateOfBirth:'', password: '', confirmPassword: ''}}
-                    onSubmit={(values) =>{
-                        console.log(values);
-                    }}
-                >
-                    {({handleChange, handleBlur, handleSubmit, values }) => 
-                    <StyledFormArea>
-                        <MyTextInput 
-                            label="Full Name"
-                            icon = "person"
-                            placeholder="John"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('fullName')}
-                            onBlur={handleBlur('fullName')}
-                            value= {values.fullName}
-                            editable = {!isDate}
-                
-                        />
-
-                        <MyTextInput 
-                            label="Email Address"
-                            icon = "mail"
-                            placeholder="john123@gmail.com"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('email')}
-                            onBlur={handleBlur('email')}
-                            value= {values.email}
-                            keyboardType='email-address'
-                            editable = {!isDate}
-                        />
-
-                        <MyTextInput 
-                            label="Date of Birth"
-                            icon = "calendar"
-                            placeholder="   YYYY - MM - DD"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('dateOfBirth')}
-                            onBlur={handleBlur('dateOfBirth')}
-                            value= {dob ? dob.toDateString() : ''}
-                            isDate = {true}
-                            editable = {!isDate}
-                            showDatePicker = {showDatePicker}
-             
-        
-                        />      
-                        <MyTextInput
-                            label="Password"
-                            icon = "lock"
-                            placeholder="* * * * *"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('password')}
-                            onBlur={handleBlur('password')}
-                            value= {values.password}
-                            secureTextEntry = {hidePassword}
-                            isPassword={true}
-                            hidePassword={hidePassword}
-                            setHidePassword={setHidePassword}
-                            editable = {!isDate}
-
-                        />
-
-                        <MyTextInput
-                            label="Confirm Password"
-                            icon = "lock"
-                            placeholder="* * * * *"
-                            placeholderTextColor={white}
-                            onChangeText={handleChange('confirmPassword')}
-                            onBlur={handleBlur('confirmPassword')}
-                            value= {values.confirmPassword}
-                            secureTextEntry = {hidePassword}
-                            isPassword={true}
-                            hidePassword={hidePassword}
-                            setHidePassword={setHidePassword}
-                            editable = {!isDate}
-
-                        />          
-                        <MsgBox>...</MsgBox>
-                        <StyledButton onPress={handleSubmit}>
-                            <ButtonText>
-                                Sign Up
-                            </ButtonText>
-                        </StyledButton>
-                        <Line />
-                    
-                        <ExtraView>
-                            <ExtraText>Already have an account?</ExtraText>
-                            <TextLink onPress ={() => navigation.navigate('Login')}>
-                                <TextLinkContent>Login</TextLinkContent>
-                            </TextLink>
-                        </ExtraView>
-                        </StyledFormArea>}
-
-                </Formik>
-
-            </InnerContainer>
-            </ScrollView>
-        </StyledContainer>
-    );
-}
-
-
-const MyTextInput = ({
-    label,
-    icon,
-    isPassword,
-    hidePassword,
-    setHidePassword,
-    isDate = false,
-    showDatePicker,
-    ...props
-  }) => {
-    const inputField = (
-      <StyledTextInput
-        {...props}
-        editable={props.editable}// disable keyboard if it's a date field
-        // pointerEvents={isDate ? "none" : "auto"} // prevent input from intercepting touch if date
-      />
-    );
-  
-    return (
-      <View>
-        <LeftIcon>
-          {icon === 'calendar' ? (
-            <TouchableOpacity onPress={showDatePicker}>
-              <Octicons name="calendar" size={30} color={white} />
-            </TouchableOpacity>
-          ) : (
-            <Octicons name={icon} size={30} color={white} />
-          )}
-        </LeftIcon>
-  
-        <StyledInputLabel>{label}</StyledInputLabel>
-  
-        {isDate ? (
-          <TouchableOpacity onPress={showDatePicker} activeOpacity={1}>
-            {inputField}
-          </TouchableOpacity>
-        ) : (
-          inputField
-        )}
-  
-        {isPassword && (
-          <RightIcon onPress={() => setHidePassword(!hidePassword)}>
-            <Ionicons
-              name={hidePassword ? 'eye-off' : 'eye'}
-              size={20}
-              color={white}
-            />
-          </RightIcon>
-        )}
-
-        </View> 
-    );
+  const onChange = (_, selectedDate) => {
+    setShow(false);
+    setDate(selectedDate || date);
+    setDob(selectedDate || date);
   };
-export default Signup;
+
+  return (
+    <View style={globalStyles.container}>
+      <StatusBar style="dark" />
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={globalStyles.inner}>
+          <Image
+            source={require('../assets/logo_not.jpg')}
+            style={globalStyles.logo}
+            resizeMode="cover"
+          />
+          <Text style={globalStyles.title}>HandyGo</Text>
+          <Text style={globalStyles.subtitle}>Account Sign Up</Text>
+
+          
+
+          <Formik
+            initialValues={{
+              fullName: '',
+              email: '',
+              password: '',
+              confirmPassword: '',
+            }}
+            onSubmit={(values) => console.log(values)}
+          >
+            {({ handleChange, handleBlur, handleSubmit, values }) => (
+              <>
+                {/* Full Name */}
+                <View style={globalStyles.inputWrapper}>
+                  <Text style={globalStyles.inputLabel}>Full Name</Text>
+                  <View style={globalStyles.inputRow}>
+                    <Octicons
+                      name="person"
+                      size={20}
+                      color={colours.white}
+                      style={globalStyles.inputIcon}
+                    />
+                    <TextInput
+                      style={globalStyles.textInput}
+                      placeholder="Enter Your Full Name Here"
+                      placeholderTextColor={colours.white}
+                      onChangeText={handleChange('fullName')}
+                      onBlur={handleBlur('fullName')}
+                      value={values.fullName}
+                    />
+                  </View>
+                </View>
+
+                {/* Email */}
+                <View style={globalStyles.inputWrapper}>
+                  <Text style={globalStyles.inputLabel}>Email Address</Text>
+                  <View style={globalStyles.inputRow}>
+                    <Octicons
+                      name="mail"
+                      size={20}
+                      color={colours.white}
+                      style={globalStyles.inputIcon}
+                    />
+                    <TextInput
+                      style={globalStyles.textInput}
+                      placeholder="Enter Your Email Address Here"
+                      placeholderTextColor={colours.white}
+                      keyboardType="email-address"
+                      onChangeText={handleChange('email')}
+                      onBlur={handleBlur('email')}
+                      value={values.email}
+                    />
+                  </View>
+                </View>
+
+                {/* Date of Birth */}
+                <View style={globalStyles.inputWrapper}>
+                  <Text style={globalStyles.inputLabel}>Date of Birth</Text>
+                  <TouchableOpacity onPress={() => setShow(true)}>
+                    <View style={globalStyles.inputRow}>
+                      <Octicons
+                        name="calendar"
+                        size={20}
+                        color={colours.white}
+                        style={globalStyles.inputIcon}
+                      />
+                      <TextInput
+                        style={globalStyles.textInput}
+                        placeholder="YYYY – MM – DD"
+                        placeholderTextColor={colours.white}
+                        editable={false}
+                        value={dob ? dob.toDateString() : ''}
+                      />
+                      {show && (
+                    <DateTimePicker
+                      value={date}
+                      mode="date"
+                      display="default"
+                      onChange={onChange}
+                    />
+                  )}
+                    </View>
+                  </TouchableOpacity>
+                  
+                </View>
+
+                {/* Password */}
+                <View style={globalStyles.inputWrapper}>
+                  <Text style={globalStyles.inputLabel}>Password</Text>
+                  <View style={globalStyles.inputRow}>
+                    <Octicons
+                      name="lock"
+                      size={20}
+                      color={colours.white}
+                      style={globalStyles.inputIcon}
+                    />
+                    <TextInput
+                      style={globalStyles.textInput}
+                      placeholder="••••••"
+                      placeholderTextColor={colours.white}
+                      secureTextEntry={hidePassword}
+                      onChangeText={handleChange('password')}
+                      onBlur={handleBlur('password')}
+                      value={values.password}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setHidePassword(!hidePassword)}
+                      style={globalStyles.rightIconRow}
+                    >
+                      <Ionicons
+                        name={hidePassword ? 'eye-off' : 'eye'}
+                        size={20}
+                        color={colours.white}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Confirm Password */}
+                <View style={globalStyles.inputWrapper}>
+                  <Text style={globalStyles.inputLabel}>Confirm Password</Text>
+                  <View style={globalStyles.inputRow}>
+                    <Octicons
+                      name="lock"
+                      size={20}
+                      color={colours.white}
+                      style={globalStyles.inputIcon}
+                    />
+                    <TextInput
+                      style={globalStyles.textInput}
+                      placeholder="••••••"
+                      placeholderTextColor={colours.white}
+                      secureTextEntry={hidePassword}
+                      onChangeText={handleChange('confirmPassword')}
+                      onBlur={handleBlur('confirmPassword')}
+                      value={values.confirmPassword}
+                    />
+                    <TouchableOpacity
+                      onPress={() => setHidePassword(!hidePassword)}
+                      style={globalStyles.rightIconRow}
+                    >
+                      <Ionicons
+                        name={hidePassword ? 'eye-off' : 'eye'}
+                        size={20}
+                        color={colours.white}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {/* Submit */}
+                <TouchableOpacity
+                  style={globalStyles.button}
+                  onPress={handleSubmit}
+                >
+                  <Text style={globalStyles.buttonText}>Sign Up</Text>
+                </TouchableOpacity>
+
+                {/* Divider */}
+                <View style={globalStyles.line} />
+
+                {/* Back to Login */}
+                <View style={globalStyles.extraView}>
+                  <Text style={globalStyles.extraText}>
+                    Already have an account?
+                  </Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                    <Text style={globalStyles.linkText}>Login</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+          </Formik>
+        </View>
+      </ScrollView>
+    </View>
+  );
+}
