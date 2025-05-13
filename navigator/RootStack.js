@@ -11,6 +11,7 @@ const {primary_darkestblue, secondary_darkblue} = colours;
 //screens
 import Login from '../screen/login';
 import Signup from '../screen/signup';
+import Welcome from '../screen/welcome_business';
 
 const RootStack = () => {
     return (
@@ -31,6 +32,7 @@ const RootStack = () => {
           
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
+        <Stack.Screen name= 'Welcome' component={Welcome}/>
       </Stack.Navigator>
     );
   };

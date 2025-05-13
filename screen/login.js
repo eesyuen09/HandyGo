@@ -11,12 +11,15 @@ import {
 } from 'react-native';
 
 import { colours, globalStyles } from '../components/style';
+//keyboardavoidingwrapper
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 
 export default function Login({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
   const { white } = colours;
 
   return (
+    <KeyboardAvoidingWrapper>
     <View style={globalStyles.container}>
       <StatusBar style="dark" />
 
@@ -136,6 +139,7 @@ export default function Login({ navigation }) {
         </Formik>
       </View>
     </View>
+    </KeyboardAvoidingWrapper>
   );
 }
 

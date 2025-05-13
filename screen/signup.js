@@ -15,6 +15,10 @@ import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 
 import { colours, globalStyles } from '../components/style';
 
+//keyboardavoidingwrapper
+import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
+
+
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
   const [show, setShow] = useState(false);
@@ -28,9 +32,10 @@ export default function Signup({ navigation }) {
   };
 
   return (
+    <KeyboardAvoidingWrapper>
     <View style={globalStyles.container}>
       <StatusBar style="dark" />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      {/* <ScrollView contentContainerStyle={{ flexGrow: 1 }}> */}
         <View style={globalStyles.inner}>
           <Image
             source={require('../assets/logo_not.jpg')}
@@ -48,10 +53,16 @@ export default function Signup({ navigation }) {
               email: '',
               password: '',
               confirmPassword: '',
+              role:'',
             }}
-            onSubmit={(values) => console.log(values)}
+            onSubmit={(values) => {
+              console.log(values);
+              navigation.navigate('Login');
+
+
+            }}
           >
-            {({ handleChange, handleBlur, handleSubmit, values }) => (
+            {({ handleChange, handleBlur, handleSubmit, values, setFieldValue }) => (
               <>
                 {/* Full Name */}
                 <View style={globalStyles.inputWrapper}>
@@ -191,6 +202,30 @@ export default function Signup({ navigation }) {
                   </View>
                 </View>
 
+              {/*role selection*/}
+              <Text style={globalStyles.inputLabel}>I am a:</Text>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 }}>
+                <TouchableOpacity
+                  style={[
+                    globalStyles.roleButton,
+                    values.role === 'business' && globalStyles.roleButtonSelected
+                  ]}
+                  onPress={() => setFieldValue('role', 'business')}
+                >
+                  <Text style={globalStyles.buttonText}>Business</Text>
+                </TouchableOpacity>
+                <View style={{width:10}}/>
+
+                <TouchableOpacity
+                  style={[
+                    globalStyles.roleButton,
+                    values.role === 'user' && globalStyles.roleButtonSelected
+                  ]}
+                  onPress={() => setFieldValue('role', 'user')}
+                >
+                  <Text style={globalStyles.buttonText}>User</Text>
+                </TouchableOpacity>
+              </View>
                 {/* Submit */}
                 <TouchableOpacity
                   style={globalStyles.button}
@@ -215,7 +250,8 @@ export default function Signup({ navigation }) {
             )}
           </Formik>
         </View>
-      </ScrollView>
+      {/* </ScrollView> */}
     </View>
+    </KeyboardAvoidingWrapper>
   );
 }
