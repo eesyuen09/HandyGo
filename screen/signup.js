@@ -57,7 +57,7 @@ export default function Signup({ navigation }) {
             }}
             onSubmit={(values) => {
               console.log(values);
-              navigation.navigate('Welcome');
+              navigation.navigate('Login');
 
 
             }}
