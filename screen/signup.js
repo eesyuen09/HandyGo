@@ -7,6 +7,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  Alert
 } from 'react-native';
 import Constants from 'expo-constants';
 import { Formik } from 'formik';
@@ -17,6 +18,9 @@ import { colours, globalStyles } from '../components/style';
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
 
 
 export default function Signup({ navigation }) {
@@ -50,20 +54,63 @@ export default function Signup({ navigation }) {
           <Formik
             initialValues={{
               fullName: '',
-              email: '',
+              email: '',          
               password: '',
               confirmPassword: '',
-              role:'',
+              role:''
             }}
-            onSubmit={(values) => {
-              console.log(values);
-              navigation.navigate('Login');
+            onSubmit={
+              async (values) => {
+                const {fullName, email, password, confirmPassword, role } = values;
 
+                if (!fullName || !email || !password || !confirmPassword || !role ) {
+                    Alert.alert('Error', 'Please fill in all fields.' );
+                    return;
+                  }
 
+                  if (values.password !== values.confirmPassword) {
+                    Alert.alert('Error', 'Passwords do not match.' );
+                    return;
+                  }
+
+                  try {
+                    const userCredential = await createUserWithEmailAndPassword(
+                      auth,
+                      email,
+                      password
+                    );
+                    const user = userCredential.user;
+
+                    await setDoc(doc(db, 'users', user.uid), {
+                      uid: user.uid,
+                      fullName: fullName,
+                      email: email,
+                      dob: dob.toISOString(),
+                      role: role,
+                      createdAt: new Date().toISOString()
+                    });
+
+                    Alert.alert('Success', 'Account created successfully!', [
+                      { text: 'OK', onPress: () => navigation.navigate('Login') }
+                    ]);
+                  } catch (error) {
+                    if (error.code === 'auth/email-already-in-use') {
+                      Alert.alert('Error', 'Email already in use' );                  
+                    } else if (error.code === 'auth/invalid-email') {
+                      Alert.alert('Error', 'Invalid email format'  );                     
+                    } else if (error.code === 'auth/weak-password') {
+                      Alert.alert('Error', 'Password should be at least 6 characters');  
+                    } else {
+                       Alert.alert('Error', error.message);  
+                    }
+                  }            
             }}
           >
             {({ handleChange, handleBlur, handleSubmit, values, setFieldValue }) => (
+              
               <>
+               
+
                 {/* Full Name */}
                 <View style={globalStyles.inputWrapper}>
                   <Text style={globalStyles.inputLabel}>Full Name</Text>
