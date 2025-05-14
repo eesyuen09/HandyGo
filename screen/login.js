@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 
 import { colours, globalStyles } from '../components/style';
@@ -75,7 +76,7 @@ export default function Login({ navigation }) {
       <View style={globalStyles.inner}>
         {/* Logo */}
         <Image
-          source={require('../assets/logo_not.jpg')}
+          source={require('../assets/png.png')}
           style={globalStyles.logo}
           resizeMode="cover"
         />
@@ -189,7 +190,7 @@ export default function Login({ navigation }) {
               <View style={globalStyles.line} />
 
               {/* Google Button */}
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 style={globalStyles.button}
                 onPress={() => promptAsync()}
               >
@@ -202,7 +203,7 @@ export default function Login({ navigation }) {
                   />
                   <Text style={globalStyles.buttonText}>Sign In with Google</Text>
                 </View>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
               {/* Sign Up Link */}
               <View style={globalStyles.extraView}>

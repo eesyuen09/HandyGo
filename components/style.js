@@ -53,6 +53,7 @@ export const globalStyles = StyleSheet.create({
     width: 250,
     height: 200,
     marginBottom: 10,
+    alignItems: 'center',
   },
 
   button: {

@@ -25,7 +25,7 @@ export default function Welcome({navigation}) {
       <View style={globalStyles.inner}>
         {/* Logo */}
         <Image
-          source={require('../assets/logo_not.jpg')}
+          source={require('../assets/png.png')}
           style={globalStyles.logo}
           resizeMode="cover"
         />
