@@ -18,7 +18,7 @@ import { colours, globalStyles } from '../components/style';
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 
@@ -80,7 +80,9 @@ export default function Signup({ navigation }) {
                       password
                     );
                     const user = userCredential.user;
+                    await sendEmailVerification(user);                 
 
+                    
                     await setDoc(doc(db, 'users', user.uid), {
                       uid: user.uid,
                       fullName: fullName,
@@ -90,9 +92,17 @@ export default function Signup({ navigation }) {
                       createdAt: new Date().toISOString()
                     });
 
-                    Alert.alert('Success', 'Account created successfully!', [
+                    Alert.alert('Please Verify Your Email', 'A verification email has been sent to you account.',
+                      [{ text: 'OK', onPress: () => navigation.navigate('Login')}]                  
+                    );                  
+
+                    
+
+                    /*Alert.alert('Success', 'Account created successfully!', [
                       { text: 'OK', onPress: () => navigation.navigate('Login') }
                     ]);
+                    */
+                   
                   } catch (error) {
                     if (error.code === 'auth/email-already-in-use') {
                       Alert.alert('Error', 'Email already in use' );                  

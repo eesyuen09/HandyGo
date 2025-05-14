@@ -97,23 +97,35 @@ export default function Login({ navigation }) {
                try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
+                await user.reload();
+
+                if (!user.emailVerified) {
+                  Alert.alert('Email Not Verified', 'Please verify your email before logging in.');
+                  return;
+                }
+
                 const docRef = doc(db, 'users', user.uid);
                 const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                  const userData = docSnap.data();
-                  if (userData.role == 'business') {
-                    navigation.navigate('Business Dashboard');
-                  } else if (userData.role == 'user') {
-                    navigation.navigate('User Dashboard');
+
+                  if (docSnap.exists()) {
+                    //Existing user
+                    const userData = docSnap.data();
+                    if (userData.role == 'business') {
+                      navigation.navigate('Business Dashboard');
+                    } else if (userData.role == 'user') {
+                      navigation.navigate('User Dashboard');
+                    } else {
+                      Alert.alert('Error', 'No role assigned' )
+                    }
                   } else {
-                    Alert.alert('Error', 'No role assigned' )
-                  }
-                }   
+                    Alert.alert('Account Not Found', 'Please sign up first.');
+                  }                      
+                
                } catch (error) {
                  if (error.code === 'auth/user-not-found') {
                   Alert.alert('Error', 'No user found' );                  
-                } else if (error.code === 'auth/wrong-password') {
-                  Alert.alert('Error', 'Incorrect password'  );                     
+                } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                  Alert.alert('Error', 'Incorrect email or password'  );                     
                 } else {
                   Alert.alert('Error', error.message);  
                 }
