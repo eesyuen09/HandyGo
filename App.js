@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 //screen
 // import Login from './screen/login';
 // import Signup from './screen/signup';
-import Moredetails from './screen/moredetails';
+import Moredetails from './screen/home page';
 
 // import { NavigationContainer } from '@react-navigation/native';
 // react navigation stack

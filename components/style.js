@@ -41,28 +41,21 @@ export const style = StyleSheet.create({
     alignItems: 'center',
   },
 
-  title: {
-    fontSize: 18,
-    color: colours.black,
-    fontFamily: 'Sora',
-    fontWeight: 400,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-
-  // subtitle: {
+  // title: {
   //   fontSize: 18,
-  //   color: primary_darkestblue,
-  //   marginBottom: 20,
-  //   fontWeight: 'bold',
+  //   color: colours.black,
+  //   fontFamily: 'Sora',
+  //   fontWeight: 400,
+  //   marginBottom: 10,
+  //   textAlign: 'center',
   // },
 
-  logo: {
-    width: 81.38,
-    height: 75,
-    marginBottom: 10,
-    alignItems: 'center',
-  },
+  // logo: {
+  //   width: 81.38,
+  //   height: 75,
+  //   marginBottom: 10,
+  //   alignItems: 'center',
+  // },
 //group:label,text input
   inputGroup: {
     width: '100%',
@@ -76,45 +69,8 @@ export const style = StyleSheet.create({
     marginBottom: 5,
     textAlign: 'left',
   },
-  //text input for single line
-  textInput: {
-    borderWidth: 1,
-    borderColor: colours.darkest_coco,
-    backgroundColor: colours.beige,
-    borderRadius: 20,
-    paddingHorizontal:15,
-    paddingVertical:12,
-    fontSize: 13,
-    color: colours.black,
-    marginLeft: 10,
-  },
-  //text area for multiline
-  textArea: {
-    borderWidth: 1,
-    borderColor: colours.border_brown,
-    backgroundColor: colours.beige,
-    borderRadius: 20,
 
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    fontSize: 14,
-    color: colours.black,
-    fontFamily: 'Inter',
-    textAlignVertical: 'top',
-    height: 100,
-  },
-
-  dropdown:{
-    borderWidth:1,
-    borderColor: colours.darkest_coco,
-    backgroundColor: beige,
-    borderRadius:10,
-    padding:12,
-    fontSize:14,
-    fontFamily: 'Inter', 
-  },
-
-  saveButton: {
+  Button: {
     backgroundColor: colours.main_coco,
     borderRadius: 20,
     paddingVertical: 15,
@@ -124,10 +80,13 @@ export const style = StyleSheet.create({
     marginTop: 20,
 
   },
-  saveButtonText: {
+  ButtonText: {
     color: colours.white,
     fontSize: 16,
     fontFamily: 'Sora',
     fontWeight: '600',
+  
   },
+
+  
 });
