@@ -42,7 +42,7 @@ export default function moredetails({ route, navigation}) {
     } = colours;
 
     const handleBusinessDetailsSubmit = async (values) =>{
-            const{ contact, address, NRIC, bankName, bankNumber, qualificationsSkillsExperiences, introduction } = values;
+            const{ contact, address, NRIC, bankName, bankNumber, categories, introduction } = values;
 
             {/* validation check */}
             if (!contact || !address || !NRIC || !bankName || !bankNumber) {
@@ -74,7 +74,7 @@ export default function moredetails({ route, navigation}) {
                     NRIC: values.NRIC,
                     bankName: values.bankName,
                     bankNumber: values.bankNumber,
-        
+                    categories: values.categories,
                     introduction: values.introduction,
                     
     
