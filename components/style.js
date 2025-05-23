@@ -78,6 +78,7 @@ export const style = StyleSheet.create({
   },
   //text input for single line
   textInput: {
+    width : '100%',
     borderWidth: 1,
     borderColor: colours.darkest_coco,
     backgroundColor: colours.beige,
@@ -86,10 +87,11 @@ export const style = StyleSheet.create({
     paddingVertical:12,
     fontSize: 13,
     color: colours.black,
-    marginLeft: 10,
+    // marginLeft: 10,
   },
   //text area for multiline
   textArea: {
+    width : '100%',
     borderWidth: 1,
     borderColor: colours.border_brown,
     backgroundColor: colours.beige,
@@ -105,22 +107,43 @@ export const style = StyleSheet.create({
   },
 
   dropdown:{
+    width : '100%',
     borderWidth:1,
     borderColor: colours.darkest_coco,
     backgroundColor: beige,
-    borderRadius:10,
+    borderRadius:20,
     padding:12,
     fontSize:14,
     fontFamily: 'Inter', 
   },
 
+  add_delete_c:{
+  
+    backgroundColor: colours.main_coco,
+    borderRadius: 20,
+    paddingVertical: 10, // Adds space inside (top and bottom)
+    paddingHorizontal: 15, // Adds space inside (left and right)
+    alignItems: 'center', // Centers the child *horizontally*
+    justifyContent: 'center', // Centers the child *vertically*
+    marginBottom: 5,
+  },
+  add_delete_t:{
+    color: colours.white,
+    fontSize: 16,
+    fontFamily: 'Inter',
+    fontWeight: '600',
+    fontSize: 10,
+    
+
+  },
+
   saveButton: {
     backgroundColor: colours.main_coco,
     borderRadius: 20,
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
+    paddingVertical: 15, // Adds space inside (top and bottom)
+    paddingHorizontal: 40, // Adds space inside (left and right)
+    alignItems: 'center', // Centers the child *horizontally*
+    justifyContent: 'center', // Centers the child *vertically*
     marginTop: 20,
 
   },

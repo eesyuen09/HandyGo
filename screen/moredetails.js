@@ -18,15 +18,19 @@ import { useFonts } from 'expo-font';
 import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
+//category import
+import { services_catogories } from '../constants/categories';
+
 
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
+// import { services_catogories } from '../constants/categories';
 // route: contain parameters passed from the previous screen
 export default function moredetails({ route, navigation}) {
-    const {uid} = route.params;
+    // const {uid} = route.params;
     const {
       darkest_coco,
       main_coco,
@@ -64,13 +68,13 @@ export default function moredetails({ route, navigation}) {
             
             {/* submit to firestore */}
             try{
-                await updateDoc(doc(db, 'serviceProviders', uid),{
+                await updateDoc(doc(db, 'serviceProviders'),{ //await updateDoc(doc(db, 'serviceProviders', uid) in dev
                     contact: values.contact,
                     address: values.address,
                     NRIC: values.NRIC,
                     bankName: values.bankName,
                     bankNumber: values.bankNumber,
-                    qualificationsSkillsExperiences: values.qualificationsSkillsExperiences,
+        
                     introduction: values.introduction,
                     
     
@@ -85,6 +89,12 @@ export default function moredetails({ route, navigation}) {
                     }
                 }
 
+  
+    const [step, setStep] = useState('title');
+    const [showPickerIndex, setShowPickerIndex] = useState(null);
+
+
+    const [categories, setCategories] = useState([{title:'',subtitle:[] }])
     const [selectedBank, setSelectedBank] = useState('');
     const [showPicker, setShowPicker] = useState(false);
     const [fontsLoaded] = useFonts({
@@ -94,6 +104,112 @@ export default function moredetails({ route, navigation}) {
       if(!fontsLoaded){
         return null;
       }
+    //function for categories
+    function addEmptyCategory() {
+        setCategories(prev => [...prev, {title:'', subtitle:[]}]);
+    }
+
+    function deleteEmptyCategory(){
+        setCategories(prev => (prev.length >1 ? prev.slice(0,prev.length-1):prev));
+    }
+    function updateTitle(index, title, setFieldValue){
+        setCategories(prev => {
+            const updated = [...prev];
+            updated[index].title = title;
+            updated[index].subtitle = [];
+            setFieldValue('categories',updated);
+            return updated;
+        });
+        
+    }
+
+
+
+    function addSubtitle(index, subtitle,setFieldValue){
+        setCategories(prev => {
+            const updated = [...prev];
+            const currentSubtitle = updated[index].subtitle;
+
+            if(currentSubtitle.includes(subtitle)){
+                //remove subtitle
+                updated[index].subtitle = currentSubtitle.filter((item) => item!==subtitle)
+            }else{
+                updated[index].subtitle = [...currentSubtitle, subtitle];
+            }
+            setFieldValue('categories',updated);
+            return updated;
+        });
+        
+    }
+
+    function renderCategoryBlock(cat, index, setFieldValue){
+        const selectedCategory = services_catogories.find((c)=> c.title === cat.title);
+
+        return (
+            <View key = {index} style = {style.inputGroup}>
+                <Text style = {style.inputLabel}>Service Category</Text>
+                <TouchableOpacity  
+                    style = {style.dropdown}
+                    onPress = {() => setShowPickerIndex(index)}
+                    >
+                    <Text style = {{fontFamily: 'Inter', fontSize:14}}>
+                        {cat.title || 'Select'}
+                    </Text>
+                    </TouchableOpacity>
+                    {showPickerIndex === index && (
+                    <Picker
+                    selectedValue={cat.title}
+                    onValueChange={(value) => {
+                        updateTitle(index, value);
+                        setShowPickerIndex(null); // hide picker after selection
+                    }}
+                    >
+                    <Picker.Item label="Select..." value="" />
+                    {services_catogories.map((cat) => (
+                        <Picker.Item key={cat.title} label={cat.title} value={cat.title} />
+                    ))}
+                    </Picker>
+                )}
+                
+            
+
+                {/* subcategory*/}
+                {selectedCategory && (
+                    <>
+                    
+                    <Text style = {{marginTop : 10}}>Select subcategories</Text>
+                    {selectedCategory.subcategories.map((subtitle) => (
+                    <TouchableOpacity
+                        key = {subtitle}
+                        onPress ={() => addSubtitle(index,subtitle)}
+                        style = {{
+                            flexDirection :'row',
+                            alignItems: 'Center',
+                            marginVertical:6,
+                        }}
+                        >
+                            <View
+                                style ={{width: 20,
+                                        height: 20,
+                                        borderWidth: 1,
+                                        borderRadius: 4,
+                                        marginRight: 10,
+                                        backgroundColor: cat.subtitle.includes(subtitle)
+                                            ? '#9A5A3C'
+                                            : 'transparent',
+                                }}
+                            />
+                            <Text>{subtitle}</Text>
+                        </TouchableOpacity>
+                    ))}
+                
+                    </>
+                )}
+                </View>
+            );
+            }
+
+   
     return(
         <KeyboardAvoidingWrapper>
         <View style= {style.container}>
@@ -113,145 +229,153 @@ export default function moredetails({ route, navigation}) {
             </View>
 
             {/* input*/}
-
             <Formik
-                initialValues={{contact:'', address:'', NRIC:'', bankName:'',
-                    bankNumber:'', qualificationsSkillsExperiences:'', introduction:'',
-                }}
-                onSubmit={handleBusinessDetailsSubmit}
+            initialValues={{
+                contact: '',
+                address: '',
+                NRIC: '',
+                bankName: '',
+                bankNumber: '',
+                categories:[{title:'', subtitle:[]}],
+                introduction: '',
+            }}
+            onSubmit={handleBusinessDetailsSubmit}
             >
+  {({ handleChange, handleBlur, handleSubmit, setFieldValue, values }) => (
+    <>
+      {/* Contact */}
+      <View style={style.inputGroup}>
+        <Text style={style.inputLabel}>Contact</Text>
+        <TextInput
+          style={style.textInput}
+          placeholder="Enter your contact here"
+          placeholderTextColor={darkest_coco}
+          onChangeText={handleChange('contact')}
+          onBlur={handleBlur('contact')}
+          value={values.contact}
+          keyboardType="number-pad"
+        />
+      </View>
 
-                {({ handleChange, handleBlur, handleSubmit,setFieldValue, values }) => (
-                    <>
-                    {/*contact*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>Contact</Text>
-                                <TextInput
-                                    style = {style.textInput}
-                                    placeholder='Enter your contact here'
-                                    placeholderTextColor={darkest_coco}
-                                    onChangeText={handleChange('contact')}
-                                    onBlur={handleBlur('contact')}
-                                    value = {values.contact}
-                                    keyboardType='number-pad'
-                                />
-                        </View>
-                    
-                    {/*Address*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>Address</Text>
-                                <TextInput
-                                    style = {style.textInput}
-                                    placeholder='Enter your address here'
-                                    placeholderTextColor={darkest_coco}
-                                    onChangeText={handleChange('address')}
-                                    onBlur={handleBlur('address')}
-                                    value = {values.address}
-                                />
-                        </View>
-                    
-                    {/*NRIC/ passport*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>NRIC/Passport</Text>
-                                <TextInput
-                                    style = {style.textInput}
-                                    placeholder='Enter your details here'
-                                    placeholderTextColor={darkest_coco}
-                                    onChangeText={handleChange('NRIC')}
-                                    onBlur={handleBlur('NRIC')}
-                                    value = {values.NRIC}
-                                />
-                        </View>
-                    
-                    
-                    {/*bank name, syntax , condition ? ifTrue : ifFalse*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>Bank Name</Text>
-                            {showPicker ?(
-                                <View style = {style.dropdown}>
-                                <Picker
-                                    selectedValue={values.bankName}
-                                    onValueChange={(value) => {
-                                        setFieldValue('bankName', value);
-                                        setShowPicker(false); // close dropdown</View>
-                                    }}
-                                >
-                                    <Picker.Item label="Select your bank" value="" />
-                                    <Picker.Item label="Maybank" value="Maybank" />
-                                    <Picker.Item label="CIMB" value="CIMB" />
-                                    <Picker.Item label="DBS" value="DBS" />
-                                    <Picker.Item label="OCBC" value="OCBC" />
-                                    <Picker.Item label="UOB" value="UOB" />
-                                    <Picker.Item label="POSB" value="POSB" />
+      {/* Address */}
+      <View style={style.inputGroup}>
+        <Text style={style.inputLabel}>Address</Text>
+        <TextInput
+          style={style.textInput}
+          placeholder="Enter your address here"
+          placeholderTextColor={darkest_coco}
+          onChangeText={handleChange('address')}
+          onBlur={handleBlur('address')}
+          value={values.address}
+        />
+      </View>
 
-                                </Picker>
-                                </View>
-                            ):(
-                                <TouchableOpacity
-                                    style={style.dropdown}
-                                    onPress={() => setShowPicker(true)}
-                                >
-                                    <Text style ={{ fontFamily: 'Inter', fontSize:14}}>
-                                        {values.bankName ?(
-                                            values.bankName):("Select your bank name")}
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                            </View>
-                    {/*bank number*/}
-                    <View style = {style.inputGroup}>
-                    <Text style = {style.inputLabel}>Bank Number </Text>
-                        <TextInput
-                            style = {style.textInput}
-                            placeholder='Enter your details here'
-                            placeholderTextColor={darkest_coco}
-                            onChangeText={handleChange('bankNumber')}
-                            onBlur={handleBlur('bankNumber')}
-                            value = {values.bankNumber}
-                            keyboardType='number-pad'
-                        />
-                    </View>
+      {/* NRIC/Passport */}
+      <View style={style.inputGroup}>
+        <Text style={style.inputLabel}>NRIC/Passport</Text>
+        <TextInput
+          style={style.textInput}
+          placeholder="Enter your details here"
+          placeholderTextColor={darkest_coco}
+          onChangeText={handleChange('NRIC')}
+          onBlur={handleBlur('NRIC')}
+          value={values.NRIC}
+        />
+      </View>
 
-                    {/*qualifications*/}
-                    <View style = {style.inputGroup}>
-                        <Text style = {style.inputLabel}>Qualifications/ Experiences/ Skills </Text>
-                        <TextInput
-                            style = {style.textArea}
-                            multiline={true}
-                            placeholder='Enter your details here'
-                            placeholderTextColor={darkest_coco}
-                            onChangeText={handleChange('qualificationsSkillsExperiences')}
-                            onBlur={handleBlur('qualificationsSkillsExperiences')}
-                            value = {values.qualificationsSkillsExperiences}
-                        />
-                    </View>
+      {/* Bank Name */}
+      <View style={style.inputGroup}>
+        <Text style={style.inputLabel}>Bank Name</Text>
+        {showPicker ? (
+          <View style={style.dropdown}>
+            <Picker
+              selectedValue={values.bankName}
+              onValueChange={(value) => {
+                setFieldValue('bankName', value);
+                setShowPicker(false);
+              }}
+            >
+              <Picker.Item label="Select your bank" value="" />
+              <Picker.Item label="Maybank" value="Maybank" />
+              <Picker.Item label="CIMB" value="CIMB" />
+              <Picker.Item label="DBS" value="DBS" />
+              <Picker.Item label="OCBC" value="OCBC" />
+              <Picker.Item label="UOB" value="UOB" />
+              <Picker.Item label="POSB" value="POSB" />
+            </Picker>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={style.dropdown}
+            onPress={() => setShowPicker(true)}
+          >
+            <Text style={{ fontFamily: 'Inter', fontSize: 14 }}>
+              {values.bankName ? values.bankName : 'Select your bank name'}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-                    {/*introduction*/}
-                    <View style = {style.inputGroup}>
-                        <Text style = {style.inputLabel}>Introduction </Text>
-                        <TextInput
-                            style = {style.textArea}
-                            multiline = {true}
-                            placeholder='Enter your details here'
-                            placeholderTextColor={darkest_coco}
-                            onChangeText={handleChange('introduction')}
-                            onBlur={handleBlur('introduction')}
-                            value = {values.introduction}
-                        />
-                    </View>
+      {/* Bank Number */}
+      <View style={style.inputGroup}>
+        <Text style={style.inputLabel}>Bank Number</Text>
+        <TextInput
+          style={style.textInput}
+          placeholder="Enter your details here"
+          placeholderTextColor={darkest_coco}
+          onChangeText={handleChange('bankNumber')}
+          onBlur={handleBlur('bankNumber')}
+          value={values.bankNumber}
+          keyboardType="number-pad"
+        />
+      </View>
 
-                    {/*savebutton*/}
-                    <TouchableOpacity 
-                        style = {style.saveButton}
-                        onPress = {handleSubmit}
-                     >
-                        <Text style = {style.saveButtonText}>Save Change</Text>
-                     </TouchableOpacity>
-            </>
-            )}
-            </Formik>
-            </View>
-        </View>
-        </KeyboardAvoidingWrapper>
+      {/* title*/}
+      {categories.map((cat, index) => renderCategoryBlock(cat, index))}
+      <TouchableOpacity 
+        onPress={addEmptyCategory}
+        style = {style.add_delete_c}>
+        <Text style={style.add_delete_t}>
+            + Add More Category
+        </Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+            onPress ={deleteEmptyCategory}
+            style = {style.add_delete_c}>
+            <Text style={style.add_delete_t}>
+                - Delete Category
+            </Text>
+        </TouchableOpacity>
+      
+
+      {/* Introduction */}
+      <View style={style.inputGroup}>
+        <Text style={style.inputLabel}>Introduction</Text>
+        <TextInput
+          style={style.textArea}
+          multiline={true}
+          placeholder="Enter your details here"
+          placeholderTextColor={darkest_coco}
+          onChangeText={handleChange('introduction')}
+          onBlur={handleBlur('introduction')}
+          value={values.introduction}
+        />
+      </View>
+
+      {/* Submit Button */}
+      <TouchableOpacity
+        style={style.saveButton}
+        onPress={handleSubmit}
+      >
+        <Text style={style.saveButtonText}>Save Changes</Text>
+      </TouchableOpacity>
+    </>
+  )}
+    </Formik>
+            
+
+    </View>
+    </View>
+    </KeyboardAvoidingWrapper>
     )
 }
