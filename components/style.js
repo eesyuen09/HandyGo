@@ -3,21 +3,23 @@ import Constants from 'expo-constants';
 
 // Colours
 export const colours = {
-  primary_darkestblue: "#27548A",
-  secondary_darkblue: "#27548A",
-  tertiary_coco: "#DDA853",
-  beige: "#F5EEDC",
-  dark_grey: "#393E46",
-  white: '#FFFDF6',
+  darkest_coco: "#704F38",
+  main_coco: "#A76545",
+  beige: "#F9F2ED",
+  grey: "E3E3E3",
+  white: '#FFFFFF',
+  yellow_brown: '#DDA853',
+  black: "#000000",
 };
 
 const {
-  primary_darkestblue,
-  secondary_darkblue,
-  tertiary_coco,
+  darkest_coco,
+  main_coco,
   beige,
-  dark_grey,
-  white
+  grey,
+  white,
+  yellow_brown,
+  black
 } = colours;
 
 // Global Styles
@@ -37,9 +39,10 @@ export const globalStyles = StyleSheet.create({
 
   title: {
     fontSize: 30,
-    color: primary_darkestblue,
+    color: darkest_coco,
     fontWeight: 'bold',
     marginBottom: 10,
+    fontFamily: 'Sora',
   },
 
   subtitle: {
