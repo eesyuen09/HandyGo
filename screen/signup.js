@@ -42,7 +42,7 @@ export default function Signup({ navigation }) {
       {/* <ScrollView contentContainerStyle={{ flexGrow: 1 }}> */}
         <View style={globalStyles.inner}>
           <Image
-            source={require('../assets/png.png')}
+            source={require('../assets/HandyGo Logo.png')}
             style={globalStyles.logo}
             resizeMode="cover"
           />

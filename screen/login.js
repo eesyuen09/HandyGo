@@ -76,7 +76,7 @@ export default function Login({ navigation }) {
       <View style={globalStyles.inner}>
         {/* Logo */}
         <Image
-          source={require('../assets/png.png')}
+          source={require('../assets/HandyGo Logo.png')}
           style={globalStyles.logo}
           resizeMode="cover"
         />

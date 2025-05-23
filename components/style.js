@@ -47,9 +47,10 @@ export const globalStyles = StyleSheet.create({
 
   subtitle: {
     fontSize: 18,
-    color: primary_darkestblue,
+    color: darkest_coco,
     marginBottom: 20,
     fontWeight: 'bold',
+    fontFamily: 'Sora',
   },
 
   logo: {
@@ -61,8 +62,8 @@ export const globalStyles = StyleSheet.create({
 
   button: {
     width: 200,
-    backgroundColor: tertiary_coco,
-    borderRadius: 20,
+    backgroundColor: darkest_coco,
+    borderRadius: 30,
     paddingVertical: 15,
     alignItems: 'center',
     marginVertical: 5,
@@ -72,12 +73,13 @@ export const globalStyles = StyleSheet.create({
     color: white,
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Inter',
   },
 
   line: {
     height: 1,
     width: '80%',
-    backgroundColor: primary_darkestblue,
+    backgroundColor: darkest_coco,
     marginVertical: 10,
   },
 
@@ -88,33 +90,37 @@ export const globalStyles = StyleSheet.create({
   },
 
   extraText: {
-    color: secondary_darkblue,
+    color: darkest_coco,
     fontSize: 15,
     marginRight: 5,
+    fontFamily: 'Inter',
   },
 
   linkText: {
-    color: secondary_darkblue,
+    color: darkest_coco,
     textDecorationLine: 'underline',
     fontSize: 15,
+    fontFamily: 'Inter',
   },
 
   inputWrapper: {
     width: '90%',
     marginBottom: 25,
+    
   },
   
   inputLabel: {
-    color: colours.secondary_darkblue,
+    color: darkest_coco,
     fontSize: 13,
     marginBottom: 5,
     textAlign: 'left',
+    borderRadius:20,
   },
   
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colours.secondary_darkblue,
+    backgroundColor: darkest_coco,
     borderRadius: 20,
     height: 60,
     paddingHorizontal: 15,
@@ -131,6 +137,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: 16,
     color: colours.white,
     marginLeft: 10,
+    fontFamily: 'Inter',
   },
 
   // Google Sign In Button Content
@@ -145,14 +152,14 @@ export const globalStyles = StyleSheet.create({
     justifyContent:'center',
   },
   roleButton: {
-    backgroundColor: tertiary_coco,
+    backgroundColor: darkest_coco,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 20,
     justifyContent: 10,
   },
   roleButtonSelected:{
-    backgroundColor: primary_darkestblue,
+    backgroundColor: darkest_coco,
     justifyContent:10,
 
   }
