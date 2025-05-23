@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {colours} from './../components/style';
+import {colours} from '../components/styleBusiness';
 
 const Stack = createNativeStackNavigator();
 const {primary_darkestblue, secondary_darkblue} = colours;
