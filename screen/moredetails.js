@@ -29,7 +29,7 @@ import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 // import { services_catogories } from '../constants/categories';
 // route: contain parameters passed from the previous screen
-export default function moredetails({ route, navigation}) {
+export default function moredetails() { //export default function moredetails({ route, navigation}) {
     // const {uid} = route.params;
     const {
       darkest_coco,
@@ -160,7 +160,7 @@ export default function moredetails({ route, navigation}) {
                     <Picker
                     selectedValue={cat.title}
                     onValueChange={(value) => {
-                        updateTitle(index, value);
+                        updateTitle(index, value,setFieldValue);
                         setShowPickerIndex(null); // hide picker after selection
                     }}
                     >
@@ -181,7 +181,7 @@ export default function moredetails({ route, navigation}) {
                     {selectedCategory.subcategories.map((subtitle) => (
                     <TouchableOpacity
                         key = {subtitle}
-                        onPress ={() => addSubtitle(index,subtitle)}
+                        onPress ={() => addSubtitle(index,subtitle,setFieldValue)}
                         style = {{
                             flexDirection :'row',
                             alignItems: 'Center',
@@ -331,7 +331,7 @@ export default function moredetails({ route, navigation}) {
       </View>
 
       {/* title*/}
-      {categories.map((cat, index) => renderCategoryBlock(cat, index))}
+      {categories.map((cat, index) => renderCategoryBlock(cat, index, setFieldValue))}
       <TouchableOpacity 
         onPress={addEmptyCategory}
         style = {style.add_delete_c}>
@@ -372,8 +372,6 @@ export default function moredetails({ route, navigation}) {
     </>
   )}
     </Formik>
-            
-
     </View>
     </View>
     </KeyboardAvoidingWrapper>
