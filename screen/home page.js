@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     View,
     Text,
@@ -6,27 +6,31 @@ import {
     TouchableOpacity,
     Image,
     Alert,
+    ImageBackground,
   } from 'react-native';
 import { Formik } from 'formik';
 
-import { colours, style } from '../components/style';
-
+import { colours, style } from '../components/style_bizhomepage';
+import bg from '../assets/bg.png';
 //fonts
 import { useFonts } from 'expo-font';
 
 //firebase storage
-import { updateDoc, doc } from 'firebase/firestore';
+import { getDocs, doc, collection, getDoc } from 'firebase/firestore';
+// use (getDocs + collection) to fetch all documents in a collection, use (getDoc+doc) to fetch single document
 import { db } from '../firebaseConfig';
+
+import { auth } from '../firebaseConfig';
+const uid = auth.currentUser.uid;
 
 
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
-import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
+
 // route: contain parameters passed from the previous screen
-export default function moredetails({ route, navigation}) {
-    const {uid} = route.params;
+export default function biz_homepage({ route, navigation}) {
+    // const {uid} = route.params;
     const {
       darkest_coco,
       main_coco,
@@ -37,56 +41,26 @@ export default function moredetails({ route, navigation}) {
       black
     } = colours;
 
-    const handleBusinessDetailsSubmit = async (values) =>{
-            const{ contact, address, NRIC, bankName, bankNumber, qualificationsSkillsExperiences, introduction } = values;
+    const [BusinessName, setBusinessName] = useState('');
 
-            {/* validation check */}
-            if (!contact || !address || !NRIC || !bankName || !bankNumber) {
-                Alert.alert('Error', 'Please fill in all required fields.');
-                return;
-              }
-            
-              if (/[a-zA-Z]/.test(contact)) {
-                Alert.alert('Invalid Contact', 'Contact number must not contain letters.');
-                return;
-              }
-            
-              if (!/^[a-zA-Z0-9]+$/.test(NRIC)) {
-                Alert.alert('Invalid NRIC/Passport', 'Only letters and numbers allowed.');
-                return;
-              }
-            
-              if (/[a-zA-Z]/.test(bankNumber)) {
-                Alert.alert('Invalid Bank Number', 'Bank number must contain digits only.');
-                return;
-              }
-
-            
-            {/* submit to firestore */}
-            try{
-                await updateDoc(doc(db, 'serviceProviders', uid),{
-                    contact: values.contact,
-                    address: values.address,
-                    NRIC: values.NRIC,
-                    bankName: values.bankName,
-                    bankNumber: values.bankNumber,
-                    qualificationsSkillsExperiences: values.qualificationsSkillsExperiences,
-                    introduction: values.introduction,
-                    
+    useEffect(() => {
+        async function fetchBusinessName() {
+          const ref = doc(db, 'serviceProviders', uid); //Build a reference to the Firestore document at collection “serviceProviders” with ID = uid
+          
+          const snap = await getDocs(ref); //fetch that document snapshot from Firestore
+          if (snap.exists()) {
+            setBusinessName(snap.data().businessName);
+          } else {
+            console.warn('No serviceProvider document for uid:', uid);
+          }
+        }
     
-                });
-                alert('Data saved successfully!');
-                        // navigation.goBack();
+        fetchBusinessName(); //The dependency array: re-run this entire effect
+        //    (and refetch) whenever `uid` changes
+      }, [uid]);
 
-                    }catch(error){
-                        console.error("Error adding document: ", error);
-                        alert("Failed to save data.");
-                    
-                    }
-                }
+  
 
-    const [selectedBank, setSelectedBank] = useState('');
-    const [showPicker, setShowPicker] = useState(false);
     const [fontsLoaded] = useFonts({
         'Sora': require('../assets/font/Sora-VariableFont_wght.ttf'),
         'Inter': require('../assets/font/Inter-regular.ttf')
@@ -96,7 +70,7 @@ export default function moredetails({ route, navigation}) {
       }
     return(
         <KeyboardAvoidingWrapper>
-        <View style= {style.container}>
+        <ImageBackground source={bg} style = {style.background}>
             <View style = {style.inner}>
                 { /*Logo*/}
                 <Image 
@@ -108,150 +82,24 @@ export default function moredetails({ route, navigation}) {
             {/* titles */}
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={style.title}>
-                    Let us know more about you!
+                    Welcome Back, {BusinessName}!
                 </Text>
             </View>
 
-            {/* input*/}
-
-            <Formik
-                initialValues={{contact:'', address:'', NRIC:'', bankName:'',
-                    bankNumber:'', qualificationsSkillsExperiences:'', introduction:'',
-                }}
-                onSubmit={handleBusinessDetailsSubmit}
-            >
-
-                {({ handleChange, handleBlur, handleSubmit,setFieldValue, values }) => (
-                    <>
-                    {/*contact*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>Contact</Text>
-                                <TextInput
-                                    style = {style.textInput}
-                                    placeholder='Enter your contact here'
-                                    placeholderTextColor={darkest_coco}
-                                    onChangeText={handleChange('contact')}
-                                    onBlur={handleBlur('contact')}
-                                    value = {values.contact}
-                                    keyboardType='number-pad'
-                                />
-                        </View>
-                    
-                    {/*Address*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>Address</Text>
-                                <TextInput
-                                    style = {style.textInput}
-                                    placeholder='Enter your address here'
-                                    placeholderTextColor={darkest_coco}
-                                    onChangeText={handleChange('address')}
-                                    onBlur={handleBlur('address')}
-                                    value = {values.address}
-                                />
-                        </View>
-                    
-                    {/*NRIC/ passport*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>NRIC/Passport</Text>
-                                <TextInput
-                                    style = {style.textInput}
-                                    placeholder='Enter your details here'
-                                    placeholderTextColor={darkest_coco}
-                                    onChangeText={handleChange('NRIC')}
-                                    onBlur={handleBlur('NRIC')}
-                                    value = {values.NRIC}
-                                />
-                        </View>
-                    
-                    
-                    {/*bank name, syntax , condition ? ifTrue : ifFalse*/}
-                        <View style = {style.inputGroup}>
-                            <Text style = {style.inputLabel}>Bank Name</Text>
-                            {showPicker ?(
-                                <View style = {style.dropdown}>
-                                <Picker
-                                    selectedValue={values.bankName}
-                                    onValueChange={(value) => {
-                                        setFieldValue('bankName', value);
-                                        setShowPicker(false); // close dropdown</View>
-                                    }}
-                                >
-                                    <Picker.Item label="Select your bank" value="" />
-                                    <Picker.Item label="Maybank" value="Maybank" />
-                                    <Picker.Item label="CIMB" value="CIMB" />
-                                    <Picker.Item label="DBS" value="DBS" />
-                                    <Picker.Item label="OCBC" value="OCBC" />
-                                    <Picker.Item label="UOB" value="UOB" />
-                                    <Picker.Item label="POSB" value="POSB" />
-
-                                </Picker>
-                                </View>
-                            ):(
-                                <TouchableOpacity
-                                    style={style.dropdown}
-                                    onPress={() => setShowPicker(true)}
-                                >
-                                    <Text style ={{ fontFamily: 'Inter', fontSize:14}}>
-                                        {values.bankName ?(
-                                            values.bankName):("Select your bank name")}
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                            </View>
-                    {/*bank number*/}
-                    <View style = {style.inputGroup}>
-                    <Text style = {style.inputLabel}>Bank Number </Text>
-                        <TextInput
-                            style = {style.textInput}
-                            placeholder='Enter your details here'
-                            placeholderTextColor={darkest_coco}
-                            onChangeText={handleChange('bankNumber')}
-                            onBlur={handleBlur('bankNumber')}
-                            value = {values.bankNumber}
-                            keyboardType='number-pad'
-                        />
-                    </View>
-
-                    {/*qualifications*/}
-                    <View style = {style.inputGroup}>
-                        <Text style = {style.inputLabel}>Qualifications/ Experiences/ Skills </Text>
-                        <TextInput
-                            style = {style.textArea}
-                            multiline={true}
-                            placeholder='Enter your details here'
-                            placeholderTextColor={darkest_coco}
-                            onChangeText={handleChange('qualificationsSkillsExperiences')}
-                            onBlur={handleBlur('qualificationsSkillsExperiences')}
-                            value = {values.qualificationsSkillsExperiences}
-                        />
-                    </View>
-
-                    {/*introduction*/}
-                    <View style = {style.inputGroup}>
-                        <Text style = {style.inputLabel}>Introduction </Text>
-                        <TextInput
-                            style = {style.textArea}
-                            multiline = {true}
-                            placeholder='Enter your details here'
-                            placeholderTextColor={darkest_coco}
-                            onChangeText={handleChange('introduction')}
-                            onBlur={handleBlur('introduction')}
-                            value = {values.introduction}
-                        />
-                    </View>
-
-                    {/*savebutton*/}
-                    <TouchableOpacity 
-                        style = {style.saveButton}
-                        onPress = {handleSubmit}
-                     >
-                        <Text style = {style.saveButtonText}>Save Change</Text>
-                     </TouchableOpacity>
-            </>
-            )}
-            </Formik>
+            <View style ={style.Button}>
+                <Text style = {style.ButtonText}>
+                    Urgent Task
+                </Text>
             </View>
-        </View>
+
+            <View style ={style.Button}>
+                <Text style = {style.ButtonText}>
+                    Scheduled Task
+                </Text>
+            </View>
+
+            </View>
+        </ImageBackground>
         </KeyboardAvoidingWrapper>
     )
 }

@@ -28,11 +28,11 @@ const {
 // Global Styles
 
 export const style = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 25,
-    paddingTop: Constants.statusBarHeight + 30,
-    backgroundColor: beige,
+  background:{
+    flex:1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   inner: {
@@ -41,34 +41,16 @@ export const style = StyleSheet.create({
     alignItems: 'center',
   },
 
-  // title: {
-  //   fontSize: 18,
-  //   color: colours.black,
-  //   fontFamily: 'Sora',
-  //   fontWeight: 400,
-  //   marginBottom: 10,
-  //   textAlign: 'center',
-  // },
-
-  // logo: {
-  //   width: 81.38,
-  //   height: 75,
-  //   marginBottom: 10,
-  //   alignItems: 'center',
-  // },
-//group:label,text input
-  inputGroup: {
-    width: '100%',
-    marginBottom: 20,
-
+  title: {
+    fontSize: 18,
+    color: white,
+    fontFamily: 'Sora',
+    fontWeight: 400,
+    marginBottom: 10,
+    textAlign: 'center',
   },
-  inputLabel: {
-    color: colours.black,
-    fontSize: 13,
-    fontFamily: 'Inter',
-    marginBottom: 5,
-    textAlign: 'left',
-  },
+
+
 
   Button: {
     backgroundColor: colours.main_coco,
@@ -77,12 +59,12 @@ export const style = StyleSheet.create({
     paddingHorizontal: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 20,
+    marginTop: 40,
 
   },
   ButtonText: {
     color: colours.white,
-    fontSize: 16,
+    fontSize: 30,
     fontFamily: 'Sora',
     fontWeight: '600',
   
