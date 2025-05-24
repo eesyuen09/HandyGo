@@ -9,7 +9,7 @@ import {
   } from 'react-native';
 import { Formik } from 'formik';
 
-import { colours, style } from '../components/styleBusiness';
+import { colours, style } from '../components/style_adddetails';
 
 //fonts
 import { useFonts } from 'expo-font';

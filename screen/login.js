@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 
-import { colours, globalStyles } from '../components/styleBusiness';
+import { colours, globalStyles } from '../components/style_adddetails';
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { signInWithCredential, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
