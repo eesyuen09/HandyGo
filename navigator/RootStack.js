@@ -8,8 +8,6 @@ import {colours} from '../components/style_loginsignup';
 const Stack = createNativeStackNavigator();
 const {primary_darkestblue, secondary_darkblue} = colours;
 
-
-
 //screens
 import Login from '../screen/login';
 import Signup from '../screen/signup';

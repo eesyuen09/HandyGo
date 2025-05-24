@@ -46,9 +46,9 @@ export default function Login({ navigation }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === 'business') {
-              navigation.navigate('Business Dashboard');
+              navigation.navigate('User Home Page');
             } else {
-              navigation.navigate('User Dashboard');
+              navigation.navigate('User Home Page');
             }
           } else {
             // First-time Google login — ask role or default
