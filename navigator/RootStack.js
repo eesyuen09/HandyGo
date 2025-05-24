@@ -1,18 +1,18 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {colours} from './../components/style';
+import {colours} from './../components/style_onboardingpg';
 
 const Stack = createNativeStackNavigator();
-const {primary_darkestblue, secondary_darkblue} = colours;
+const {darkest_coco, main_coco, beige, grey, white, yellow_brown, black} = colours;
 
 
 
 //screens
-import Login from '../screen/login';
-import Signup from '../screen/signup';
-import businessDashboard from '../screen/welcome_business';
-import userDashboard from '../screen/welcome_user';
+// import Login from '../screen/login';
+// import Signup from '../screen/signup';
+// import businessDashboard from '../screen/welcome_business';
+// import userDashboard from '../screen/welcome_user';
 
 const RootStack = () => {
     return (
