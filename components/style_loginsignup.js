@@ -121,7 +121,7 @@ export const globalStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: darkest_coco,
-    borderRadius: 20,
+    borderRadius: 30,
     height: 60,
     paddingHorizontal: 15,
   },
