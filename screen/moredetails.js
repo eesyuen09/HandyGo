@@ -15,22 +15,28 @@ import { colours, style } from '../components/style_adddetails';
 import { useFonts } from 'expo-font';
 
 //firebase storage
-import { updateDoc, doc } from 'firebase/firestore';
+import { updateDoc, doc, arrayRemove, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 //category import
-import { services_catogories } from '../constants/categories';
+import { categoryMap } from '../constants/categorymap';
+import { services_catogories } from '../constants/category_constant';
 
+import { auth } from '../firebaseConfig';
 
+const uid = auth.currentUser?.uid;
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
-// import { services_catogories } from '../constants/categories';
+import { useNavigation } from '@react-navigation/native';
+
 // route: contain parameters passed from the previous screen
 export default function moredetails() { //export default function moredetails({ route, navigation}) {
-    // const {uid} = route.params;
+
+
+    const navigation = useNavigation();
     const {
       darkest_coco,
       main_coco,
@@ -41,8 +47,44 @@ export default function moredetails() { //export default function moredetails({ 
       black
     } = colours;
 
+    useEffect(() => {
+      const checkIfDetailsExist = async () => {
+        const user = auth.currentUser;
+        if (!user) return;
+  
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
+  
+        if (snap.exists()) {
+          const data = snap.data();
+          const hasAllDetails =
+            data.contact &&
+            data.address &&
+            data.NRIC &&
+            data.bankName &&
+            data.bankNumber &&
+            Array.isArray(data.category) && data.category.length > 0 &&
+            Array.isArray(data.subcategory) && data.subcategory.length > 0 &&
+            data.introduction;
+  
+          if (hasAllDetails) {
+            navigation.replace('Business Dashboard');
+          }
+        }
+      };
+  
+      checkIfDetailsExist();
+    }, []);
+
     const handleBusinessDetailsSubmit = async (values) =>{
-            const{ contact, address, NRIC, bankName, bankNumber, categories, introduction } = values;
+
+            const user = auth.currentUser;
+            if (!user) {
+              Alert.alert('Error', 'User not logged in');
+              return;
+            }
+            const uid = user.uid;
+            const{ contact, address, NRIC, bankName, bankNumber, category, subcategory, introduction } = values;
 
             {/* validation check */}
             if (!contact || !address || !NRIC || !bankName || !bankNumber) {
@@ -64,22 +106,48 @@ export default function moredetails() { //export default function moredetails({ 
                 Alert.alert('Invalid Bank Number', 'Bank number must contain digits only.');
                 return;
               }
+              
+
+              if (!category.length || !subcategory.length) {
+                Alert.alert('Error', 'Please select at least one category and subcategory.');
+                return;
+              }
 
             
             {/* submit to firestore */}
             try{
-                await updateDoc(doc(db, 'serviceProviders'),{ //await updateDoc(doc(db, 'serviceProviders', uid) in dev
+                await updateDoc(doc(db, 'users',uid),{ //await updateDoc(doc(db, 'serviceProviders', uid) in dev
                     contact: values.contact,
                     address: values.address,
                     NRIC: values.NRIC,
                     bankName: values.bankName,
                     bankNumber: values.bankNumber,
-                    categories: values.categories,
-                    introduction: values.introduction,
+                    category :values.category,
+                    subcategory :values.subcategory,
+                    introduction : values.introduction,
                     
     
                 });
+
                 alert('Data saved successfully!');
+                values.category.forEach(async (category) => {
+                  console.log(category);
+                  console.log('UID', uid);
+                  await updateDoc(doc(db, 'categoryToWorker', category), {
+                    workers: arrayUnion(uid) //
+                  });
+                });
+
+                values.subcategory.forEach(async (subcategory) => {
+  
+                  await updateDoc(doc(db,'subcategoryToWorker', subcategory),{
+                    workers: arrayUnion(uid)
+                  });
+                });
+
+
+
+
                         // navigation.goBack();
 
                     }catch(error){
@@ -94,79 +162,88 @@ export default function moredetails() { //export default function moredetails({ 
     const [showPickerIndex, setShowPickerIndex] = useState(null);
 
 
-    const [categories, setCategories] = useState([{title:'',subtitle:[] }])
+    const [category, setCategory] = useState([])
+    const [subcategory, setSubcategory] = useState([]);
     const [selectedBank, setSelectedBank] = useState('');
     const [showPicker, setShowPicker] = useState(false);
     const [fontsLoaded] = useFonts({
-        'Sora': require('../assets/font/Sora-VariableFont_wght.ttf'),
-        'Inter': require('../assets/font/Inter-regular.ttf')
+        'Sora': require('../assets/fonts/Sora-VariableFont_wght.ttf'),
+        'Inter': require('../assets/fonts/Inter-regular.ttf')
       });
       if(!fontsLoaded){
         return null;
       }
     //function for categories
     function addEmptyCategory() {
-        setCategories(prev => [...prev, {title:'', subtitle:[]}]);
+      setCategory(prev => [...prev,'']);
+      setSubcategory(prev => [...prev,''])
+      
     }
 
     function deleteEmptyCategory(){
-        setCategories(prev => (prev.length >1 ? prev.slice(0,prev.length-1):prev));
+      setCategory(prev => (prev.length >1 ? prev.slice(0,prev.length-1):prev));
+      setSubcategory(prev => (prev.length >1 ? prev.slice(0,prev.length-1):prev));
     }
-    function updateTitle(index, title, setFieldValue){
-        setCategories(prev => {
-            const updated = [...prev];
-            updated[index].title = title;
-            updated[index].subtitle = [];
-            setFieldValue('categories',updated);
-            return updated;
-        });
-        
+    function updateTitle(index, newTitle, setFieldValue) {
+      setCategory(prev => {
+        const updated = [...prev];
+        if(updated.includes(newTitle) && updated[index]!==newTitle){
+          Alert.alert("Category already selected.")
+          return updated;
+        }else{
+        updated[index] = newTitle; // replace selected one
+        setFieldValue('category', updated);
+        return updated;
+      }
+    });
     }
-
-
-
-    function addSubtitle(index, subtitle,setFieldValue){
-        setCategories(prev => {
-            const updated = [...prev];
-            const currentSubtitle = updated[index].subtitle;
-
-            if(currentSubtitle.includes(subtitle)){
-                //remove subtitle
-                updated[index].subtitle = currentSubtitle.filter((item) => item!==subtitle)
-            }else{
-                updated[index].subtitle = [...currentSubtitle, subtitle];
-            }
-            setFieldValue('categories',updated);
-            return updated;
-        });
-        
+    function addSubtitle(subtitle, setFieldValue) {
+      setSubcategory(prev => {
+        let updated;
+    
+        if (prev.includes(subtitle)) {
+          // remove subtitle
+          updated = prev.filter(item => item !== subtitle);
+        } else {
+          if(prev.length ===0){
+            updated = [subtitle];}
+          else{
+          // add subtitle
+            updated = [...prev, subtitle];
+            };
+        }
+    
+        setFieldValue('subcategory', updated);
+        return updated;
+      });
     }
-
-    function renderCategoryBlock(cat, index, setFieldValue){
-        const selectedCategory = services_catogories.find((c)=> c.title === cat.title);
+// cat = titles
+    function renderCategoryBlock(cat, index, setFieldValue, subcategory){
+        const selectedCategory = services_catogories.find((c)=> c.title === cat);
 
         return (
-            <View key = {index} style = {style.inputGroup}>
+            <View key = {cat} style = {style.inputGroup}>
                 <Text style = {style.inputLabel}>Service Category</Text>
                 <TouchableOpacity  
                     style = {style.dropdown}
-                    onPress = {() => setShowPickerIndex(index)}
+                    onPress = {() => setShowPickerIndex(cat)}
                     >
                     <Text style = {{fontFamily: 'Inter', fontSize:14}}>
-                        {cat.title || 'Select'}
+                        {cat || 'Select'}
                     </Text>
                     </TouchableOpacity>
-                    {showPickerIndex === index && (
+                    {showPickerIndex === cat && (
                     <Picker
-                    selectedValue={cat.title}
+                    selectedValue={cat}
+                    
                     onValueChange={(value) => {
                         updateTitle(index, value,setFieldValue);
                         setShowPickerIndex(null); // hide picker after selection
                     }}
                     >
                     <Picker.Item label="Select..." value="" />
-                    {services_catogories.map((cat) => (
-                        <Picker.Item key={cat.title} label={cat.title} value={cat.title} />
+                    {services_catogories.map((catObj) => (
+                        <Picker.Item key={catObj.title} label={catObj.title} value={catObj.title} />
                     ))}
                     </Picker>
                 )}
@@ -181,7 +258,7 @@ export default function moredetails() { //export default function moredetails({ 
                     {selectedCategory.subcategories.map((subtitle) => (
                     <TouchableOpacity
                         key = {subtitle}
-                        onPress ={() => addSubtitle(index,subtitle,setFieldValue)}
+                        onPress ={() => addSubtitle(subtitle,setFieldValue)}
                         style = {{
                             flexDirection :'row',
                             alignItems: 'Center',
@@ -194,7 +271,7 @@ export default function moredetails() { //export default function moredetails({ 
                                         borderWidth: 1,
                                         borderRadius: 4,
                                         marginRight: 10,
-                                        backgroundColor: cat.subtitle.includes(subtitle)
+                                        backgroundColor: subcategory.includes(subtitle)
                                             ? '#9A5A3C'
                                             : 'transparent',
                                 }}
@@ -236,7 +313,8 @@ export default function moredetails() { //export default function moredetails({ 
                 NRIC: '',
                 bankName: '',
                 bankNumber: '',
-                categories:[{title:'', subtitle:[]}],
+                category: [],
+                subcategory: [],
                 introduction: '',
             }}
             onSubmit={handleBusinessDetailsSubmit}
@@ -331,7 +409,7 @@ export default function moredetails() { //export default function moredetails({ 
       </View>
 
       {/* title*/}
-      {categories.map((cat, index) => renderCategoryBlock(cat, index, setFieldValue))}
+      {category.map((cat, index ) => renderCategoryBlock(cat, index,  setFieldValue, values.subcategory))}
       <TouchableOpacity 
         onPress={addEmptyCategory}
         style = {style.add_delete_c}>
@@ -358,6 +436,7 @@ export default function moredetails() { //export default function moredetails({ 
           placeholderTextColor={darkest_coco}
           onChangeText={handleChange('introduction')}
           onBlur={handleBlur('introduction')}
+        
           value={values.introduction}
         />
       </View>

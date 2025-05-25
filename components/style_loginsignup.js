@@ -159,7 +159,7 @@ export const globalStyles = StyleSheet.create({
     justifyContent: 10,
   },
   roleButtonSelected:{
-    backgroundColor: darkest_coco,
+    backgroundColor: yellow_brown,
     justifyContent:10,
 
   }
