@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 // import Signup from './screen/signup';
 import Moredetails from './screen/moredetails';
 import User_homepage from './screen/user_home';
+import User_booking from './screen/user_booking';
 
 // import { NavigationContainer } from '@react-navigation/native';
 // react navigation stack
@@ -20,7 +21,8 @@ export default function App() {
   //   <NavigationContainer>
   //   <RootStack/>
   // </NavigationContainer>
-   //< Moredetails/>
-   <User_homepage/>
+  //  < Moredetails/>
+   //<User_homepage/>
+   <User_booking/>
   );
 }
