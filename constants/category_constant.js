@@ -1,60 +1,68 @@
 export const services_catogories = [
     {
-      title: 'Cleaning Services',
+      title: 'Cleaning',
       subcategories: [
         'General House Cleaning',
         'Deep Cleaning',
         'Aircond Cleaning',
         'Carpet Cleaning',
         'Post-Renovation Cleaning',
-        'Sofa/ Mattress Cleaning',
+        'Sofa or Mattress Cleaning',
       ],
     },
     {
-      title: 'Repair & Technician',
+      title: 'Repair',
       subcategories: [
         'Plumbing Services',
         'Air Conditioner Repair',
         'Electrical Repair',
         'Washing Machine Repair',
         'Refrigerator Repair',
-        'CCTV/ Security System Installation',
+        'CCTV or Security System Installation',
       ],
     },
     {
-        title: 'Handyman Services',
+        title: 'HandymanServices',
         subcategories:[
             'Furniture Assembly',
             'Mounting',
             'Door & Lock Repair',
             'Painting & Touch-up Work',
-            'Curtain / Blind Installation',
+            'Curtain or Blind Installation',
             'Minor Welding Jobs',
         ]
     },
     {
-      title: 'Moving & Logistics',
+      title: 'MovingandDeliveryServices',
       subcategories: [
         'House Moving',
         'Furniture Delivery',
       ],
     },
     {
-        title: 'Renovation & Construction',
+        title: 'Renovation',
         subcategories:[
             'Kitchen Remodeling',
             'Tiling & Flooring',
-            'Ceiling Repair / False Ceiling',
+            'Ceiling Repair or False Ceiling',
         ]
     },
     {
-      title: 'Outdoor & Landscaping',
+      title: 'Outdoor',
       subcategories:[
         'Lawn Mowing',
         'Gardening',
         'Tree Cutting',
-        'Roof / Gutter Cleaning',
+        'Roof or Gutter Cleaning',
 
+      ]
+    },
+    {
+      title: 'Maintenance',
+      subcategories: [
+        'Electrical Safety Check',
+        'Gas Leak Detection',
+        'Fire Extinguisher Servicing',
       ]
     },
   ];

@@ -46,7 +46,8 @@ export default function Login({ navigation }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === 'business') {
-              navigation.navigate('Business Dashboard');
+              
+              navigation.navigate('Business Home Page');
             } else {
               navigation.navigate('User Dashboard');
             }
@@ -113,8 +114,13 @@ export default function Login({ navigation }) {
                   if (docSnap.exists()) {
                     //Existing user
                     const userData = docSnap.data();
-                    if (userData.role == 'business') {
-                      navigation.navigate('Business Dashboard');
+                    if (userData.role === 'business') {
+                      if (!userData.contact || !userData.address ||
+                        !userData.NRIC || !userData.bankName || !userData.category 
+                        || !userData.subcategory || !userData.introduction){
+                          navigation.navigate('Add Details');
+                        }else{
+                      navigation.navigate('Business Home Page');}
                     } else if (userData.role == 'user') {
                       navigation.navigate('User Dashboard');
                     } else {

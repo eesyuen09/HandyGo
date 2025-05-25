@@ -4,10 +4,13 @@ import { StatusBar } from 'expo-status-bar';
 
 //screen
 
-// import Login from './screen/login';
-// import Signup from './screen/signup';
+import PrepopulateWorkerMaps from './constants/categorymap';
+import Login from './screen/login';
+import Signup from './screen/signup';
 import Moredetails from './screen/moredetails';
 import Onboard from './screen/onboardingpg';
+import Biz_homepage from './screen/biz_homepage';
+
 
 
 
@@ -20,10 +23,12 @@ import RootStack from './navigator/RootStack';
 
 export default function App() {
   return (
-
-    <NavigationContainer>
-    <RootStack/>
-  </NavigationContainer>
-
+  //   <>
+  //   <PrepopulateWorkerMaps/>
+  //   <NavigationContainer>
+  //   <RootStack/>
+  // </NavigationContainer>
+  // </>
+  <Biz_homepage/>
   );
 }

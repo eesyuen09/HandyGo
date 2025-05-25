@@ -38,8 +38,8 @@ export default function Onboarding({navigation}){
 
      
       <TouchableOpacity 
-        style = {globalStyles.button}>
-        {/* // onPress={() => navigation}> */}
+        style = {globalStyles.button}
+        onPress={() => navigation.navigate('Login')}>
 
         <Text style={globalStyles.buttonText}>
         Login
@@ -49,7 +49,8 @@ export default function Onboarding({navigation}){
      
 
       <TouchableOpacity 
-        style = {globalStyles.button}>
+        style = {globalStyles.button}
+        onPress={() => navigation.navigate('SignUp')}>
       <Text style={globalStyles.buttonText}>
           SignUp
         </Text>

@@ -37,6 +37,8 @@ export default function Signup({ navigation }) {
     setDob(selectedDate || date);
   };
 
+
+
   return (
     <KeyboardAvoidingWrapper>
     <View style={globalStyles.container}>
@@ -82,28 +84,49 @@ export default function Signup({ navigation }) {
                       password
                     );
                     const user = userCredential.user;
-                    await sendEmailVerification(user);                 
-
+                    await sendEmailVerification(user);  
                     
-                    await setDoc(doc(db, 'users', user.uid), {
+                    const baseUserData = {
                       uid: user.uid,
                       fullName: fullName,
                       email: email,
                       dob: dob.toISOString(),
                       role: role,
                       createdAt: new Date().toISOString()
-                    });
-
-                    Alert.alert('Please Verify Your Email', 'A verification email has been sent to you account.',
-                      [{ text: 'OK', onPress: () => navigation.navigate('Login')}]                  
-                    );                  
+                    };
+                    
+                    if (role === 'business') {
+                      baseUserData.contact = '';
+                      baseUserData.address = '';
+                      baseUserData.NRIC = '';
+                      baseUserData.bankName = '';
+                      baseUserData.bankNumber = '';
+                      baseUserData.category = [];
+                      baseUserData.subcategory = [];
+                      baseUserData.introduction = '';
+                    }
+                
 
                     
+                    await setDoc(doc(db, 'users', user.uid), 
+                      baseUserData);
 
-                    /*Alert.alert('Success', 'Account created successfully!', [
-                      { text: 'OK', onPress: () => navigation.navigate('Login') }
-                    ]);
-                    */
+
+                    const isBusiness = role === 'business';
+
+                    Alert.alert(
+                      'Account Created',
+                      'A verification email has been sent to your account. Please verify it before logging in.',
+                      [
+                        {
+                          text: 'OK',
+                          onPress: () => {
+                              navigation.navigate('Login');
+                            }
+                          
+                        }
+                      ]
+);
                    
                   } catch (error) {
                     if (error.code === 'auth/email-already-in-use') {
@@ -289,6 +312,7 @@ export default function Signup({ navigation }) {
                 <TouchableOpacity
                   style={globalStyles.button}
                   onPress={handleSubmit}
+        
                 >
                   <Text style={globalStyles.buttonText}>Sign Up</Text>
                 </TouchableOpacity>
