@@ -3,6 +3,7 @@ export const services_catogories = [
       title: 'Cleaning',
       subcategories: [
         'General House Cleaning',
+        'Home Organizing',
         'Deep Cleaning',
         'Aircond Cleaning',
         'Carpet Cleaning',
@@ -18,34 +19,32 @@ export const services_catogories = [
         'Electrical Repair',
         'Washing Machine Repair',
         'Refrigerator Repair',
-        'CCTV or Security System Installation',
+        'Door & Lock Repair',
+        'Ceiling Repair'
       ],
     },
     {
-        title: 'HandymanServices',
-        subcategories:[
-            'Furniture Assembly',
-            'Mounting',
-            'Door & Lock Repair',
-            'Painting & Touch-up Work',
-            'Curtain or Blind Installation',
-            'Minor Welding Jobs',
-        ]
+      title: 'Maintenance',
+      subcategories:[
+        'Furniture Assembly',
+        'Mounting',
+        'Painting & Touch-up Work',
+        'Curtain or Blind Installation',
+        'Minor Welding Jobs',
+        'Kitchen Remodeling',
+        'Tiling & Flooring',
+        'Electrical Safety Check',
+        'Gas Leak Detection',
+        'Fire Extinguisher Servicing'
+      ]
     },
     {
-      title: 'MovingandDeliveryServices',
+      title: 'Moving',
       subcategories: [
         'House Moving',
-        'Furniture Delivery',
+        'Large Item Delivery',
+        'Small Item Delivery'
       ],
-    },
-    {
-        title: 'Renovation',
-        subcategories:[
-            'Kitchen Remodeling',
-            'Tiling & Flooring',
-            'Ceiling Repair or False Ceiling',
-        ]
     },
     {
       title: 'Outdoor',
@@ -57,12 +56,5 @@ export const services_catogories = [
 
       ]
     },
-    {
-      title: 'Maintenance',
-      subcategories: [
-        'Electrical Safety Check',
-        'Gas Leak Detection',
-        'Fire Extinguisher Servicing',
-      ]
-    },
+    
   ];

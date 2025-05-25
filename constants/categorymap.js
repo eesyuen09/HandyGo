@@ -19,27 +19,14 @@ export const categoryMap = {
     'Electrical Repair',
     'Washing Machine Repair',
     'Refrigerator Repair',
-    'CCTV or Security System Installation',
-  ],
-
-  HandymanServices: [
-    'Furniture Assembly',
-    'Mounting',
     'Door & Lock Repair',
-    'Painting & Touch-up Work',
-    'Curtain or Blind Installation',
-    'Minor Welding Jobs',
+    'Ceiling Repair'
   ],
 
-  MovingandDeliveryServices: [
+  Moving: [
     'House Moving',
-    'Furniture Delivery',
-  ],
-
-  Renovation: [
-    'Kitchen Remodeling',
-    'Tiling & Flooring',
-    'Ceiling Repair or False Ceiling',
+    'Large Item Delivery',
+    'Small Item Delivery'
   ],
 
   Outdoor: [
@@ -50,9 +37,16 @@ export const categoryMap = {
   ],
 
   Maintenance: [
-    'Electrical Safety Check',
-    'Gas Leak Detection',
-    'Fire Extinguisher Servicing',
+    'Furniture Assembly',
+        'Mounting',
+        'Painting & Touch-up Work',
+        'Curtain or Blind Installation',
+        'Minor Welding Jobs',
+        'Kitchen Remodeling',
+        'Tiling & Flooring',
+        'Electrical Safety Check',
+        'Gas Leak Detection',
+        'Fire Extinguisher Servicing'
   ]
 };
 
