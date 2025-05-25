@@ -10,7 +10,6 @@ import {
   } from 'react-native';
 
 import { colours, styles } from '../components/style_u_home';
-console.log("STYLES LOADED:", styles);
 
 //fonts
 import { useFonts } from 'expo-font';
@@ -24,7 +23,7 @@ import { services_catogories } from '../constants/categories';
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
-import { Feather, AntDesign, MaterialIcons, FontAwesome5, FontAwesome6} from '@expo/vector-icons';
+import { Feather, AntDesign, MaterialIcons, FontAwesome5, FontAwesome6,MaterialCommunityIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
 export default function user_home() {
@@ -50,6 +49,9 @@ export default function user_home() {
         { icon: <MaterialIcons name="cleaning-services" size={30} color = {colours.darkest_coco} />, label: 'Cleaning' },
         { icon: <FontAwesome5 name="truck-moving" size={30} color = {colours.darkest_coco}/>, label: 'Moving' },
         { icon: <Feather name="tool" size={35} color = {colours.darkest_coco} />, label: 'Repair' },
+        { icon: <FontAwesome5 name="tree" size={30} color = {colours.darkest_coco} />, label: 'Outdoor'},
+        { icon: <MaterialCommunityIcons name="file-cabinet" size={30} color = {colours.darkest_coco} />, label: 'Home\nOrganization'},
+        { icon: <FontAwesome6 name="hands-holding" size={30} color = {colours.darkest_coco} />, label: 'Maintenance'},
         { icon: <FontAwesome6 name="border-all" size={30} color = {colours.darkest_coco}/>, label: 'All' },
     ];
 
@@ -63,13 +65,20 @@ export default function user_home() {
     const serviceBanners = [
         { image: 'Moving.png', label: 'Moving'},
         { image: 'home_organization.png', label: 'Home Organization'  },
-        { image: 'repair_banner.jpg', label: 'Repair' }
+        { image: 'repair_banner.jpg', label: 'Repair' },
+        { image: 'cleaning_banner.png', label: 'Cleaning' },
+        { image: 'maintenance_banner.png', label: 'Maintenance' },
+        { image: 'outdoor_banner.png', label: 'Outdoor Services' },
     ];
 
     const bannerImageMap = {
         'Moving.png': require('../assets/images/Moving.png'),
         'home_organization.png': require('../assets/images/home_organization.png'),
-        'repair_banner.jpg': require('../assets/images/repair_banner.png')
+        'repair_banner.jpg': require('../assets/images/repair_banner.png'),
+        'cleaning_banner.png': require('../assets/images/cleaning_banner.png'),
+        'maintenance_banner.png': require('../assets/images/maintenance_banner.png'),
+        'outdoor_banner.png': require('../assets/images/outdoor_banner.png'),
+        
     };
 
     const handlePress = (label) => {
@@ -123,10 +132,9 @@ export default function user_home() {
                 source={bannerImageMap[item.image]}
                 style={styles.serviceBanner}
             />
-
             </View>
-            
             </TouchableOpacity>
+
         ))}
         </View>
       </ScrollView>
