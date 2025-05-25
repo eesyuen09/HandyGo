@@ -216,7 +216,7 @@ export default function moredetails() { //export default function moredetails({ 
             <View style = {style.inner}>
                 { /*Logo*/}
                 <Image 
-                source={require('../assets/HandyGo Logo.png')}
+                source={require('../assets/handygo-logo.png')}
                 style= {style.logo}
                 resizeMode = 'cover'
             />

@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions} from 'react-native';
 import Constants from 'expo-constants';
 
 // Colours
@@ -23,6 +23,12 @@ const {
   yellow_brown,
   black
 } = colours;
+
+const screenWidth = Dimensions.get('window').width;
+const horizontalPadding = 52; 
+const imageWidth = screenWidth - horizontalPadding;
+const aspectRatio = 32 / 14;
+const imageHeight = imageWidth / aspectRatio;
 
 // styles
 export const styles = StyleSheet.create({
@@ -75,7 +81,9 @@ export const styles = StyleSheet.create({
     },
 
     section: {
-        padding: 20,
+        paddingHorizontal: 20,
+        marginTop: 20,
+        marginBottom: 10,
     },
 
     sectionTitle: {
@@ -84,12 +92,12 @@ export const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 20,
         color: darkest_coco,
-        marginBottom: 15,
+        marginBottom: 17,
     },
 
     icon: {
         alignItems: 'center',
-  
+        marginLeft: 10,
     },
 
     circle: {
@@ -128,11 +136,28 @@ export const styles = StyleSheet.create({
     },
 
     serviceBanner: {
-        marginTop: 10,
-        padding: 10,
+        paddingHorizontal: 10,
+        alignSelf: 'center',
         resizeMode: 'cover',
-        height: 160,
-        marginBottom: 10,
+        height: imageHeight,
+        width: imageWidth,
+        marginBottom: 25,
+        borderRadius: 8,
     },
+
+       bannerLabel: {
+        position: 'absolute',
+        fontFamily: 'Sora',
+        top: 120,
+        left: 18,
+        color: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 2,
+        zIndex: 1,
+    },
+
 
 });

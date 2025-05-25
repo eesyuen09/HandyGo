@@ -4,11 +4,11 @@
     "slug": "HandyGo",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/HandyGo Logo.png",
+    "icon": "./assets/handygo-logo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/HandyGo Logo.png",
+      "image": "./assets/handygo-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,13 +17,13 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./HandyGo Logo.png",
+        "foregroundImage": "./assets/handygo-logo.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/HandyGo Logo.png"
+       "favicon": "./assets/handygo-logo.png"
     },
     "plugins": [
       "expo-web-browser",

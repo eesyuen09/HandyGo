@@ -24,7 +24,7 @@ import { services_catogories } from '../constants/categories';
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
-import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
+import { Feather, AntDesign, MaterialIcons, FontAwesome5, FontAwesome6} from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
 export default function user_home() {
@@ -47,23 +47,23 @@ export default function user_home() {
           }
 
     const services = [
-        { icon: 'cleaning.png', label: 'Cleaning' },
-        { icon: 'organizing.png', label: 'Home \n Organising' },
-        { icon: 'repair_icon.png', label: 'Home \nRepair' },
-        { icon: 'all.png', label: 'All' },
+        { icon: <MaterialIcons name="cleaning-services" size={30} color = {colours.darkest_coco} />, label: 'Cleaning' },
+        { icon: <FontAwesome5 name="truck-moving" size={30} color = {colours.darkest_coco}/>, label: 'Moving' },
+        { icon: <Feather name="tool" size={35} color = {colours.darkest_coco} />, label: 'Repair' },
+        { icon: <FontAwesome6 name="border-all" size={30} color = {colours.darkest_coco}/>, label: 'All' },
     ];
 
-    const iconMap = {
-        'cleaning.png': require('../assets/icons/cleaning.png'),
-        'organizing.png': require('../assets/icons/organizing.png'),
-        'repair_icon.png': require('../assets/icons/repair_icon.png'),
-        'all.png': require('../assets/icons/all.png'),
-    };
+    // const iconMap = {
+    //     'cleaning.png': require('../assets/icons/cleaning.png'),
+    //     'organizing.png': require('../assets/icons/organizing.png'),
+    //     'repair_icon.png': require('../assets/icons/repair_icon.png'),
+    //     'all.png': require('../assets/icons/all.png'),
+    // };
 
     const serviceBanners = [
-        { image: 'Moving.png' },
-        { image: 'home_organization.png' },
-        { image: 'repair_banner.jpg' }
+        { image: 'Moving.png', label: 'Moving'},
+        { image: 'home_organization.png', label: 'Home Organization'  },
+        { image: 'repair_banner.jpg', label: 'Repair' }
     ];
 
     const bannerImageMap = {
@@ -81,7 +81,7 @@ export default function user_home() {
       {/* Top Search Bar */}
       <View style = {styles.container}>
       <View style={styles.searchBar}>
-        <Image source={require('../assets/icons/search.png')} style={styles.searchIcon} />
+        <AntDesign name="search1" size={24} color="white"  style={styles.searchIcon} />
         <TextInput
           placeholder="Looking for any service?"
           placeholderTextColor="white"
@@ -98,7 +98,7 @@ export default function user_home() {
                 {services.map((item, index) => (
                     <TouchableOpacity key={index} style={styles.icon}>
                     <View style={styles.circle}>
-                        <Image source={iconMap[item.icon]} style={styles.iconImage} />
+                        {item.icon}
                     </View>
                     <Text style={styles.iconLabel}>{item.label}</Text>
                     </TouchableOpacity>
@@ -117,10 +117,15 @@ export default function user_home() {
             style={styles.serviceBanner}
             onPress={() => handlePress(item.label)}
             >
+            <View>
+            <Text style={styles.bannerLabel}>{item.label}</Text>
             <Image
                 source={bannerImageMap[item.image]}
                 style={styles.serviceBanner}
             />
+
+            </View>
+            
             </TouchableOpacity>
         ))}
         </View>
