@@ -85,7 +85,9 @@ export default function user_booking() {
         >
           
 
+
           <ScrollView style={styles.frame}>
+            {/* top banner */}
             <View style={styles.bannerContainer}>
               <Image source={bannerImage} style={styles.bannerImage} />
               <View style={styles.bannerOverlay}>
@@ -96,6 +98,7 @@ export default function user_booking() {
               </View>
             </View>
 
+            {/* Booking Information */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Booking Information</Text>
               <TouchableOpacity style={styles.inputRow}>
@@ -108,6 +111,7 @@ export default function user_booking() {
               </TouchableOpacity>
             </View>
 
+            {/* Time */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Time</Text>
               <TouchableOpacity style={styles.inputRow}>
@@ -120,6 +124,7 @@ export default function user_booking() {
               </TouchableOpacity>
             </View>
 
+            {/* Location */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Location</Text>
               <TouchableOpacity style={styles.inputRow}>
@@ -136,12 +141,14 @@ export default function user_booking() {
               </TouchableOpacity>
             </View>
 
+            {/* Preferences */}
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>Preferences (Optional)</Text>
               <TouchableOpacity style={styles.inputRow}>
                 <FontAwesome name="venus" size={18} color="#704F38" />
-                <Text style={styles.inputText}>Gender Preference: Female</Text>
+                <Text style={styles.inputText}>Gender Preference</Text>
               </TouchableOpacity>
+
               <View style={styles.preferenceRow}>
                 <TouchableOpacity style={styles.preferenceButton}>
                   <FontAwesome name="star" size={16} color="#704F38" />
@@ -152,6 +159,7 @@ export default function user_booking() {
                   <Text style={styles.preferenceText}>Notify Me</Text>
                 </TouchableOpacity>
               </View>
+
               <TextInput
                 placeholder="Additional Description"
                 multiline
