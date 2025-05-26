@@ -135,7 +135,7 @@ export default function Biz_homepage({navigation}){
     <ImageBackground source={bg} style = {style.background}>
       <View>
         <Text style={style.title}>
-          Welcome Back!
+          Welcome Back! Good to see you! Let’s match you with someone who needs a hand.
         </Text>
       </View>
 
