@@ -26,7 +26,7 @@ const RootStack = () => {
       <>
       <PrepopulateWorkerMaps/>
       <Stack.Navigator 
-      initialRouteName='Onboard'
+      initialRouteName='Login'
       screenOptions={{
          headerStyle: {
           backgroundColor: 'transparent'
