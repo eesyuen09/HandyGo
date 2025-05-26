@@ -10,7 +10,7 @@ import Signup from './screen/signup';
 import Moredetails from './screen/moredetails';
 import Onboard from './screen/onboardingpg';
 import Biz_homepage from './screen/biz_homepage';
-
+import UrgentTask from './screen/biz_urgenttask';
 
 
 
@@ -23,12 +23,12 @@ import RootStack from './navigator/RootStack';
 
 export default function App() {
   return (
-  //   <>
-  //   <PrepopulateWorkerMaps/>
-  //   <NavigationContainer>
-  //   <RootStack/>
-  // </NavigationContainer>
-  // </>
-  <Biz_homepage/>
+    <>
+    <PrepopulateWorkerMaps/>
+    <NavigationContainer>
+    <RootStack/>
+  </NavigationContainer>
+  </>
+  
   );
 }
