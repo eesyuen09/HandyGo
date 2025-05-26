@@ -23,12 +23,12 @@ import RootStack from './navigator/RootStack';
 
 export default function App() {
   return (
-  //   <>
-  //   <PrepopulateWorkerMaps/>
-  //   <NavigationContainer>
-  //   <RootStack/>
-  // </NavigationContainer>
-  // </>
-  <UrgentTask/>
+    <>
+    <PrepopulateWorkerMaps/>
+    <NavigationContainer>
+    <RootStack/>
+  </NavigationContainer>
+  </>
+  
   );
 }

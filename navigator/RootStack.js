@@ -21,6 +21,7 @@ import Signup from '../screen/signup';
 // import userDashboard from '../screen/welcome_user';
 import Biz_adddetails from '../screen/moredetails';
 import Biz_homepage from '../screen/biz_homepage';
+import Biz_urgentTask from '../screen/biz_urgenttask';
 
 
 const RootStack = () => {
@@ -46,6 +47,7 @@ const RootStack = () => {
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name= 'Business Home Page' component={Biz_homepage}/>
         <Stack.Screen name = "Add Details" component={Biz_adddetails}/>
+        <Stack.Screen name = 'Business Urgent Task' component ={Biz_urgentTask}/>
       </Stack.Navigator>
       </>
     );

@@ -44,7 +44,7 @@ export const style = StyleSheet.create({
 
   title: {
     fontSize: 24,
-    color: white,
+    color: darkest_coco,
     fontFamily: 'Sora',
     fontWeight: '200',
     marginTop: 10,
