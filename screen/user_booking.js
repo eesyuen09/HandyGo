@@ -10,13 +10,9 @@ import {
   } from 'react-native';
 
 import { colours, styles } from '../components/style_u_booking.js';
-<<<<<<< HEAD
 
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-=======
-import BookingForm from '../components/style_u_booking.js';
->>>>>>> dev
 
 //fonts
 import { useFonts } from 'expo-font';
@@ -60,11 +56,7 @@ export default function user_booking() {
     return (
       <ScrollView style={styles.container}>
 
-<<<<<<< HEAD
         <Formik
-=======
-        {/* <Formik
->>>>>>> dev
           initialValues={{
             type: '',
             urgency: '',
@@ -90,11 +82,7 @@ export default function user_booking() {
             // Upload booking data to Firestore
             console.log('Booking Data', values);
           }}
-<<<<<<< HEAD
         >
-=======
-        > */}
->>>>>>> dev
           
 
 
@@ -184,13 +172,8 @@ export default function user_booking() {
             </TouchableOpacity>
           </ScrollView>
         
-<<<<<<< HEAD
           {/* Add your form fields here (e.g., dropdowns, text inputs) */}
         </Formik>
-=======
-          {/* Add your form fields here (e.g., dropdowns, text inputs)
-        </Formik> */}
->>>>>>> dev
       </ScrollView>
     );
   }

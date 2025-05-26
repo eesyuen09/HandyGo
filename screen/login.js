@@ -46,12 +46,9 @@ export default function Login({ navigation }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === 'business') {
-<<<<<<< HEAD
               navigation.navigate('User Home Page');
-=======
               
               navigation.navigate('Business Home Page');
->>>>>>> dev
             } else {
               navigation.navigate('User Home Page');
             }
@@ -84,7 +81,7 @@ export default function Login({ navigation }) {
       <View style={globalStyles.inner}>
         {/* Logo */}
         <Image
-          source={require('../assets/HandyGo Logo.png')}
+          source={require('../assets/handygo-logo.png')}
           style={globalStyles.logo}
           resizeMode="cover"
         />

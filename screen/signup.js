@@ -12,7 +12,7 @@ import {
 import Constants from 'expo-constants';
 import { Formik } from 'formik';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
+import { Octicons, Ionicons } from '@expo/vector-icons';
 
 
 import { colours, globalStyles } from '../components/style_loginsignup';
@@ -37,8 +37,6 @@ export default function Signup({ navigation }) {
     setDob(selectedDate || date);
   };
 
-
-
   return (
     <KeyboardAvoidingWrapper>
     <View style={globalStyles.container}>
@@ -46,7 +44,7 @@ export default function Signup({ navigation }) {
       {/* <ScrollView contentContainerStyle={{ flexGrow: 1 }}> */}
         <View style={globalStyles.inner}>
           <Image
-            source={require('../assets/HandyGo Logo.png')}
+            source={require('../assets/handygo-logo.png')}
             style={globalStyles.logo}
             resizeMode="cover"
           />
@@ -84,49 +82,28 @@ export default function Signup({ navigation }) {
                       password
                     );
                     const user = userCredential.user;
-                    await sendEmailVerification(user);  
+                    await sendEmailVerification(user);                 
+
                     
-                    const baseUserData = {
+                    await setDoc(doc(db, 'users', user.uid), {
                       uid: user.uid,
                       fullName: fullName,
                       email: email,
                       dob: dob.toISOString(),
                       role: role,
                       createdAt: new Date().toISOString()
-                    };
-                    
-                    if (role === 'business') {
-                      baseUserData.contact = '';
-                      baseUserData.address = '';
-                      baseUserData.NRIC = '';
-                      baseUserData.bankName = '';
-                      baseUserData.bankNumber = '';
-                      baseUserData.category = [];
-                      baseUserData.subcategory = [];
-                      baseUserData.introduction = '';
-                    }
-                
+                    });
+
+                    Alert.alert('Please Verify Your Email', 'A verification email has been sent to you account.',
+                      [{ text: 'OK', onPress: () => navigation.navigate('Login')}]                  
+                    );                  
 
                     
-                    await setDoc(doc(db, 'users', user.uid), 
-                      baseUserData);
 
-
-                    const isBusiness = role === 'business';
-
-                    Alert.alert(
-                      'Account Created',
-                      'A verification email has been sent to your account. Please verify it before logging in.',
-                      [
-                        {
-                          text: 'OK',
-                          onPress: () => {
-                              navigation.navigate('Login');
-                            }
-                          
-                        }
-                      ]
-);
+                    /*Alert.alert('Success', 'Account created successfully!', [
+                      { text: 'OK', onPress: () => navigation.navigate('Login') }
+                    ]);
+                    */
                    
                   } catch (error) {
                     if (error.code === 'auth/email-already-in-use') {
@@ -312,7 +289,6 @@ export default function Signup({ navigation }) {
                 <TouchableOpacity
                   style={globalStyles.button}
                   onPress={handleSubmit}
-        
                 >
                   <Text style={globalStyles.buttonText}>Sign Up</Text>
                 </TouchableOpacity>
