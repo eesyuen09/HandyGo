@@ -93,15 +93,17 @@ import { useNavigation } from '@react-navigation/native';
         <View style = {style.container}>
 
         <View style = {style.header}>
-            <Ionicons name ='arrow-back' size = {24} color = {colours.darkest_coco}/>
+            <TouchableOpacity
+                onPress={() => navigation.goBack()}
+                style={style.backButton}>
+            <Ionicons name ='arrow-back' size = {24} color = {colours.darkest_coco} />
+            </TouchableOpacity>
             <Text style = {style.headerTitle}>Urgent Task</Text>
-
+            {/* <View style = {style.backButton}/> */}
         </View>
 
         <View style={style.searchContainer}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name = "search" size ={20} color = {colours.darkest_coco} />
-            </TouchableOpacity>
             <TextInput
                 placeholder = "Searching for any services?"
                 placeholderTextColor={colours.darkest_coco}
