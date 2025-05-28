@@ -10,7 +10,7 @@ import Signup from './screen/signup';
 import Moredetails from './screen/moredetails';
 import Onboard from './screen/onboardingpg';
 import Biz_homepage from './screen/biz_homepage';
-
+import UrgentTask from './screen/biz_urgenttask';
 
 
 
@@ -29,6 +29,10 @@ export default function App() {
     <RootStack/>
   </NavigationContainer>
   </>
+<<<<<<< HEAD
 
+=======
+  
+>>>>>>> c5b3661dae408a9a59c8a218cc5dca41c360dfcb
   );
 }

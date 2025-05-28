@@ -61,19 +61,19 @@ export const categoryMap = {
         if (flagSnap.exists() && flagSnap.data().initialized) {
           return;
         }
-        console.log("categoryMap keys:", Object.keys(categoryMap));
+        // console.log("categoryMap keys:", Object.keys(categoryMap));
       
   
         for (const [category, subcategories] of Object.entries(categoryMap)) {
           try {
-            console.log("Writing category:", category);
+            // console.log("Writing category:", category);
             await setDoc(doc(db, "categoryToWorker", category), { workers: [] });
-            console.log(`Wrote category: ${category}`);
+            // console.log(`Wrote category: ${category}`);
         
             for (const sub of subcategories) {
-              console.log(`   Sub: ${sub}`);
+              // console.log(`   Sub: ${sub}`);
               await setDoc(doc(db, "subcategoryToWorker", sub), { workers: [] });
-              console.log(`Wrote subcategory: ${sub}`);
+              // console.log(`Wrote subcategory: ${sub}`);
             }
           } catch (error) {
             console.error(`Error writing ${category} / ${sub}:`, error.message);
@@ -81,7 +81,7 @@ export const categoryMap = {
         }
         
         await setDoc(flagRef, { initialized: true });
-        console.log("Worker maps initialized and flagged.");
+        // console.log("Worker maps initialized and flagged.");
       };
   
       upload();
