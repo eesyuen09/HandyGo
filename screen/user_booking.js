@@ -1,4 +1,4 @@
-import React, {useState, useRoute} from 'react';
+// import React, {useState, useRoute} from 'react';
 import {
     View,
     Text,
@@ -8,11 +8,14 @@ import {
     ScrollView,
     Alert,
   } from 'react-native';
-import { styles } from '../components/style_u_booking.js';
+import { colours, styles } from '../components/style_u_booking.js';
 //Keyboard Avoiding Wrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper.js';
 import { FontAwesome5, AntDesign, MaterialIcons, Entypo, FontAwesome, Feather, FontAwesome6 } from '@expo/vector-icons';
 import BookingForm from '../components/BookingForm';
+import { useRoute } from '@react-navigation/native';
+import {services_categories}  from '../constants/category_constant';
+
 
 const handleBookingSubmit = (values) => {
   console.log('Booking submitted:', values);
@@ -28,11 +31,13 @@ export default function UserBooking() {
     // };
 
     const route = useRoute() ;
-    const { serviceType, subcategory, description, price, bannerImage, icon } = route.params || {};
+    const { serviceType, subcategory, description, price} = route.params || {};
+
+    const icon = services_categories.find(category => category.title === serviceType)?.icon || <MaterialIcons name="cleaning-services" size={18} color="#704F38" />;
+    const bannerImage = services_categories.find(category => category.title === serviceType)?.bannerImage || require('../assets/images/cleaning_banner.png');
 
     return (
       <KeyboardAvoidingWrapper>
-      <ScrollView style={styles.container}>
         <ScrollView style={styles.frame}>
 
           {/* top banner */}
@@ -50,7 +55,7 @@ export default function UserBooking() {
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Booking Information</Text>
             <TouchableOpacity style={styles.inputRow}>
-              <Image source = {icon} />
+              {icon} 
               {/* <MaterialIcons name="cleaning-services" size={18} color="#704F38" /> */}
               <Text style={styles.inputText}>{subcategory}</Text>
             </TouchableOpacity>
@@ -122,7 +127,6 @@ export default function UserBooking() {
           onSubmit={handleBookingSubmit}
       />
         </ScrollView>
-      </ScrollView>
       </KeyboardAvoidingWrapper>
       
     );

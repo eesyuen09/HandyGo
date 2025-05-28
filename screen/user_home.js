@@ -19,14 +19,16 @@ import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 //category import
-import { services_catogories } from '../constants/category_constant';
+import {services_categories}  from '../constants/category_constant';
+
+
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { Feather, AntDesign, MaterialIcons, FontAwesome5, FontAwesome6,MaterialCommunityIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
-export default function UserHome() {
+export default function UserHome( {navigation} ) {
     
   const services = [   
     { icon: <MaterialIcons name="cleaning-services" size={30} color = {colours.darkest_coco} />, label: 'Cleaning' }, 
@@ -44,7 +46,7 @@ export default function UserHome() {
     //     'repair_icon.png': require('../assets/icons/repair_icon.png'),
     //     'all.png': require('../assets/icons/all.png'),
     // };
-
+ 
     const serviceBanners = [
       { image: 'cleaning_banner.png', label: 'Deep Cleaning'},        
       { image: 'home_organization.png', label: 'Home Organization'  },        
@@ -65,19 +67,21 @@ export default function UserHome() {
 
     // category press    
     const handleCategoryPress = (serviceType) => {
-    const serviceData = services_catogories.find((c)=> c.title === serviceType);
-    navigation.navigate('user_booking', {
+    const serviceData = services_categories.find((c)=> c.title === serviceType);
+    console.log(serviceData);
+    navigation.navigate('UserBooking', {
     serviceType: serviceData.title,
     subcategory: serviceData.subcategories[0],
     description: serviceData.description,       
     price: serviceData.price,        
-    bannerImage: serviceData.bannerImage,
+    // bannerImage: serviceData.bannerImage,
+    // icon: serviceData.icon,
   });
 };
 
   // subcategory press
-    const handleSubcategoryPress = (subcategory) => {  
-      const serviceData = services_categories.find((category) =>      
+    const handleSubcategoryPress = (subcategory) => { 
+      const serviceData = services_categories.find((category) =>        
         category.subcategories.includes(subcategory));
         
         if (!serviceData) {
@@ -85,16 +89,18 @@ export default function UserHome() {
         return;
       }
 
-      navigation.navigate('user_booking', {
+      navigation.navigate('UserBooking', {
         serviceType: serviceData.title,
         subcategory: subcategory,
         description: serviceData.description,
         price: serviceData.price,
-        bannerImage: serviceData.bannerImage,
+        // bannerImage: serviceData.bannerImage,
+        // icon: serviceData.icon,
       });
     };
                    
   return (
+    
     <View style={styles.frame}>
       {/* Top Search Bar */}
       <View style = {styles.container}>
@@ -114,12 +120,11 @@ export default function UserHome() {
             <Text style = {styles.sectionTitle}>Popular Services</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.iconRow}>
                 {services.map((item, index) => (
-                    <TouchableOpacity key={index} style={styles.icon}>
+                    <TouchableOpacity key={index} style={styles.icon} onPress={() => handleCategoryPress(item.label)}>
                     <View style={styles.circle}>
                         {item.icon}
                     </View>
                     <Text style={styles.iconLabel}>{item.label}</Text>
-                    onPress={() => handleCategoryPress(item.label)}
                     </TouchableOpacity>
                 ))}
                 </ScrollView>
@@ -134,6 +139,7 @@ export default function UserHome() {
             <TouchableOpacity
             key={index}
             style={styles.serviceBanner}
+            onPress={() => handleSubcategoryPress(item.label)}
             >
             <View>
             <Text style={styles.bannerLabel}>{item.label}</Text>
@@ -142,7 +148,6 @@ export default function UserHome() {
                 style={styles.serviceBanner}
             />
             </View>
-            onPress={() => handleSubcategoryPress(item.label)}
             </TouchableOpacity>
 
         ))}

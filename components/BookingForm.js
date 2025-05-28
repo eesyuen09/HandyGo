@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Picker } from '@react-native-picker/picker';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
-//category import
+
 
 const calculateEndTime = (startTime, hours, minutes) => {
   const [h, m] = startTime.split(':').map(Number);   
@@ -156,7 +156,6 @@ export default function BookingForm({ onSubmit, initialType}) {
       {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
 
         <View style={styles.form}>
-            <Text>type</Text>
             <Picker
             selectedValue={values.type}
             onValueChange={handleChange('type')}

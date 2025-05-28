@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
+import { services_categories } from '../constants/category_constant';
 
 // Colours
 export const colours = {
@@ -57,7 +58,7 @@ export const styles = StyleSheet.create({
     },
 
     bannerTitle: {
-      left: 250,
+      alignSelf: 'flex-end',
       top: Constants.statusBarHeight - 25,
       color: 'white',
       fontWeight: 'bold',

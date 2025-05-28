@@ -11,12 +11,12 @@ const colours = {
   black: "#000000",
 };
 
-export const services_catogories = [  
+export const services_categories = [  
     {
       title: 'Cleaning',
       subcategories: [
         'General House Cleaning',
-        'Home Organizing',
+        'Home Organization',
         'Deep Cleaning',
         'Aircond Cleaning',
         'Carpet Cleaning',

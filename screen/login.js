@@ -118,7 +118,7 @@ export default function Login({ navigation }) {
                       if (!userData.contact || !userData.address ||
                         !userData.NRIC || !userData.bankName || !userData.category 
                         || !userData.subcategory || !userData.introduction){
-                          navigation.navigate('Add Details');
+                          navigation.navigate('Biz_adddetails');
                         }else{
                       navigation.navigate('Business Home Page');}
                     } else if (userData.role == 'user') {
