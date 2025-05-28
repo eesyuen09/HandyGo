@@ -10,6 +10,9 @@ export const services_catogories = [
         'Post-Renovation Cleaning',
         'Sofa or Mattress Cleaning',
       ],
+      description: "Book trusted cleaners to dust, mop, sanitize, and freshen up your home—giving you a spotless space without the hassle.",
+      price: 20,
+      bannerImage: require('../assets/images/cleaning_banner.png'),
     },
     {
       title: 'Repair',
@@ -22,6 +25,9 @@ export const services_catogories = [
         'Door & Lock Repair',
         'Ceiling Repair'
       ],
+      description: "Connect with skilled repair technicians to fix everything from leaks and electrical issues to broken fixtures, keeping your home safe and fully functional.",
+      price: 20,
+      bannerImage: require('../assets/images/repair_banner.png'),
     },
     {
       title: 'Maintenance',
@@ -36,7 +42,11 @@ export const services_catogories = [
         'Electrical Safety Check',
         'Gas Leak Detection',
         'Fire Extinguisher Servicing'
-      ]
+      ],
+      description: "Connect with experienced maintenance professionals to perform safety checks, fix minor wear and tear, and ensure your home systems stay in top working condition.",
+      price: 20,
+      bannerImage: require('../assets/images/maintenance_banner.png'),
+
     },
     {
       title: 'Moving',
@@ -45,16 +55,22 @@ export const services_catogories = [
         'Large Item Delivery',
         'Small Item Delivery'
       ],
+      description: "Get help from professional movers who carefully pack, transport, and set up your belongings—making your move fast, safe, and hassle-free.",
+      price: 50,
+      bannerImage: require('../assets/images/Moving.png'),
     },
     {
-      title: 'Outdoor',
+      title: 'Outdoor Services',
       subcategories:[
         'Lawn Mowing',
         'Gardening',
         'Tree Cutting',
         'Roof or Gutter Cleaning',
 
-      ]
+      ],
+      description: "Keep your outdoor spaces clean and beautiful with expert lawn care, tree trimming, and garden upkeep tailored to your needs.",
+      price: 50,
+      bannerImage: require('../assets/images/outdoor_banner.png'),
     },
     
   ];
