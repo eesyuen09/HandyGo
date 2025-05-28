@@ -219,7 +219,7 @@ export default function moredetails() { //export default function moredetails({ 
     }
 // cat = titles
     function renderCategoryBlock(cat, index, setFieldValue, subcategory){
-        const selectedCategory = services_catogories.find((c)=> c.title === cat);
+        const selectedCategory = services_catogories[cat];
 
         return (
             <View key = {cat} style = {style.inputGroup}>
@@ -243,7 +243,7 @@ export default function moredetails() { //export default function moredetails({ 
                     >
                     <Picker.Item label="Select..." value="" />
                     {services_catogories.map((catObj) => (
-                        <Picker.Item key={catObj.title} label={catObj.title} value={catObj.title} />
+                        <Picker.Item key={catObj} label={catObj} value={catObj} />
                     ))}
                     </Picker>
                 )}
