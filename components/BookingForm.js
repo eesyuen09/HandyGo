@@ -6,7 +6,6 @@ import { Picker } from '@react-native-picker/picker';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 //category import
-import { services_catogories } from '../constants/category_constant.js';
 
 const calculateEndTime = (startTime, hours, minutes) => {
   const [h, m] = startTime.split(':').map(Number);   
@@ -45,7 +44,7 @@ const styles = StyleSheet.create({
     },
 
   error: {
-    color: 'red',
+    color: '#704F38',
     marginBottom: 10,
   },
 
@@ -231,7 +230,7 @@ export default function BookingForm({ onSubmit, initialType}) {
                       style={styles.input}
                     />
                     {values.durationHour && values.durationMinute && slot.time && (
-                      <Text style={styles.info}>
+                      <Text style={styles.input}>
                         Ends at: {calculateEndTime(slot.time, values.durationHour, values.durationMinute)}
                       </Text>
                     )}

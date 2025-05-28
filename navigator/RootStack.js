@@ -15,10 +15,8 @@ import PrepopulateWorkerMaps from '../constants/categorymap';
 import Onboard from '../screen/onboardingpg';
 import Login from '../screen/login';
 import Signup from '../screen/signup';
-// import businessDashboard from '../screen/welcome_business';
-// import userDashboard from '../screen/welcome_user';
-import user_home from '../screen/user_home';
-import user_booking from '../screen/user_booking';
+import UserHome from '../screen/user_home';
+import UserBooking from '../screen/user_booking';
 import Biz_adddetails from '../screen/moredetails';
 import Biz_homepage from '../screen/biz_homepage';
 
@@ -26,7 +24,7 @@ import Biz_homepage from '../screen/biz_homepage';
 const RootStack = () => {
     return (
       <>
-      <PrepopulateWorkerMaps/>
+      {/* <PrepopulateWorkerMaps/> */}
       <Stack.Navigator 
       initialRouteName='Onboard'
       screenOptions={{
@@ -41,11 +39,12 @@ const RootStack = () => {
          }
 
          }}>
+
         <Stack.Screen name = "Onboard" component={Onboard}/>
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
-        <Stack.Screen name="user_home" component={user_home} />
-        <Stack.Screen name="user_booking" component={user_booking} />
+        <Stack.Screen name="UserHome" component={UserHome} />
+        <Stack.Screen name="UserBooking" component={UserBooking} />
         <Stack.Screen name= 'Business Home Page' component={Biz_homepage}/>
         <Stack.Screen name = "Add Details" component={Biz_adddetails}/>
       </Stack.Navigator>

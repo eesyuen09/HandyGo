@@ -26,7 +26,7 @@ import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { Feather, AntDesign, MaterialIcons, FontAwesome5, FontAwesome6,MaterialCommunityIcons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 
-export default function user_home() {
+export default function UserHome() {
     
   const services = [   
     { icon: <MaterialIcons name="cleaning-services" size={30} color = {colours.darkest_coco} />, label: 'Cleaning' }, 

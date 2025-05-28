@@ -1,3 +1,4 @@
+import { StyleSheet } from 'react-native';
 import Constants from 'expo-constants';
 
 // Colours
@@ -6,7 +7,7 @@ export const colours = {
   light_coco: "#CB9D83",
   main_coco: "#A76545",
   beige: "#F9F2ED",
-  grey: "E3E3E3",
+  grey: "#E3E3E3",
   white: '#FFFFFF',
   yellow_brown: '#DDA853',
   black: "#000000",

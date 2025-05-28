@@ -19,7 +19,7 @@ const handleBookingSubmit = (values) => {
   Alert.alert('Booking Submitted', 'Your booking has been successfully submitted!');
 };
 
-export default function user_booking() {
+export default function UserBooking() {
     // const placeholderData = {
     //   bannerImage: require('../assets/images/cleaning_banner.png'), 
     //   serviceType: 'Cleaning',
@@ -127,4 +127,3 @@ export default function user_booking() {
       
     );
   }
-  
