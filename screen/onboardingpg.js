@@ -39,7 +39,7 @@ export default function Onboarding({navigation}){
      
       <TouchableOpacity 
         style = {globalStyles.button}
-        onPress={() => navigation.navigate('Login')}>
+        onPress={() => navigation.navigate('UserHome')}>
 
         <Text style={globalStyles.buttonText}>
         Login

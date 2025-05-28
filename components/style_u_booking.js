@@ -59,6 +59,7 @@ export const styles = StyleSheet.create({
 
     bannerTitle: {
       alignSelf: 'flex-end',
+      paddingRight: 15,
       top: Constants.statusBarHeight - 25,
       color: 'white',
       fontWeight: 'bold',
@@ -69,11 +70,11 @@ export const styles = StyleSheet.create({
     bannerDescription: {
       top: Constants.statusBarHeight -25,
       width: '50%',
-      left: 187,
+      alignSelf: 'flex-end',
+      paddingRight: 15,
       color: 'white',
       fontSize: 13,
       marginTop: 4,
-
       textAlign: 'right',
       fontFamily: 'Sora',
     },
@@ -97,7 +98,7 @@ export const styles = StyleSheet.create({
 
     section: {
       marginTop: 30,
-      paddingHorizontal: 40,
+      paddingHorizontal: 30,
     },
 
     sectionLabel: {
@@ -106,12 +107,13 @@ export const styles = StyleSheet.create({
       color: '#704F38',
       marginBottom: 8,
       fontFamily: 'Sora',
+      marginLeft: 10,
     },
 
     inputRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#F9F2ED',
+      flexDirection: 'column',
+      alignItems: 'flex-start',
+      backgroundColor: colours.beige,
       padding: 12,
       borderRadius: 10,
       marginBottom: 8,
@@ -125,6 +127,54 @@ export const styles = StyleSheet.create({
       fontSize: 14,
     },
 
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: 15,
+      color: '#704F38',
+      fontFamily: 'Sora',
+      fontSize: 18,
+      paddingHorizontal: 10,
+      },
+
+    pickerContainer: {
+      backgroundColor: 'colours.beige',
+      // borderRadius: 8,
+      height: 40,
+      width: '100%',
+      borderColor: colours.darkest_coco,
+      marginTop:20,
+      marginBottom: 20,
+      padding: 10,
+      overflow: 'hidden',
+      zIndex: 10000,
+    },
+
+
+    picker: {
+      height: 50,
+      width: '100%',
+      zIndex: 900 , 
+      flex: 1, 
+      marginLeft: 10,
+      backgroundColor: colours.beige,
+      borderColor: colours.beige,
+      fontFamily: 'Sora',
+      fontSize: 14,
+    },
+
+    dropdownContainer: {
+      borderWidth: 1,
+      width: '95%',
+      borderColor: colours.darkest_coco,
+      backgroundColor: colours.beige,
+      borderRadius: 10,
+      fontFamily: 'Sora',
+      fontSize: 14,
+      color: colours.darkest_coco,
+      zIndex:100,
+    },
+
     preferenceRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -132,10 +182,13 @@ export const styles = StyleSheet.create({
     },
 
     preferenceButton: {
-      paddingHorizontal: '50',
+      paddingHorizontal: '10',
+      marginLeft: 10,
+      bottom: 5,
+      paddingBottom: 10,
       flexDirection: 'row',
-      alignItems: 'center',
-      padding: 10,
+      alignSelf: 'flex-end',
+      alignItems: 'flex-end',
       borderRadius: 10,
       backgroundColor: '#F9F2ED',
     },
@@ -146,12 +199,37 @@ export const styles = StyleSheet.create({
     },
 
     textArea: {
-      height: 80,
+      height: 120,
       borderRadius: 10,
+      width: '95%',
       borderColor: '#ccc',
       borderWidth: 1,
       padding: 10,
       textAlignVertical: 'top',
       color: darkest_coco,
-    },    
+    }, 
+    
+    bookNowButton: {
+      marginHorizontal: 40,
+      marginVertical: 20,
+      backgroundColor: '#A76545',
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+
+    bookNowText: {
+      paddingHorizontal: 40,
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+
+    error: {
+      color: 'red',
+      fontSize: 12,
+      marginTop: 4,
+      fontFamily: 'Sora',
+      marginLeft: 20,
+    }
   });
