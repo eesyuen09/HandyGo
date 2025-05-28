@@ -1,4 +1,3 @@
-import { StyleSheet, Dimensions} from 'react-native';
 import Constants from 'expo-constants';
 
 // Colours
@@ -117,7 +116,7 @@ export const styles = StyleSheet.create({
       marginTop: 5,
     },
 
-    inputText: {
+    input: {
       marginLeft: 10,
       color: '#704F38',
       fontFamily: 'Sora',
@@ -152,23 +151,5 @@ export const styles = StyleSheet.create({
       padding: 10,
       textAlignVertical: 'top',
       color: darkest_coco,
-    },
-
-    bookNowButton: {
-      marginHorizontal: 40,
-      marginVertical: 20,
-      backgroundColor: '#A76545',
-      paddingVertical: 14,
-      borderRadius: 10,
-      alignItems: 'center',
-    },
-
-    bookNowText: {
-      paddingHorizontal: 40,
-      color: 'white',
-      fontWeight: 'bold',
-      fontSize: 16,
-    },
-
-    
+    },    
   });

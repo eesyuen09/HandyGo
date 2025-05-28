@@ -6,6 +6,7 @@ import { db } from '../firebaseConfig';
 export const categoryMap = {
   Cleaning: [
     'General House Cleaning',
+    'Home Organizing',
     'Deep Cleaning',
     'Aircond Cleaning',
     'Carpet Cleaning',

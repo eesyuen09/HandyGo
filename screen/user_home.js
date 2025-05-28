@@ -19,7 +19,7 @@ import { updateDoc, doc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 //category import
-import { services_catogories } from '../constants/categories';
+import { services_catogories } from '../constants/category_constant';
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
@@ -27,32 +27,15 @@ import { Feather, AntDesign, MaterialIcons, FontAwesome5, FontAwesome6,MaterialC
 import { Picker } from '@react-native-picker/picker';
 
 export default function user_home() {
-    const {
-          darkest_coco,
-          main_coco,
-          beige,
-          grey,
-          white,
-          yellow_brown,
-          black
-        } = colours;
-
-    const [fontsLoaded] = useFonts({
-            'Sora': require('../assets/font/Sora-VariableFont_wght.ttf'),
-            'Inter': require('../assets/font/Inter-regular.ttf')
-          });
-          if(!fontsLoaded){
-            return null;
-          }
-
-    const services = [
-        { icon: <MaterialIcons name="cleaning-services" size={30} color = {colours.darkest_coco} />, label: 'Cleaning' },
-        { icon: <FontAwesome5 name="truck-moving" size={30} color = {colours.darkest_coco}/>, label: 'Moving' },
-        { icon: <Feather name="tool" size={35} color = {colours.darkest_coco} />, label: 'Repair' },
-        { icon: <FontAwesome5 name="tree" size={30} color = {colours.darkest_coco} />, label: 'Outdoor'},
-        { icon: <MaterialCommunityIcons name="file-cabinet" size={30} color = {colours.darkest_coco} />, label: 'Home\nOrganization'},
-        { icon: <FontAwesome6 name="hands-holding" size={30} color = {colours.darkest_coco} />, label: 'Maintenance'},
-        { icon: <FontAwesome6 name="border-all" size={30} color = {colours.darkest_coco}/>, label: 'All' },
+    
+  const services = [   
+    { icon: <MaterialIcons name="cleaning-services" size={30} color = {colours.darkest_coco} />, label: 'Cleaning' }, 
+    { icon: <FontAwesome5 name="truck-moving" size={30} color = {colours.darkest_coco}/>, label: 'Moving' },        
+    { icon: <Feather name="tool" size={35} color = {colours.darkest_coco} />, label: 'Repair' },        
+    { icon: <FontAwesome5 name="tree" size={30} color = {colours.darkest_coco} />, label: 'Outdoor Services'},        
+    // { icon: <MaterialCommunityIcons name="file-cabinet" size={30} color = {colours.darkest_coco} />, label: 'Home\nOrganization'},        
+    { icon: <FontAwesome6 name="hands-holding" size={30} color = {colours.darkest_coco} />, label: 'Maintenance'},        
+    // { icon: <FontAwesome6 name="border-all" size={30} color = {colours.darkest_coco}/>, label: 'All' },
     ];
 
     // const iconMap = {
@@ -63,26 +46,52 @@ export default function user_home() {
     // };
 
     const serviceBanners = [
-        { image: 'Moving.png', label: 'Moving'},
-        { image: 'home_organization.png', label: 'Home Organization'  },
-        { image: 'repair_banner.jpg', label: 'Repair' },
-        { image: 'cleaning_banner.png', label: 'Cleaning' },
-        { image: 'maintenance_banner.png', label: 'Maintenance' },
-        { image: 'outdoor_banner.png', label: 'Outdoor Services' },
+      { image: 'cleaning_banner.png', label: 'Deep Cleaning'},        
+      { image: 'home_organization.png', label: 'Home Organization'  },        
+      { image: 'aircond_repair.png', label: 'Air Conditioner Repair' },        
+      { image: 'Moving.png', label: 'House Moving' },        
+      { image: 'gasleak.png', label: 'Gas Leak Detection' },        
+      { image: 'outdoor_banner.png', label: 'Outdoor Services' },
     ];
 
-    const bannerImageMap = {
-        'Moving.png': require('../assets/images/Moving.png'),
-        'home_organization.png': require('../assets/images/home_organization.png'),
-        'repair_banner.jpg': require('../assets/images/repair_banner.png'),
-        'cleaning_banner.png': require('../assets/images/cleaning_banner.png'),
-        'maintenance_banner.png': require('../assets/images/maintenance_banner.png'),
-        'outdoor_banner.png': require('../assets/images/outdoor_banner.png'),
-        
+    const bannerImageMap = {        
+      'Moving.png': require('../assets/images/Moving.png'),        
+      'home_organization.png': require('../assets/images/home_organization.png'),        
+      'aircond_repair.png': require('../assets/images/aircond_repair.png'),        
+      'cleaning_banner.png': require('../assets/images/cleaning_banner.png'),        
+      'gasleak.png': require('../assets/images/gasleak.png'),        
+      'outdoor_banner.png': require('../assets/images/outdoor_banner.png'),       
     };
 
-    const handlePress = (label) => {
-        console.log(`Pressed: ${label}`);
+    // category press    
+    const handleCategoryPress = (serviceType) => {
+    const serviceData = services_catogories.find((c)=> c.title === serviceType);
+    navigation.navigate('user_booking', {
+    serviceType: serviceData.title,
+    subcategory: serviceData.subcategories[0],
+    description: serviceData.description,       
+    price: serviceData.price,        
+    bannerImage: serviceData.bannerImage,
+  });
+};
+
+  // subcategory press
+    const handleSubcategoryPress = (subcategory) => {  
+      const serviceData = services_categories.find((category) =>      
+        category.subcategories.includes(subcategory));
+        
+        if (!serviceData) {
+        console.error('Service type not found', subcategory);
+        return;
+      }
+
+      navigation.navigate('user_booking', {
+        serviceType: serviceData.title,
+        subcategory: subcategory,
+        description: serviceData.description,
+        price: serviceData.price,
+        bannerImage: serviceData.bannerImage,
+      });
     };
                    
   return (
@@ -110,6 +119,7 @@ export default function user_home() {
                         {item.icon}
                     </View>
                     <Text style={styles.iconLabel}>{item.label}</Text>
+                    onPress={() => handleCategoryPress(item.label)}
                     </TouchableOpacity>
                 ))}
                 </ScrollView>
@@ -124,7 +134,6 @@ export default function user_home() {
             <TouchableOpacity
             key={index}
             style={styles.serviceBanner}
-            onPress={() => handlePress(item.label)}
             >
             <View>
             <Text style={styles.bannerLabel}>{item.label}</Text>
@@ -133,11 +142,16 @@ export default function user_home() {
                 style={styles.serviceBanner}
             />
             </View>
+            onPress={() => handleSubcategoryPress(item.label)}
             </TouchableOpacity>
 
         ))}
         </View>
       </ScrollView>
+
+
     </View>
+
+    
   );
 }

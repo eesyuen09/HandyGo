@@ -1,13 +1,12 @@
 import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { colours, styles } from '../components/style_u_booking.js';
-import { Formik } from 'formik';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Switch, Button } from 'react-native';
+import { Formik, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import { Picker } from '@react-native-picker/picker';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 //category import
-import { services_catogories } from '../constants/categories.js';
+import { services_catogories } from '../constants/category_constant.js';
 
 const calculateEndTime = (startTime, hours, minutes) => {
   const [h, m] = startTime.split(':').map(Number);   
@@ -25,13 +24,70 @@ const calculateEndTime = (startTime, hours, minutes) => {
   });
 };
 
+const styles = StyleSheet.create({
+  form: {
+    padding: 20,
+  },
 
-export default function BookingForm({ onSubmit }) {
+  label: {    
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#704F38',
+    marginBottom: 8,
+    fontFamily: 'Sora',
+  },
+
+    input: {
+      marginLeft: 10,
+      color: '#704F38',
+      fontFamily: 'Sora',
+      fontSize: 14,
+    },
+
+  error: {
+    color: 'red',
+    marginBottom: 10,
+  },
+
+  bookNowButton: {
+      marginHorizontal: 40,
+      marginVertical: 20,
+      backgroundColor: '#A76545',
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: 'center',
+    },
+
+    bookNowText: {
+      paddingHorizontal: 40,
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+
+    durationRow: {  
+      flexDirection: 'row',  
+      justifyContent: 'space-between',  
+      marginBottom: 15,
+    },
+
+
+    picker: {  
+      flex: 1,  
+      marginRight: 10,  
+      color: '#704F38',
+    },
+
+  });
+
+
+
+export default function BookingForm({ onSubmit, initialType}) {
     
-  return (
+  return(
     <Formik
       initialValues={{
-        type: '',
+        type: initialType || '',
         urgency: '',
         durationHour: '',
         durationMinute: '',
@@ -41,23 +97,23 @@ export default function BookingForm({ onSubmit }) {
         address: '',
         gender: '',
         rating: '',
-        notif: '',
+        notif: false,
         notes: '',
       }}
 
-      validationSchema={Yup.object({
-                  type: Yup.string().required('Type is required'),
-                  urgency: Yup.string().required('Urgency is required'),
-                  durationHour: Yup.string().required('durationHour is required'),
-                  durationMinute: Yup.string().required('durationMinute is required'),
-                  availability: Yup.array().of(
-                    Yup.object().shape({
-                      date: Yup.string().required('Date is required'),
-                      time: Yup.string().required('Time is required'),
-                    })),
-                  state: Yup.string().required('State is required'),
-                  postcode: Yup.string().required('Postcode is required'),
-                  address: Yup.string().required('Address is required'),
+      validationSchema={Yup.object({                  
+        type: Yup.string().required('Type is required'),                  
+        urgency: Yup.string().required('Urgency is required'),                  
+        durationHour: Yup.string().required('durationHour is required'),                  
+        durationMinute: Yup.string().required('durationMinute is required'),                  
+        availability: Yup.array().of(                    
+          Yup.object().shape({                      
+            date: Yup.string().required('Date is required'),                      
+            time: Yup.string().required('Time is required'),                    
+          })),                  
+          state: Yup.string().required('State is required'),                  
+          postcode: Yup.string().required('Postcode is required'),                  
+          address: Yup.string().required('Address is required'),
                 })}
 
       onSubmit={
@@ -82,58 +138,29 @@ export default function BookingForm({ onSubmit }) {
             return;
           }
 
+          if (/[a-zA-Z]/.test(postcode)) {
+            Alert.alert('Invalid Postcode', 'Incorrect format.');
+            return;
+          } 
+
           try {
-            const userCredential = await createUserWithEmailAndPassword(
-              auth,
-              email,
-              password
-            );
-                    
-            const user = userCredential.user;
-            await sendEmailVerification(user);            
-
-                    
-            await setDoc(doc(db, 'users', user.uid), {
-                      uid: user.uid,
-                      fullName: fullName,
-                      email: email,
-                      dob: dob.toISOString(),
-                      role: role,
-                      createdAt: new Date().toISOString()
-                    });
-
-                    Alert.alert('Please Verify Your Email', 'A verification email has been sent to you account.',
-                      [{ text: 'OK', onPress: () => navigation.navigate('Login')}]                  
-                    );                  
-
-                    
-
-                    /*Alert.alert('Success', 'Account created successfully!', [
-                      { text: 'OK', onPress: () => navigation.navigate('Login') }
-                    ]);
-                    */
-                   
-                  } catch (error) {
-                    if (error.code === 'auth/email-already-in-use') {
-                      Alert.alert('Error', 'Email already in use' );                  
-                    } else if (error.code === 'auth/invalid-email') {
-                      Alert.alert('Error', 'Invalid email format'  );                     
-                    } else if (error.code === 'auth/weak-password') {
-                      Alert.alert('Error', 'Password should be at least 6 characters');  
-                    } else {
-                       Alert.alert('Error', error.message);  
-                    }
-                  }            
-            }}
-          
+            const docRef = await addDoc(collection(db, 'bookings'), values);          
+            console.log("Document written with ID: ", docRef.id);        
+          } catch (e) {          
+            console.error("Error adding document: ", e);        
+          }
+      
+        }}
+    
     >
-      {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
+  
+      {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
 
         <View style={styles.form}>
             <Text>type</Text>
             <Picker
             selectedValue={values.type}
-            onValueChange={handleChange('serviceType')}
+            onValueChange={handleChange('type')}
             style={styles.input}
           >
             <Picker.Item label="Select Service Type" value="" />
@@ -287,7 +314,7 @@ export default function BookingForm({ onSubmit }) {
             style={styles.input}
             placeholder="Tell us more about your request"
           />
-          {touched.address && errors.address && <Text style={styles.error}>{errors.address}</Text>}  
+          {touched.notes && errors.notes && <Text style={styles.error}>{errors.notes}</Text>}  
 
           {/* Notification */}
           <Text>Notification</Text>
@@ -296,47 +323,13 @@ export default function BookingForm({ onSubmit }) {
             onValueChange={(val) => setFieldValue('notif', val)}
           />
 
-        
-          <TouchableOpacity onPress={handleSubmit} style={styles.submitBtn}>
-            <Text style={styles.submitText}>Book Now</Text>
+          <TouchableOpacity onPress={handleSubmit} style={styles.bookNowButton}>
+            <Text style={styles.bookNowText}>Book Now</Text>
           </TouchableOpacity>
         </View>
         
       )}
+    
     </Formik>
   );
 }
-
-const styles = StyleSheet.create({
-  form: {
-    padding: 20,
-  },
-
-  label: {
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#aaa',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 8,
-  },
-
-  error: {
-    color: 'red',
-    marginBottom: 10,
-  },
-  submitBtn: {
-    backgroundColor: '#A76545',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  submitText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-});
