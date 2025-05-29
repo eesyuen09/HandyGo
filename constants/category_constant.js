@@ -16,7 +16,7 @@ export const services_categories = [
       title: 'Cleaning',
       subcategories: [
         'General House Cleaning',
-        'Home Organization',
+        'Home Organizing',
         'Deep Cleaning',
         'Aircond Cleaning',
         'Carpet Cleaning',

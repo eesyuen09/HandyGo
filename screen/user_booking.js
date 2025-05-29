@@ -22,7 +22,6 @@ import {services_categories}  from '../constants/category_constant';
 import { Formik, FieldArray } from 'formik';
 import * as Yup from 'yup';
 import DropDownPicker from 'react-native-dropdown-picker';
-import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
@@ -32,20 +31,15 @@ const handleBookingSubmit = (values) => {
   Alert.alert('Booking Submitted', 'Your booking has been successfully submitted!');
 };
 
-const calculateEndTime = (startTime, hours, minutes) => {
-  const [h, m] = startTime.split(':').map(Number);   
-  const start = new Date();                          
-  start.setHours(h, m, 0, 0);                        
+const calculateEndTime = (startTime, duration) => {
+  const [hour, minute] = startTime.split(':').map(Number); 
+  const start = new Date();
+  start.setHours(hour, minute, 0, 0); 
 
-  const end = new Date(start);                       
-  end.setHours(end.getHours() + parseInt(hours));
-  end.setMinutes(end.getMinutes() + parseInt(minutes));
+  const end = new Date(start);
+  end.setHours(end.getHours() + parseInt(duration));
 
-  return end.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: false,
-  });
+  return end.toTimeString().slice(0, 5); 
 };
 
 export default function UserBooking() {
@@ -59,11 +53,15 @@ export default function UserBooking() {
     const route = useRoute() ;
     const { serviceType, subcategory, description, price} = route.params || {};
 
-    const icon = services_categories.find(category => category.title === serviceType)?.icon || <MaterialIcons name="cleaning-services" size={18} color="#704F38" />;
-    const bannerImage = services_categories.find(category => category.title === serviceType)?.bannerImage || require('../assets/images/cleaning_banner.png');
-    const subcategories = services_categories.find(category => category.title === serviceType)?.subcategories || [];
+    const icon = services_categories.find(category => category.title === serviceType)?.icon 
+    const bannerImage = services_categories.find(category => category.title === serviceType)?.bannerImage 
+    const subcategories = services_categories.find(category => category.title === serviceType)?.subcategories;
     const [openUrgency, setOpenUrgency] = useState(false);
-    const [openType, setOpenType, openDuration, setOpenDuration, setGender, setOpenGender, setRating, setOpenRating] = useState(false);
+    const [openType, setOpenType] = useState(false);
+    const [openDuration, setOpenDuration] = useState(false);
+    const [openGender, setOpenGender] = useState(false);
+    const [openRating, setOpenRating] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(null);
 
     return (
 
@@ -137,14 +135,13 @@ export default function UserBooking() {
           >
             {({ handleChange, handleBlur, handleSubmit, values, errors, touched, setFieldValue }) => (
         
-
+        <View style={{ flex: 1, zIndex: 0 }}>     
         <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         <ScrollView contentContainerStyle={{ paddingBottom: 300 }} keyboardShouldPersistTaps="handled">
     
-
           {/* top banner */}
           <View style={styles.bannerContainer}>
             <Image source={bannerImage} style={styles.bannerImage} />
@@ -180,11 +177,14 @@ export default function UserBooking() {
               setValue={(val) => setFieldValue('type', val())}
               setItems={() => {}}
               placeholder="Select Service Type"
+              containerStyle={{ zIndex: 1000 }}
+              zIndex = {1000}
+              listMode= 'SCROLLVIEW'
             />
           </View>
           </View>
 
-          {touched.type && errors.type&& (
+          {touched.type && errors.type && (
             <Text style={styles.error}>{errors.type}</Text>
           )}
           
@@ -196,7 +196,7 @@ export default function UserBooking() {
               <Text style={styles.input}>Urgency</Text>
             </View>
 
-            <View style={ {zIndex:900, marginLeft:10} }>
+            <View style={ {zIndex:750, marginLeft:10} }>
             <DropDownPicker
               style={styles.dropdownContainer}
               open={openUrgency}
@@ -209,6 +209,9 @@ export default function UserBooking() {
               setValue={(val) => setFieldValue('urgency', val())}
               setItems={() => {}}
               placeholder="Do you need it now?"
+              containerStyle={{ zIndex: 750 }}
+              zIndex = {750}
+              listMode= 'SCROLLVIEW'
             />
           </View>
           </View>
@@ -229,6 +232,7 @@ export default function UserBooking() {
               <MaterialIcons name="schedule" size={18} color="#704F38" />
               <Text style={styles.input}>Duration</Text>
             </View>
+
             <View style={ {zIndex:800, marginLeft:10} }>
             <DropDownPicker
               style={styles.dropdownContainer}
@@ -242,6 +246,9 @@ export default function UserBooking() {
               setValue={(val) => setFieldValue('duration', val())}
               setItems={() => {}}
               placeholder="Select Duration"
+              ontainerStyle={{ zIndex: 800}}
+              zIndex = {800}
+              listMode= 'SCROLLVIEW'
             />
           </View>
           </View>
@@ -249,48 +256,140 @@ export default function UserBooking() {
           {touched.duration && errors.duration && (
             <Text style={styles.error}>{errors.duration}</Text>
           )}
+
           
+                        
 
-
+          {/* Availability */}
           <View style={styles.inputRow}>
             <View style={styles.header}>
               <MaterialIcons name="date-range" size={18} color="#704F38" />
-              <Text style={styles.input}>Duration</Text>
+              <Text style={styles.input}>Availability (Sort by Priority)</Text>
             </View>
               
-              <Text style={{alignSelf: 'center', fontSize:14}}>Select available dates</Text>
+              {/* <Text style={{alignSelf: 'center', fontSize:14}}>Select available dates</Text> */}
               <FieldArray
-                          name="availability"
-                          render={({ push, remove }) => (
-                            <View>
-                              {values.availability.map((slot, index) => (
-                                <View key={index}>
-                                  <TextInput
-                                    placeholder="Date (YYYY-MM-DD)"
-                                    value={slot.date}
-                                    onChangeText={text => setFieldValue(`availability[${index}].date`, text)}
-                                    style={styles.input}
-                                  />
-                                  <TextInput
-                                    placeholder="Start Time (eg: 16:3)"
-                                    value={slot.time}
-                                    onChangeText={text => setFieldValue(`availability[${index}].time`, text)}
-                                    style={styles.input}
-                                  />
-                                  {values.durationHour && values.durationMinute && slot.time && (
-                                    <Text style={styles.input}>
-                                      Ends at: {calculateEndTime(slot.time, values.durationHour, values.durationMinute)}
-                                    </Text>
-                                  )}
-                                  <Button title="Remove"  onPress={() => remove(index)} />
-                                </View>
-                              ))}
-                              <Button title="Add Time Slot" onPress={() => push({ date: '', time: '' })} />
-                            </View>
-                          )}
-                        />
+                name="availability"
+                render={({ push, remove }) => (
+                  <View style={styles.centerContainer}>
+                    {values.availability.map((slot, index) => (
+                      <View key={index} style={styles.availabilityInputRow}>
+                        {/* Date Picker */}
+                        <View>
+                        <TouchableOpacity onPress={() => setShowDatePicker({ index, type: 'date' })}>
+                          <Text style={styles.availabilityInput}>
+                            {slot.date ? slot.date : 'Select Date'}
+                          </Text>
+                        </TouchableOpacity>
+
+                        {showDatePicker && showDatePicker.index === index && showDatePicker.type === 'date' && (
+                          <DateTimePicker style={{ marginBottom:10, alignSelf: 'center' }}
+                            value={slot.date ? new Date(slot.date) : new Date()}
+                            mode="date"
+                            display='default'
+                            minimumDate={new Date()}
+                            onChange={(event, selectedDate) => {
+                              setShowDatePicker(null);
+                              if (event.type === 'dismissed') return;
+                              // Extract local date
+                              const year = selectedDate.getFullYear();
+                              const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+                              const day = String(selectedDate.getDate()).padStart(2, '0');
+                              const formatted = `${year}-${month}-${day}`;
+
+                              setFieldValue(`availability[${index}].date`, formatted);
+                            }}
+                          />
+                        )}
+                        </View>
+
+                        
+
+                        {/* Time Picker */}
+                        <View>
+                        <TouchableOpacity onPress={() => setShowDatePicker({ index, type: 'time' })}>
+                          <Text style={styles.availabilityInput}>
+                            {slot.time ? slot.time : 'Select Time'}
+                          </Text>
+                        </TouchableOpacity>
+
+                        {values.duration && slot.time && (
+                          <Text style={styles.input}>
+                            Ends at: {calculateEndTime(slot.time, values.duration)}
+                          </Text>
+                        )}
+
+                        {showDatePicker && showDatePicker.index === index && showDatePicker.type === 'time' && (
+                          <DateTimePicker style = {{alignSelf: 'center'}}
+                            value={ slot.time
+                                    ? new Date(`2025-05-301T${slot.time}:00`)
+                                    : new Date()
+                                  }
+                            mode="time"
+                            minuteInterval={15}
+                            display="default"            
+                            onChange={(event, selectedDate) => {
+                              setShowDatePicker(null);
+                              if (event.type === 'dismissed') return;
+                              const selectedHours = selectedDate.getHours();
+                              const selectedMinutes = selectedDate.getMinutes();
+                              const now = new Date();
+
+                              const year = now.getFullYear();
+                              const month = String(now.getMonth() + 1).padStart(2, '0');
+                              const day = String(now.getDate()).padStart(2, '0');
+                              const today = `${year}-${month}-${day}`;
+                              const isToday = values.availability[index].date === today;
+
+                              const isPastTime = isToday && (
+                                selectedHours < now.getHours() ||
+                                (selectedHours === now.getHours() && selectedMinutes < now.getMinutes())
+                              );
+
+                              if (isPastTime) {
+                                Alert.alert('Invalid Time', 'You cannot select a time in the past.');
+                                return;
+                              }
+                              const formatted = selectedDate.toTimeString().slice(0, 5);
+                              setFieldValue(`availability[${index}].time`, formatted);
+                              }
+                            }
+                          />
+                        )}
+                        </View>
+
+                        {/* Remove/Add Buttons */}
+                        <View style={styles.buttonRow}>
+                          <TouchableOpacity onPress={() => {
+                            if (values.availability.length === 1) {
+                              Alert.alert('Action Not Allowed', 'At least one time slot must be chosen.');
+                            } else {
+                              remove(index);
+                            }
+                          }}>
+                            <Text style={styles.smallButtonText}>Remove</Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => {
+                            if (values.availability.length >= 3) {
+                              Alert.alert('Action Not Allowed', 'You can only choose up to 3 time slots.');
+                            } else {
+                              push({ date: '', time: '' })
+                            }
+                          }}
+                              >
+                            <Text style={styles.smallButtonText}>Add Time Slot</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              />
             </View>
-            </View>
+            {touched.availability && errors.availability && (
+              <Text style={styles.error}>{errors.availability}</Text>
+            )}
+          </View>
        
 
           {/* Location */}
@@ -361,10 +460,10 @@ export default function UserBooking() {
               <Text style={styles.input}>Gender Preference</Text>
               </View>
             
-            <View style={ {zIndex:800, marginLeft:10} }>
+            <View style={ {zIndex:700, marginLeft:10} }>
             <DropDownPicker
               style={styles.dropdownContainer}
-              open={openDuration}
+              open={openGender}
               value={values.duration}
               items={[
                 { label: 'Female', value: 'female' },
@@ -374,6 +473,9 @@ export default function UserBooking() {
               setValue={(val) => setFieldValue('gender', val())}
               setItems={() => {}}
               placeholder="No Preference"
+              containerStyle={{ zIndex: 700 }}
+              zIndex = {700}
+              listMode= 'SCROLLVIEW'
             />
           </View>
           </View>
@@ -389,10 +491,10 @@ export default function UserBooking() {
               <Text style={styles.input}>Ratings</Text>
             </View>
 
-            <View style={ {zIndex:700, marginLeft:10} }>
+            <View style={ {zIndex:600, marginLeft:10} }>
             <DropDownPicker
               style={styles.dropdownContainer}
-              open={openDuration}
+              open={openRating}
               value={values.rating}
               items={[
                 { label: '5.0+', value: '5.0'},
@@ -406,6 +508,9 @@ export default function UserBooking() {
               setValue={(val) => setFieldValue('rating', val())}
               setItems={() => {}}
               placeholder="4.0+"
+              containerStyle={{ zIndex: 600 }}
+              zIndex = {600}
+              listMode= 'SCROLLVIEW'
             />
           </View>
           </View>
@@ -457,6 +562,7 @@ export default function UserBooking() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+        </View>
 
       
             )}

@@ -1,6 +1,7 @@
 import { StyleSheet, Dimensions} from 'react-native';
 import Constants from 'expo-constants';
 
+
 // Colours
 export const colours = {
   darkest_coco: "#704F38",

@@ -127,6 +127,48 @@ export const styles = StyleSheet.create({
       fontSize: 14,
     },
 
+    availabilityInput: {
+      borderColor: colours.darkest_coco,
+      borderWidth: 1,
+      borderRadius: 20,
+      padding:10,
+      paddingHorizontal: 20,
+      marginBottom: 10,
+      width: '100%',
+      alignSelf: 'center',
+      color: 'black',
+      fontFamily: 'Sora',
+      fontSize: 15,
+    },
+
+    availabilityInputRow: {
+      flexDirection: 'column',
+      alignItems: 'center',      
+      backgroundColor: colours.beige,
+      padding: 12,
+      borderRadius: 10,
+      marginVertical: 8,
+    },  
+    
+    centerContainer: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginVertical: 10,
+    },
+
+    buttonRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: '60%',
+      marginTop: 5,
+    },
+
+    smallButtonText: {
+      fontSize: 15,
+      color: '#007AFF',
+      paddingHorizontal:45,
+    },
+
     header: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -146,7 +188,7 @@ export const styles = StyleSheet.create({
       marginTop:20,
       marginBottom: 20,
       padding: 10,
-      overflow: 'hidden',
+
       zIndex: 10000,
     },
 
@@ -165,7 +207,7 @@ export const styles = StyleSheet.create({
 
     dropdownContainer: {
       borderWidth: 1,
-      width: '95%',
+      width: '100%',
       borderColor: colours.darkest_coco,
       backgroundColor: colours.beige,
       borderRadius: 10,

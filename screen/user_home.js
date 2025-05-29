@@ -49,11 +49,11 @@ export default function UserHome( {navigation} ) {
  
     const serviceBanners = [
       { image: 'cleaning_banner.png', label: 'Deep Cleaning'},        
-      { image: 'home_organization.png', label: 'Home Organization'  },        
+      { image: 'home_organization.png', label: 'Home Organizing'  },        
       { image: 'aircond_repair.png', label: 'Air Conditioner Repair' },        
       { image: 'Moving.png', label: 'House Moving' },        
       { image: 'gasleak.png', label: 'Gas Leak Detection' },        
-      { image: 'outdoor_banner.png', label: 'Outdoor Services' },
+      { image: 'outdoor_banner.png', label: 'Gardening' },
     ];
 
     const bannerImageMap = {        
