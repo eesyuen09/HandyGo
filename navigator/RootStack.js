@@ -45,7 +45,21 @@ const RootStack = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="UserHome" component={UserHome} />
-        <Stack.Screen name="UserBooking" component={UserBooking} />
+        <Stack.Screen name="UserBooking" component={UserBooking}
+        options={{
+          headerTitle: 'Booking',
+          headerTransparent: false,
+          headerStyle: {
+            backgroundColor: 'white',           
+          },
+          headerTintColor: main_coco,
+          headerTitleStyle: {
+            fontFamily: 'Sora',     
+            fontSize: 18,             
+            color: darkest_coco,         
+          },
+        }}
+       />
         <Stack.Screen name= 'Business Home Page' component={Biz_homepage}/>
         <Stack.Screen name = "Add Details" component={Biz_adddetails}/>
         <Stack.Screen name = 'Business Urgent Task' component ={Biz_urgentTask}/>

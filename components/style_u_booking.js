@@ -60,7 +60,7 @@ export const styles = StyleSheet.create({
     bannerTitle: {
       alignSelf: 'flex-end',
       paddingRight: 15,
-      top: Constants.statusBarHeight - 25,
+      top: Constants.statusBarHeight - 75,
       color: 'white',
       fontWeight: 'bold',
       fontSize: 30,
@@ -68,8 +68,8 @@ export const styles = StyleSheet.create({
     },
 
     bannerDescription: {
-      top: Constants.statusBarHeight -25,
-      width: '50%',
+      top: Constants.statusBarHeight -73,
+      width: '70%',
       alignSelf: 'flex-end',
       paddingRight: 15,
       color: 'white',
@@ -82,6 +82,8 @@ export const styles = StyleSheet.create({
     bannerPrice: {
       color: 'white',
       fontSize: 14,
+      top: Constants.statusBarHeight - 65,
+      left: 15,
       // fontWeight: 'bold',
       marginTop: 4,
       fontFamily: 'Sora',
@@ -89,9 +91,10 @@ export const styles = StyleSheet.create({
 
      Price: {
       color: 'white',
-      fontSize: 35,
+      fontSize: 40,
       fontWeight: 'bold',
-      left: 45,
+      top: Constants.statusBarHeight - 60,
+      left: 60,
       marginTop: 4,
       fontFamily: 'Sora',
     },

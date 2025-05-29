@@ -8,7 +8,6 @@ import {
     ScrollView,
     Alert,
     Switch,
-    Button,
     KeyboardAvoidingView,
     Platform,
   } from 'react-native';
@@ -16,8 +15,7 @@ import { colours, styles } from '../components/style_u_booking.js';
 //Keyboard Avoiding Wrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper.js';
 import { FontAwesome5, AntDesign, MaterialIcons, Entypo, FontAwesome, Feather, FontAwesome6 } from '@expo/vector-icons';
-import BookingForm from '../components/BookingForm';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, useIsFocused } from '@react-navigation/native';
 import {services_categories}  from '../constants/category_constant';
 import { Formik, FieldArray } from 'formik';
 import * as Yup from 'yup';
@@ -43,16 +41,10 @@ const calculateEndTime = (startTime, duration) => {
 };
 
 export default function UserBooking() {
-    // const placeholderData = {
-    //   bannerImage: require('../assets/images/cleaning_banner.png'), 
-    //   serviceType: 'Cleaning',
-    //   description: 'Book trusted cleaners to dust, mop, sanitize, and freshen up your home—giving you a spotless space without the hassle.',
-    //   price: 20,
-    // };
-
+    const isFocused = useIsFocused();
+    if (!isFocused) return null; // Prevent rendering when not focused
     const route = useRoute() ;
     const { serviceType, subcategory, description, price} = route.params || {};
-
     const icon = services_categories.find(category => category.title === serviceType)?.icon 
     const bannerImage = services_categories.find(category => category.title === serviceType)?.bannerImage 
     const subcategories = services_categories.find(category => category.title === serviceType)?.subcategories;
@@ -64,6 +56,7 @@ export default function UserBooking() {
     const [showDatePicker, setShowDatePicker] = useState(null);
 
     return (
+
 
       <Formik
             initialValues={{
@@ -89,8 +82,8 @@ export default function UserBooking() {
                   date: Yup.string().required('Date is required'),                      
                   time: Yup.string().required('Time is required'),                    
                 })),                  
-                state: Yup.string().required('State is required'),                  
-                postcode: Yup.string().required('Postcode is required'),                  
+                state: Yup.string().matches(/^[A-Za-z\s]+$/, 'State can only contain letters').required('State is required'),                  
+                postcode: Yup.string().matches(/^[0-9]+$/, 'Postcode can only contain numbers').required('Postcode is required'),                  
                 address: Yup.string().required('Address is required'),
                       })}
 
@@ -439,13 +432,14 @@ export default function UserBooking() {
               <Text style={styles.input}>Address</Text>
               </View>
               <TextInput
-                          value={values.address}
-                          onChangeText={handleChange('address')}
-                          onBlur={handleBlur('address')}
-                          style={styles.input}
-                          placeholder="Enter your address"
-                        />
-                        {touched.address && errors.address && <Text style={styles.error}>{errors.address}</Text>}
+                value={values.address}                          
+                onChangeText={handleChange('address')}                          
+                onBlur={handleBlur('address')}                          
+                style={styles.input}                          
+                placeholder="Enter your address"                        
+             />
+                        
+            {touched.address && errors.address && <Text style={styles.error}>{errors.address}</Text>}
             </View>
           </View>
 
@@ -567,6 +561,7 @@ export default function UserBooking() {
       
             )}
           </Formik> 
+  
      
     );
 
