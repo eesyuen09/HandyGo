@@ -131,7 +131,7 @@ export default function Login({ navigation }) {
                       !userData.subcategory ||
                       !userData.introduction
                     ) {
-                      navigation.navigate("Biz_adddetails");
+                      navigation.navigate("Add Details");
                     } else {
                       navigation.navigate("Business Home Page");
                     }
