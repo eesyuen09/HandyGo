@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,8 @@ import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
+import { auth } from "../firebaseConfig";
+import { getDoc, doc } from "firebase/firestore";
 
 //extract data from firebase
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -29,25 +31,40 @@ export default function UrgentTask() {
   if (!fontsLoaded) return null;
 
   useEffect(() => {
+
     const fetchUrgentTasks = async () => {
       try {
-        const q = query(collection(db, "bookings"), where("urgency", "==", true));
+        const user = auth.currentUser;
+        if (!user) return;
+
+      //get worker category
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return;
+
+        const userData = userSnap.data();
+        const workerCategories = userData.subcategory || [];
+        console.log(workerCategories);
+        const q = query(collection(db, "booking"));//, where("urgency", "==", true)
         const querySnapshot = await getDocs(q);
         const formatted = [];
 
+      
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-          const avail = data.availability?.[0] || {};
-
+          // const avail = data.availability?.[0] || {};
+        if (workerCategories.includes(data.type)) {
           formatted.push({
-            id: data.orderID || doc.id,
-            category: data.type || "Unknown",
-            time: `${avail.date || "N/A"} | ${avail.time || "N/A"}`,
-            location: `${data.state || ""}, ${data.postcode || ""}`,
-            price: "$39.99", // Optional: generate dynamically
-            icon: getIcon(data.type),
-          });
+          id: data.orderID || doc.id,
+          category: data.type || "Unknown",
+          time: `${data.date || "N/A"} | ${data.time || "N/A"}`,
+          location: `${data.state || ""}, ${data.postcode || ""}`,
+          price: "$39.99",
+          icon: getIcon(data.type),
         });
+      };
+      }) ;
+
 
         setTasks(formatted);
       } catch (err) {
@@ -110,7 +127,7 @@ export default function UrgentTask() {
         </View>
       </View>
       <TouchableOpacity>
-        <Text style={style.viewText}>View</Text>
+        <Text style={style.viewText}>Accept</Text>
       </TouchableOpacity>
     </View>
   );
@@ -164,7 +181,7 @@ export default function UrgentTask() {
 
         {/* to be amend!!!!!!!!*/}
         <FlatList
-          data={dummytasks}
+          data={tasks}
           renderItem={showTask}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 100 }}

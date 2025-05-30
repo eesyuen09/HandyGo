@@ -33,7 +33,7 @@ import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 
 // route: contain parameters passed from the previous screen
-export default function moredetails({ navigation }) {
+export default function Moredetails({ navigation }) {
   const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
     colours;
 
@@ -154,7 +154,7 @@ export default function moredetails({ navigation }) {
         });
       });
 
-      // navigation.goBack();
+      navigation.navigate("Business Home Page");
     } catch (error) {
       console.error("Error adding document: ", error);
       alert("Failed to save data.");
