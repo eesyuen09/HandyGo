@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   ImageBackground,
+  Alert,
 } from "react-native";
 
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -13,8 +14,10 @@ import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
 import { useNavigation } from "@react-navigation/native";
-import { auth } from "../firebaseConfig";
-import { getDoc, doc } from "firebase/firestore";
+import { auth, getAuth } from "../firebaseConfig";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { services_categories } from "../constants/category_constant";
 
 //extract data from firebase
 import { collection, getDocs, query, where } from "firebase/firestore";
@@ -30,34 +33,128 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
-  useEffect(() => {
-    const fetchUrgentTasks = async () => {
-      try {
-        const user = auth.currentUser;
-        if (!user) return;
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(
+  //     auth,
+  //     async (user) => {
+  //       if (!user) return;
 
-        //get worker category
+  //       const fetchUrgentTasks = async () => {
+  //         try {
+  //           const user = auth.currentUser;
+  //           if (!user) return;
+
+  //           //get worker category
+  //           const userRef = doc(db, "users", user.uid);
+  //           const userSnap = await getDoc(userRef);
+  //           if (!userSnap.exists()) return;
+
+  //           const userData = userSnap.data();
+  //           const workerCategories = userData.subcategory || [];
+  //           console.log(workerCategories);
+  //           const q = query(
+  //             collection(db, "booking"),
+  //             where("status", "==", "pending")
+  //           ); //, where("urgency", "==", true)
+  //           const querySnapshot = await getDocs(q);
+  //           const formatted = [];
+  //           const auth = getAuth();
+
+  //           const acceptBooking = async (bookingId, currentWorkerId) => {
+  //             const bookingRef = doc(db, "bookings", bookingId);
+
+  //             await updateDoc(bookingRef, {
+  //               status: "accepted",
+  //               workerId: currentWorkerId,
+  //               acceptedAt: new Date(),
+  //             });
+
+  //             Alert.alert("Booking accepted!");
+  //           };
+
+  //           querySnapshot.forEach((doc) => {
+  //             const data = doc.data();
+  //             // const avail = data.availability?.[0] || {};
+  //             if (workerCategories.includes(data.type)) {
+  //               formatted.push({
+  //                 id: data.orderID || doc.id,
+  //                 category: data.type || "Unknown",
+  //                 time: `${data.availability.date || "N/A"} | ${
+  //                   data.availability.time || "N/A"
+  //                 }`,
+  //                 location: `${data.state || ""}, ${data.postcode || ""}`,
+  //                 price: data.price,
+  //                 icon: services_categories.find(
+  //                   (category) => category.title === data.type
+  //                 )?.icon,
+  //               });
+  //             }
+  //           });
+
+  //           setTasks(formatted);
+  //         } catch (err) {
+  //           console.error("Error fetching urgent tasks:", err);
+  //         }
+  //         fetchUrgentTasks();
+  //       };
+  //       return () => unsubscribe();
+  //     },
+  //     []
+  //   );
+  // }, []);
+  const acceptBooking = async (bookingId, currentWorkerId) => {
+    try {
+      const bookingRef = doc(db, "booking", bookingId);
+      await updateDoc(bookingRef, {
+        status: "accepted",
+        workerId: currentWorkerId,
+        acceptedAt: new Date(),
+      });
+
+      Alert.alert("Booking accepted!");
+
+      // Optional: re-fetch the tasks to refresh the UI
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => task.id !== bookingId)
+      );
+    } catch (err) {
+      console.error("Failed to accept booking:", err);
+      Alert.alert("Error", "Failed to accept booking.");
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      try {
+        // Get the worker's subcategories
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) return;
 
         const userData = userSnap.data();
         const workerCategories = userData.subcategory || [];
-        console.log(workerCategories);
-        const q = query(collection(db, "booking")); //, where("urgency", "==", true)
+
+        const q = query(
+          collection(db, "booking"),
+          where("status", "==", "pending")
+        );
         const querySnapshot = await getDocs(q);
+
         const formatted = [];
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          // const avail = data.availability?.[0] || {};
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
           if (workerCategories.includes(data.type)) {
             formatted.push({
-              id: data.orderID || doc.id,
+              id: data.orderID || docSnap.id,
               category: data.type || "Unknown",
-              time: `${data.date || "N/A"} | ${data.time || "N/A"}`,
+              time: `${data.availability?.[0]?.date || "N/A"} | ${
+                data.availability?.[0]?.time || "N/A"
+              }`,
               location: `${data.state || ""}, ${data.postcode || ""}`,
-              price: "$39.99",
+              price: data.price || "35.99",
               icon: getIcon(data.type),
             });
           }
@@ -67,11 +164,10 @@ export default function UrgentTask() {
       } catch (err) {
         console.error("Error fetching urgent tasks:", err);
       }
-    };
+    });
 
-    fetchUrgentTasks();
+    return () => unsubscribe();
   }, []);
-
   if (!fontsLoaded) return null;
 
   const getIcon = (type) => {
@@ -122,7 +218,9 @@ export default function UrgentTask() {
           <Text style={style.taskDetailsText}>{item.price}</Text>
         </View>
       </View>
-      <TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => acceptBooking(item.id, auth.currentUser.uid)}
+      >
         <Text style={style.viewText}>Accept</Text>
       </TouchableOpacity>
     </View>

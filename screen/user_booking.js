@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -29,8 +29,9 @@ import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";
 import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { addDoc, collection, doc, setDoc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
+import { addDoc, collection, setDoc } from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { db, app } from "../firebaseConfig";
 
 const handleBookingSubmit = (values) => {
   console.log("Booking submitted:", values);
@@ -69,10 +70,22 @@ export default function UserBooking() {
   const [openGender, setOpenGender] = useState(false);
   const [openRating, setOpenRating] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+  const auth = getAuth(app);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser(user);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   return (
     <Formik
       initialValues={{
+        serviceType: serviceType,
         type: subcategory,
         urgency: false,
         duration: "",
@@ -84,6 +97,7 @@ export default function UserBooking() {
         rating: "",
         notif: false,
         notes: "",
+        status: "pending",
       }}
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
@@ -116,12 +130,14 @@ export default function UserBooking() {
           rating,
           notif,
           notes,
+          status,
         } = values;
 
         try {
           const bookingRef = await addDoc(collection(db, "booking"), {
             ...values,
             createdAt: new Date(),
+            userId: auth.currentUser.uid,
           });
 
           await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
@@ -578,7 +594,7 @@ export default function UserBooking() {
                     <DropDownPicker
                       style={styles.dropdownContainer}
                       open={openGender}
-                      value={values.duration}
+                      value={values.gender}
                       items={[
                         { label: "Female", value: "female" },
                         { label: "Male", value: "male" },

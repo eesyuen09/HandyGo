@@ -144,7 +144,7 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="Enter Your Full Name Here"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       onChangeText={handleChange("fullName")}
                       onBlur={handleBlur("fullName")}
                       value={values.fullName}
@@ -165,7 +165,7 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="Enter Your Email Address Here"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       keyboardType="email-address"
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
@@ -188,7 +188,7 @@ export default function Signup({ navigation }) {
                       <TextInput
                         style={globalStyles.textInput}
                         placeholder="YYYY – MM – DD"
-                        placeholderTextColor={colours.white}
+                        placeholderTextColor={colours.grey}
                         editable={false}
                         value={dob ? dob.toDateString() : ""}
                       />
@@ -217,7 +217,7 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="••••••"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       secureTextEntry={hidePassword}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
@@ -249,7 +249,7 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="••••••"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       secureTextEntry={hidePassword}
                       onChangeText={handleChange("confirmPassword")}
                       onBlur={handleBlur("confirmPassword")}

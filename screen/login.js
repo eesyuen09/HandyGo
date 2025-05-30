@@ -29,7 +29,7 @@ WebBrowser.maybeCompleteAuthSession();
 
 export default function Login({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
-  const { white } = colours;
+  const { white, grey } = colours;
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId:
       "158473300904-4qg6m53aic6gtp2ttjlcg19b0rihshhi.apps.googleusercontent.com",
@@ -172,7 +172,7 @@ export default function Login({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="Enter Your Email Here"
-                      placeholderTextColor={white}
+                      placeholderTextColor={grey}
                       onChangeText={handleChange("email")}
                       onBlur={handleBlur("email")}
                       value={values.email}
@@ -194,7 +194,7 @@ export default function Login({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="••••••"
-                      placeholderTextColor={white}
+                      placeholderTextColor={grey}
                       secureTextEntry={hidePassword}
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}

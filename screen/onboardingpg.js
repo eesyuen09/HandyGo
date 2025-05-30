@@ -39,9 +39,9 @@ export default function Onboarding({ navigation }) {
 
       <TouchableOpacity
         style={globalStyles.button}
-        onPress={() => navigation.navigate("SignUp")}
+        onPress={() => navigation.navigate("Signup")}
       >
-        <Text style={globalStyles.buttonText}>SignUp</Text>
+        <Text style={globalStyles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
     </ImageBackground>
   );
