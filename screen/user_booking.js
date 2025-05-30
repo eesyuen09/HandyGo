@@ -454,10 +454,10 @@ export default function UserBooking() {
                               </TouchableOpacity>
                               <TouchableOpacity
                                 onPress={() => {
-                                  if (values.availability.length >= 3) {
+                                  if (values.availability.length > 1) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "You can only choose up to 3 time slots."
+                                      "You can only choose up to 1 time slots."
                                     );
                                   } else {
                                     push({ date: "", time: "" });
