@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {
     View,
     Text,
@@ -446,7 +446,10 @@ export default function moredetails() { //export default function moredetails({ 
         style={style.saveButton}
         onPress={handleSubmit}
       >
-        <Text style={style.saveButtonText}>Save Changes</Text>
+        <Text 
+        style={style.saveButtonText}
+        onPress={() => navigation.navigate('Business Home Page')}
+        >Save Changes</Text>
       </TouchableOpacity>
     </>
   )}
