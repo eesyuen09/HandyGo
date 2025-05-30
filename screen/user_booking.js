@@ -23,7 +23,7 @@ import {
   Feather,
   FontAwesome6,
 } from "@expo/vector-icons";
-import { useRoute, useIsFocused } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
 import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";

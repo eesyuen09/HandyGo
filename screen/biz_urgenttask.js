@@ -31,13 +31,12 @@ export default function UrgentTask() {
   if (!fontsLoaded) return null;
 
   useEffect(() => {
-
     const fetchUrgentTasks = async () => {
       try {
         const user = auth.currentUser;
         if (!user) return;
 
-      //get worker category
+        //get worker category
         const userRef = doc(db, "users", user.uid);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) return;
@@ -45,26 +44,24 @@ export default function UrgentTask() {
         const userData = userSnap.data();
         const workerCategories = userData.subcategory || [];
         console.log(workerCategories);
-        const q = query(collection(db, "booking"));//, where("urgency", "==", true)
+        const q = query(collection(db, "booking")); //, where("urgency", "==", true)
         const querySnapshot = await getDocs(q);
         const formatted = [];
 
-      
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           // const avail = data.availability?.[0] || {};
-        if (workerCategories.includes(data.type)) {
-          formatted.push({
-          id: data.orderID || doc.id,
-          category: data.type || "Unknown",
-          time: `${data.date || "N/A"} | ${data.time || "N/A"}`,
-          location: `${data.state || ""}, ${data.postcode || ""}`,
-          price: "$39.99",
-          icon: getIcon(data.type),
+          if (workerCategories.includes(data.type)) {
+            formatted.push({
+              id: data.orderID || doc.id,
+              category: data.type || "Unknown",
+              time: `${data.date || "N/A"} | ${data.time || "N/A"}`,
+              location: `${data.state || ""}, ${data.postcode || ""}`,
+              price: "$39.99",
+              icon: getIcon(data.type),
+            });
+          }
         });
-      };
-      }) ;
-
 
         setTasks(formatted);
       } catch (err) {
@@ -89,7 +86,6 @@ export default function UrgentTask() {
         return "wrench";
     }
   };
-
 
   const showTask = ({ item }) => (
     <View style={style.card}>
