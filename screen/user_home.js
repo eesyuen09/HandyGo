@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,10 @@ import {
   Image,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 
 import { colours, styles } from "../components/style_u_home";
@@ -138,6 +142,7 @@ export default function UserHome({ navigation }) {
       // icon: serviceData.icon,
     });
   };
+  const searchInputRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -172,30 +177,35 @@ export default function UserHome({ navigation }) {
   return (
     <View style={styles.frame}>
       {/* Top Search Bar */}
-      <View style={styles.container}>
-        <View style={styles.searchBar}>
-          <AntDesign
-            name="search1"
-            size={24}
-            color="white"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Looking for any service?"
-            placeholderTextColor="white"
-            style={styles.searchInput}
-            returnKeyType="search"
-            onSubmitEditing={handleSearch}
-          />
+
+      <TouchableWithoutFeedback onPress={() => searchInputRef.current?.focus()}>
+        <View style={styles.container}>
+          <View style={styles.searchBar}>
+            <AntDesign
+              name="search1"
+              size={24}
+              color="white"
+              style={styles.searchIcon}
+            />
+            <TextInput
+              ref={searchInputRef}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Looking for any service?"
+              editable={true}
+              placeholderTextColor="white"
+              style={styles.searchInput}
+              returnKeyType="search"
+              onSubmitEditing={handleSearch}
+            />
+          </View>
         </View>
-      </View>
+      </TouchableWithoutFeedback>
 
       <ScrollView>
-        {/* Popular Services Section */}
+        {/* Shortcut Section */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Popular Services</Text>
+          <Text style={styles.sectionTitle}>Shortcut</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
