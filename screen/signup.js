@@ -285,7 +285,7 @@ export default function Signup({ navigation }) {
                     ]}
                     onPress={() => setFieldValue("role", "business")}
                   >
-                    <Text style={globalStyles.buttonText}>Business</Text>
+                    <Text style={globalStyles.buttonText}>Worker</Text>
                   </TouchableOpacity>
                   <View style={{ width: 10 }} />
 
