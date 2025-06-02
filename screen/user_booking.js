@@ -161,7 +161,7 @@ export default function UserBooking() {
         touched,
         setFieldValue,
       }) => (
-        <View style={{ flex: 1, zIndex: 0 }}>
+        <View style={{ flex: 1, zIndex: 0, backgroundColor: "#F9F2ED" }}>
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}

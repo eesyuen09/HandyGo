@@ -14,6 +14,7 @@ import {
 } from "react-native";
 
 import { colours, styles } from "../components/style_u_home";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 //fonts
 import { useFonts } from "expo-font";
@@ -175,11 +176,11 @@ export default function UserHome({ navigation }) {
   };
 
   return (
-    <View style={styles.frame}>
+    <SafeAreaView style={styles.frame}>
       {/* Top Search Bar */}
 
       <TouchableWithoutFeedback onPress={() => searchInputRef.current?.focus()}>
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
           <View style={styles.searchBar}>
             <AntDesign
               name="search1"
@@ -199,10 +200,13 @@ export default function UserHome({ navigation }) {
               onSubmitEditing={handleSearch}
             />
           </View>
-        </View>
+        </SafeAreaView>
       </TouchableWithoutFeedback>
 
-      <ScrollView>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 100 }}
+        keyboardShouldPersistTaps="handled"
+      >
         {/* Shortcut Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Shortcut</Text>
@@ -244,6 +248,6 @@ export default function UserHome({ navigation }) {
           ))}
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

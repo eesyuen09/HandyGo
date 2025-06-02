@@ -1,4 +1,4 @@
-import { StyleSheet, Dimensions } from "react-native";
+import { StyleSheet, Dimensions, Platform } from "react-native";
 import Constants from "expo-constants";
 
 // Colours
@@ -44,7 +44,7 @@ export const styles = StyleSheet.create({
     flexDirection: "column",
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
-    paddingTop: Constants.statusBarHeight + 8,
+    paddingTop: Platform.OS === "android" ? 16 : Constants.statusBarHeight + 8,
     // height: Constants.statusBarHeight + 75,
     minHeight: 100,
     paddingHorizontal: 0,
@@ -58,7 +58,7 @@ export const styles = StyleSheet.create({
     backgroundColor: light_coco,
     borderRadius: 30,
     paddingHorizontal: 26,
-    paddingVertical: 8,
+    // paddingVertical: 8,
     marginHorizontal: 25,
     marginBottom: 8,
     height: 45,
@@ -78,7 +78,7 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     flex: 1,
     zIndex: 100,
-    lineHeight: 20,
+    lineHeight: 25,
   },
 
   section: {

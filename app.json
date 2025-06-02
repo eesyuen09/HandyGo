@@ -13,21 +13,31 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.eesyuen.HandyGo",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/handygo-logo.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.eesyuen.HandyGo"
     },
     "web": {
-       "favicon": "./assets/handygo-logo.png"
+      "favicon": "./assets/handygo-logo.png"
     },
     "plugins": [
       "expo-web-browser",
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9ea46c82-7e55-4bed-a197-d422c4f36f6b"
+      }
+    }
   }
 }
