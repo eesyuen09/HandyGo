@@ -13,7 +13,7 @@ import {
   Alert,
 } from 'react-native';
 
-import { colours, globalStyles } from '../components/style';
+import { colours, globalStyles } from '../components/style_loginsignup';
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
 import { signInWithCredential, GoogleAuthProvider, signInWithEmailAndPassword } from 'firebase/auth';
@@ -187,8 +187,16 @@ export default function Login({ navigation }) {
                       color={white}
                     />
                   </TouchableOpacity>
+                 
                 </View>
-              </View>
+                </View>
+                 <TouchableOpacity
+                    onPress={() => navigation.navigate('Forgot Password')}
+                    style = {globalStyles.forgotPasswordLink}
+                    >
+                      <Text style ={globalStyles.linkText} >Forgot Password?</Text>
+                  </TouchableOpacity>
+              
 
               {/* Login Button */}
               <TouchableOpacity

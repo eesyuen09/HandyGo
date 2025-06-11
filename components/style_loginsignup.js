@@ -162,6 +162,14 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: darkest_coco,
     justifyContent:10,
 
-  }
+  },
+  forgotPasswordLink: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+    paddingVertical: 5,
+
+  },
+
+  
 
 });

@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import {colours} from './../components/style';
+import {colours} from '../components/style_loginsignup';
 
 const Stack = createNativeStackNavigator();
 const {primary_darkestblue, secondary_darkblue} = colours;
@@ -13,6 +13,7 @@ import Login from '../screen/login';
 import Signup from '../screen/signup';
 import businessDashboard from '../screen/welcome_business';
 import userDashboard from '../screen/welcome_user';
+import ForgotPassword from '../screen/forgotpassword';
 
 const RootStack = () => {
     return (
@@ -35,6 +36,7 @@ const RootStack = () => {
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name= 'Business Dashboard' component={businessDashboard}/>
         <Stack.Screen name= 'User Dashboard' component={userDashboard}/>
+        <Stack.Screen name = 'Forgot Password' component={ForgotPassword}/>
       </Stack.Navigator>
     );
   };
