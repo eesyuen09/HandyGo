@@ -169,6 +169,7 @@ export default function Login({ navigation }) {
                       color={white}
                       style={globalStyles.inputIcon}
                     />
+
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="Enter Your Email Here"
@@ -211,6 +212,13 @@ export default function Login({ navigation }) {
                       />
                     </TouchableOpacity>
                   </View>
+
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Forgot Password')}
+                    style = {globalStyles.forgotPasswordLink}
+                    >
+                      <Text style ={globalStyles.linkText} >Forgot Password?</Text>
+                  </TouchableOpacity>
                 </View>
 
                 {/* Login Button */}

@@ -150,8 +150,20 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 20,
     justifyContent: 10,
   },
+
   roleButtonSelected: {
     backgroundColor: yellow_brown,
     justifyContent: 10,
   },
+
+  forgotPasswordLink: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+    paddingVertical: 5,
+
+  },
+
+  
+
+
 });

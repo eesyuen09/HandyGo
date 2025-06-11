@@ -6,7 +6,6 @@ import React from 'react';
 import {colours} from '../components/style_loginsignup';
 
 
-
 const Stack = createNativeStackNavigator();
 const {darkest_coco, main_coco, beige, grey, white, yellow_brown, black} = colours;
 
@@ -20,6 +19,7 @@ import UserBooking from '../screen/user_booking';
 import Biz_adddetails from '../screen/moredetails';
 import Biz_homepage from '../screen/biz_homepage';
 import Biz_urgentTask from '../screen/biz_urgenttask';
+import ForgotPassword from '../screen/forgotpassword';
 
 
 const RootStack = () => {
@@ -63,6 +63,8 @@ const RootStack = () => {
         <Stack.Screen name= 'Business Home Page' component={Biz_homepage}/>
         <Stack.Screen name = "Add Details" component={Biz_adddetails}/>
         <Stack.Screen name = 'Business Urgent Task' component ={Biz_urgentTask}/>
+        <Stack.Screen name = 'Forgot Password' component={ForgotPassword}/>
+
       </Stack.Navigator>
       </>
     );

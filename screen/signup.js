@@ -14,7 +14,9 @@ import { Formik } from "formik";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Octicons, Ionicons } from "@expo/vector-icons";
 
+
 import { colours, globalStyles } from "../components/style_loginsignup";
+
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
