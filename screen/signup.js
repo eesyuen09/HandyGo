@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StatusBar } from 'expo-status-bar';
+import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
 import {
   ScrollView,
   View,
@@ -7,21 +7,25 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  Alert
-} from 'react-native';
-import Constants from 'expo-constants';
-import { Formik } from 'formik';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Octicons, Ionicons, FontAwesome } from '@expo/vector-icons';
+  Alert,
+} from "react-native";
+import Constants from "expo-constants";
+import { Formik } from "formik";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Octicons, Ionicons } from "@expo/vector-icons";
 
-import { colours, globalStyles } from '../components/style';
+
+import { colours, globalStyles } from "../components/style_loginsignup";
+
 
 //keyboardavoidingwrapper
-import KeyboardAvoidingWrapper from '../components/KeyboardAvoidingWrapper';
-import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../firebaseConfig';
-
+import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
 
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
@@ -37,90 +41,98 @@ export default function Signup({ navigation }) {
 
   return (
     <KeyboardAvoidingWrapper>
-    <View style={globalStyles.container}>
-      <StatusBar style="dark" />
-      {/* <ScrollView contentContainerStyle={{ flexGrow: 1 }}> */}
+      <View style={globalStyles.container}>
+        <StatusBar style="dark" />
+        {/* <ScrollView contentContainerStyle={{ flexGrow: 1 }}> */}
         <View style={globalStyles.inner}>
           <Image
-            source={require('../assets/png.png')}
+            source={require("../assets/handygo-logo.png")}
             style={globalStyles.logo}
             resizeMode="cover"
           />
           <Text style={globalStyles.title}>HandyGo</Text>
           <Text style={globalStyles.subtitle}>Account Sign Up</Text>
 
-          
-
           <Formik
             initialValues={{
-              fullName: '',
-              email: '',          
-              password: '',
-              confirmPassword: '',
-              role:''
+              fullName: "",
+              email: "",
+              password: "",
+              confirmPassword: "",
+              role: "",
             }}
-            onSubmit={
-              async (values) => {
-                const {fullName, email, password, confirmPassword, role } = values;
+            onSubmit={async (values) => {
+              const { fullName, email, password, confirmPassword, role } =
+                values;
 
-                if (!fullName || !email || !password || !confirmPassword || !role ) {
-                    Alert.alert('Error', 'Please fill in all fields.' );
-                    return;
-                  }
+              if (
+                !fullName ||
+                !email ||
+                !password ||
+                !confirmPassword ||
+                !role
+              ) {
+                Alert.alert("Error", "Please fill in all fields.");
+                return;
+              }
 
-                  if (values.password !== values.confirmPassword) {
-                    Alert.alert('Error', 'Passwords do not match.' );
-                    return;
-                  }
+              if (values.password !== values.confirmPassword) {
+                Alert.alert("Error", "Passwords do not match.");
+                return;
+              }
 
-                  try {
-                    const userCredential = await createUserWithEmailAndPassword(
-                      auth,
-                      email,
-                      password
-                    );
-                    const user = userCredential.user;
-                    await sendEmailVerification(user);                 
+              try {
+                const userCredential = await createUserWithEmailAndPassword(
+                  auth,
+                  email,
+                  password
+                );
+                const user = userCredential.user;
+                await sendEmailVerification(user);
 
-                    
-                    await setDoc(doc(db, 'users', user.uid), {
-                      uid: user.uid,
-                      fullName: fullName,
-                      email: email,
-                      dob: dob.toISOString(),
-                      role: role,
-                      createdAt: new Date().toISOString()
-                    });
+                await setDoc(doc(db, "users", user.uid), {
+                  uid: user.uid,
+                  fullName: fullName,
+                  email: email,
+                  dob: dob.toISOString(),
+                  role: role,
+                  createdAt: new Date().toISOString(),
+                });
 
-                    Alert.alert('Please Verify Your Email', 'A verification email has been sent to you account.',
-                      [{ text: 'OK', onPress: () => navigation.navigate('Login')}]                  
-                    );                  
+                Alert.alert(
+                  "Please Verify Your Email",
+                  "A verification email has been sent to you account.",
+                  [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+                );
 
-                    
-
-                    /*Alert.alert('Success', 'Account created successfully!', [
+                /*Alert.alert('Success', 'Account created successfully!', [
                       { text: 'OK', onPress: () => navigation.navigate('Login') }
                     ]);
                     */
-                   
-                  } catch (error) {
-                    if (error.code === 'auth/email-already-in-use') {
-                      Alert.alert('Error', 'Email already in use' );                  
-                    } else if (error.code === 'auth/invalid-email') {
-                      Alert.alert('Error', 'Invalid email format'  );                     
-                    } else if (error.code === 'auth/weak-password') {
-                      Alert.alert('Error', 'Password should be at least 6 characters');  
-                    } else {
-                       Alert.alert('Error', error.message);  
-                    }
-                  }            
+              } catch (error) {
+                if (error.code === "auth/email-already-in-use") {
+                  Alert.alert("Error", "Email already in use");
+                } else if (error.code === "auth/invalid-email") {
+                  Alert.alert("Error", "Invalid email format");
+                } else if (error.code === "auth/weak-password") {
+                  Alert.alert(
+                    "Error",
+                    "Password should be at least 6 characters"
+                  );
+                } else {
+                  Alert.alert("Error", error.message);
+                }
+              }
             }}
           >
-            {({ handleChange, handleBlur, handleSubmit, values, setFieldValue }) => (
-              
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              setFieldValue,
+            }) => (
               <>
-               
-
                 {/* Full Name */}
                 <View style={globalStyles.inputWrapper}>
                   <Text style={globalStyles.inputLabel}>Full Name</Text>
@@ -134,9 +146,9 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="Enter Your Full Name Here"
-                      placeholderTextColor={colours.white}
-                      onChangeText={handleChange('fullName')}
-                      onBlur={handleBlur('fullName')}
+                      placeholderTextColor={colours.grey}
+                      onChangeText={handleChange("fullName")}
+                      onBlur={handleBlur("fullName")}
                       value={values.fullName}
                     />
                   </View>
@@ -155,10 +167,10 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="Enter Your Email Address Here"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       keyboardType="email-address"
-                      onChangeText={handleChange('email')}
-                      onBlur={handleBlur('email')}
+                      onChangeText={handleChange("email")}
+                      onBlur={handleBlur("email")}
                       value={values.email}
                     />
                   </View>
@@ -178,21 +190,20 @@ export default function Signup({ navigation }) {
                       <TextInput
                         style={globalStyles.textInput}
                         placeholder="YYYY – MM – DD"
-                        placeholderTextColor={colours.white}
+                        placeholderTextColor={colours.grey}
                         editable={false}
-                        value={dob ? dob.toDateString() : ''}
+                        value={dob ? dob.toDateString() : ""}
                       />
                       {show && (
-                    <DateTimePicker
-                      value={date}
-                      mode="date"
-                      display="default"
-                      onChange={onChange}
-                    />
-                  )}
+                        <DateTimePicker
+                          value={date}
+                          mode="date"
+                          display="default"
+                          onChange={onChange}
+                        />
+                      )}
                     </View>
                   </TouchableOpacity>
-                  
                 </View>
 
                 {/* Password */}
@@ -208,10 +219,10 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="••••••"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       secureTextEntry={hidePassword}
-                      onChangeText={handleChange('password')}
-                      onBlur={handleBlur('password')}
+                      onChangeText={handleChange("password")}
+                      onBlur={handleBlur("password")}
                       value={values.password}
                     />
                     <TouchableOpacity
@@ -219,7 +230,7 @@ export default function Signup({ navigation }) {
                       style={globalStyles.rightIconRow}
                     >
                       <Ionicons
-                        name={hidePassword ? 'eye-off' : 'eye'}
+                        name={hidePassword ? "eye-off" : "eye"}
                         size={20}
                         color={colours.white}
                       />
@@ -240,10 +251,10 @@ export default function Signup({ navigation }) {
                     <TextInput
                       style={globalStyles.textInput}
                       placeholder="••••••"
-                      placeholderTextColor={colours.white}
+                      placeholderTextColor={colours.grey}
                       secureTextEntry={hidePassword}
-                      onChangeText={handleChange('confirmPassword')}
-                      onBlur={handleBlur('confirmPassword')}
+                      onChangeText={handleChange("confirmPassword")}
+                      onBlur={handleBlur("confirmPassword")}
                       value={values.confirmPassword}
                     />
                     <TouchableOpacity
@@ -251,7 +262,7 @@ export default function Signup({ navigation }) {
                       style={globalStyles.rightIconRow}
                     >
                       <Ionicons
-                        name={hidePassword ? 'eye-off' : 'eye'}
+                        name={hidePassword ? "eye-off" : "eye"}
                         size={20}
                         color={colours.white}
                       />
@@ -259,30 +270,37 @@ export default function Signup({ navigation }) {
                   </View>
                 </View>
 
-              {/*role selection*/}
-              <Text style={globalStyles.inputLabel}>I am a:</Text>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginBottom: 20 }}>
-                <TouchableOpacity
-                  style={[
-                    globalStyles.roleButton,
-                    values.role === 'business' && globalStyles.roleButtonSelected
-                  ]}
-                  onPress={() => setFieldValue('role', 'business')}
+                {/*role selection*/}
+                <Text style={globalStyles.inputLabel}>I am a:</Text>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    marginBottom: 20,
+                  }}
                 >
-                  <Text style={globalStyles.buttonText}>Business</Text>
-                </TouchableOpacity>
-                <View style={{width:10}}/>
+                  <TouchableOpacity
+                    style={[
+                      globalStyles.roleButton,
+                      values.role === "business" &&
+                        globalStyles.roleButtonSelected,
+                    ]}
+                    onPress={() => setFieldValue("role", "business")}
+                  >
+                    <Text style={globalStyles.buttonText}>Worker</Text>
+                  </TouchableOpacity>
+                  <View style={{ width: 10 }} />
 
-                <TouchableOpacity
-                  style={[
-                    globalStyles.roleButton,
-                    values.role === 'user' && globalStyles.roleButtonSelected
-                  ]}
-                  onPress={() => setFieldValue('role', 'user')}
-                >
-                  <Text style={globalStyles.buttonText}>User</Text>
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity
+                    style={[
+                      globalStyles.roleButton,
+                      values.role === "user" && globalStyles.roleButtonSelected,
+                    ]}
+                    onPress={() => setFieldValue("role", "user")}
+                  >
+                    <Text style={globalStyles.buttonText}>User</Text>
+                  </TouchableOpacity>
+                </View>
                 {/* Submit */}
                 <TouchableOpacity
                   style={globalStyles.button}
@@ -299,7 +317,9 @@ export default function Signup({ navigation }) {
                   <Text style={globalStyles.extraText}>
                     Already have an account?
                   </Text>
-                  <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate("Login")}
+                  >
                     <Text style={globalStyles.linkText}>Login</Text>
                   </TouchableOpacity>
                 </View>
@@ -307,8 +327,8 @@ export default function Signup({ navigation }) {
             )}
           </Formik>
         </View>
-      {/* </ScrollView> */}
-    </View>
+        {/* </ScrollView> */}
+      </View>
     </KeyboardAvoidingWrapper>
   );
 }

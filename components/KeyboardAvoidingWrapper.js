@@ -1,6 +1,6 @@
 // components/KeyboardAvoidingWrapper.js
 import React from 'react';
-import { KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform } from 'react-native';
+import { KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform, View } from 'react-native';
 
 const KeyboardAvoidingWrapper = ({ children }) => {
   return (
@@ -13,7 +13,9 @@ const KeyboardAvoidingWrapper = ({ children }) => {
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
+          <View>
           {children}
+          </View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
