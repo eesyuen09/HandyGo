@@ -38,6 +38,7 @@ import { db, app } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
 import {style} from '../components/style_b_ordersummary.js'
+import { FlatList } from "react-native";
 
 //colours
 
@@ -97,12 +98,12 @@ export default function OrderSummary({navigation}){
     const [booking, setBooking] = useState([]);
 
     //find category with data array
-    console.log(booking);
+    
     const categoryItem = booking.find(item => item.type === 'category');
-    console.log('categoryItem:',categoryItem); // { type: 'category', title: 'Plumbing Services', image: '...' }
+    // console.log('categoryItem:',categoryItem); // { type: 'category', title: 'Plumbing Services', image: '...' }
 
     const bookingDetails = booking.filter(item => item.type !== 'category');
-    // console.log(bookingDetails); // array of availability, location, etc.
+    console.log(bookingDetails); // array of availability, location, etc.
 
     const renderCard = ({ item }) => (
     <View style={style.cardContainer}>
@@ -112,12 +113,18 @@ export default function OrderSummary({navigation}){
         <View style={style.taskInfo}>
             <Text style={style.cardTitle}>{item.title}</Text>
             {Array.isArray(item.content) ? (
-                item.content.map((text, index) => (
-                    <Text key={index} style={style.cardContent}>{text}</Text>
+                item.content.map((entry, index) => (
+                    typeof entry === 'object' ? (
+                    <Text key={index} style={style.cardContent}>
+                        {entry.date} | {entry.time}
+                    </Text>
+                    ) : (
+                    <Text key={index} style={style.cardContent}>{entry}</Text>
+                    )
                 ))
-            ) : (
+                ) : (
                 <Text style={style.cardContent}>{item.content}</Text>
-            )}
+                )}
         </View>
     </View>
 );
@@ -128,9 +135,6 @@ export default function OrderSummary({navigation}){
             const data = await fetchBooking(orderID);
 
             if (data) {
-                console.log('hi');
-                console.log(data.serviceType);
-
                 const matched_cat = services_categories.find(cat => cat.title === data.serviceType);
                 const image = matched_cat.bannerImage;
                 if (!image) {
@@ -152,24 +156,24 @@ export default function OrderSummary({navigation}){
                     {
                     type : 'location',
                     title: data.state,
-                    icon: 'location-pin',
+                    icon: 'map-marker-alt',
                     content: `${data.address || ''}, ${data.postcode || ''}, ${data.state || ''}`,
                     },
                     {
                     type: 'note',
                     title: data.notes || "No notes",
-                    icon: 'file-text',
+                    icon: 'file-alt',
                     content: 'To be uploaded picture',
                     },
                     {
                     type: 'price',
                     title: "Price",
-                    icon: 'yen',
+                    icon: 'dollar-sign',
                     content: `$${data.price || '35.99'}`,
                     },
                 ];
 
-                console.log('format', formatted);
+          
                 setBooking(formatted);
                 }
         }
@@ -185,7 +189,6 @@ export default function OrderSummary({navigation}){
                     </TouchableOpacity>
 
                     <Text style = {style.headerTitle}>Order Summary</Text>
-
                     {/* place holder to balance the space*/}
                     <View style = {styles.backButton} /> 
                 </View>
@@ -212,17 +215,29 @@ export default function OrderSummary({navigation}){
                 {/* order details */}
                 <Text style = {style.titleBelow}>Order Details</Text>
 
-                {/* <View style = {style.cardContainer}>
-                    <View style = {style.taskIconWrap}>
-                        <FontAwesome5 name = {getActionFromState(.icon)}
-                    </View> */}
-                
+                <FlatList
+                    data = {bookingDetails}
+                    renderItem = {renderCard}
+                    keyExtractor={(item,index) => index.toString()}
+                    contentContainerStyle = {{paddingBottom: 100}}
+                    scrollEnabled = {false}
+                    />
+
+                {/* Divider */}
+                <View style={style.line} />
+
+                <TouchableOpacity style = {style.button}>
+                    <Text style = {style.buttonText}>Accept Booking</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style = {style.button}>
+                    <Text style = {style.buttonText}>Back</Text>
+                </TouchableOpacity>
+
                 </ScrollView>
                 </View>
             </ImageBackground>
 
-
-            
         );
 
     };

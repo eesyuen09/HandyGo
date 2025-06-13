@@ -104,6 +104,7 @@ export const style = StyleSheet.create({
         fontSize: 18,
         color: darkest_coco,
         marginLeft: 15,
+        marginTop: 10,
     },
 
     cardContainer: {
@@ -198,12 +199,12 @@ export const style = StyleSheet.create({
     },
 
     button:{
-        width: 343,
+        width: '50%',
         backgroundColor: main_coco,
-        borderRadius: 10,
+        borderRadius: 20,
         paddingVertical: 25,
         paddingHorizontal:20,
-        alignItems: 'center',
+        alignSelf: 'center',
         marginVertical: 20,
         marginBottom: 40,
     },
@@ -211,5 +212,14 @@ export const style = StyleSheet.create({
         fontFamily: "Sora",
         fontSize: 16,
         color: white,
+        alignSelf: 'center',
+    },
+
+    line: {
+        height: 1,
+        width: "100%",
+        backgroundColor: darkest_coco,
+        marginVertical: 5,
+        alignSelf: 'center',
     },
 }) 
