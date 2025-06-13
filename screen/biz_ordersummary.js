@@ -9,8 +9,11 @@ import {
   Switch,
   KeyboardAvoidingView,
   Platform,
+  ImageBackground,
 } from "react-native";
 import { colours, styles } from "../components/style_u_booking.js";
+
+
 //Keyboard Avoiding Wrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper.js";
 import {
@@ -33,7 +36,7 @@ import { getDoc, doc} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db, app } from "../firebaseConfig";
 
-import {BgImage} from '../assets/bg_UrgentTask.png';
+import BgImage from '../assets/bg_UrgentTask.png';
 import {style} from '../components/style_b_ordersummary.js'
 
 //colours
@@ -55,12 +58,12 @@ const {
 export default function OrderSummary({navigation}){
 
      const serviceBanners = [
-        { image: "cleaning_banner.png", label: "Deep Cleaning" },
-        { image: "home_organization.png", label: "Home Organizing" },
-        { image: "aircond_repair.png", label: "Air Conditioner Repair" },
-        { image: "Moving.png", label: "House Moving" },
-        { image: "gasleak.png", label: "Gas Leak Detection" },
-        { image: "outdoor_banner.png", label: "Gardening" },
+        { image: "cleaning_banner.png", label: "Cleaning" },
+        { image: "home_organization.png", label: "Cleaning" },
+        { image: "aircond_repair.png", label: "Repair" },
+        { image: "Moving.png", label: "Moving" },
+        { image: "gasleak.png", label: "Maintenance" },
+        { image: "outdoor_banner.png", label: "Outdoor Services" },
     ];
 
     const bannerImageMap = {
@@ -72,7 +75,6 @@ export default function OrderSummary({navigation}){
         "outdoor_banner.png": require("../assets/images/outdoor_banner.png"),
     };
 
-
     async function fetchBooking(orderID) {
         const docRef = doc(db,'booking',orderID);
         //creates reference to the document you want to retrieve
@@ -80,7 +82,7 @@ export default function OrderSummary({navigation}){
         //getDoc is the function to retrieve data from the document reference
 
         if (docSnap.exists()){
-            console.log('Booking Info',docSnap.data());
+            // console.log('Booking Info',docSnap.data());
             const data = docSnap.data();
             return data;
         }else{
@@ -90,111 +92,138 @@ export default function OrderSummary({navigation}){
         };
     const route = useRoute();
     const { orderID } = route.params;
+    
 
     const [booking, setBooking] = useState([]);
 
     //find category with data array
-    const categoryItem = booking.find(item => item.type === 'category')
+    console.log(booking);
+    const categoryItem = booking.find(item => item.type === 'category');
+    console.log('categoryItem:',categoryItem); // { type: 'category', title: 'Plumbing Services', image: '...' }
 
+    const bookingDetails = booking.filter(item => item.type !== 'category');
+    // console.log(bookingDetails); // array of availability, location, etc.
 
+    const renderCard = ({ item }) => (
+    <View style={style.cardContainer}>
+        <View style={style.taskIconWrap}>
+            <FontAwesome5 name={item.icon} size={18} color={main_coco} />
+        </View>
+        <View style={style.taskInfo}>
+            <Text style={style.cardTitle}>{item.title}</Text>
+            {Array.isArray(item.content) ? (
+                item.content.map((text, index) => (
+                    <Text key={index} style={style.cardContent}>{text}</Text>
+                ))
+            ) : (
+                <Text style={style.cardContent}>{item.content}</Text>
+            )}
+        </View>
+    </View>
+);
 
     useEffect(() => {
+
         async function loadData(){
             const data = await fetchBooking(orderID);
-            if (data){
-                const matched = serviceBanners.find((b) => b.label === data.type);
-                const image = matched.image;
-                //collect the data and transform into an array
+
+            if (data) {
+                console.log('hi');
+                console.log(data.serviceType);
+
+                const matched_cat = services_categories.find(cat => cat.title === data.serviceType);
+                const image = matched_cat.bannerImage;
+                if (!image) {
+                    console.warn(`No banner image found for type: ${data.type}`);
+                }
+
                 const formatted = [
                     {
-                        type: 'category',
-                        title: data.type,
-                        image : image,
+                    type: 'category',
+                    title: data.type,
+                    image: image,
                     },
                     {
-                        type : 'availability',
-                        icon: 'clock',
-                        title: `${data.duration} hours`,
-                        content: data.availability || [],
-                    },
-                    // {
-                    //     type = 'gender preference',
-                    //     title : data.gender || '',
-                    // },
-                    {
-                        type : 'location',
-                        title: data.state,
-                        icon: 'location-pin',
-                        content: `${data.address || ''}, ${data.postcode}|| '', ${data.state}`,
-
+                    type : 'availability',
+                    icon: 'clock',
+                    title: `${data.duration} hours`,
+                    content: data.availability || [],
                     },
                     {
-                        type: 'note',
-                        title: data.notes || "No notes",
-                        icon: 'file-text',
-                        content: 'To be uploaded picture',
+                    type : 'location',
+                    title: data.state,
+                    icon: 'location-pin',
+                    content: `${data.address || ''}, ${data.postcode || ''}, ${data.state || ''}`,
                     },
                     {
-                        type: 'price',
-                        title: "Price",
-                        icon: 'yen',
-                        content: `$${data.price}`
-
+                    type: 'note',
+                    title: data.notes || "No notes",
+                    icon: 'file-text',
+                    content: 'To be uploaded picture',
                     },
-
-
+                    {
+                    type: 'price',
+                    title: "Price",
+                    icon: 'yen',
+                    content: `$${data.price || '35.99'}`,
+                    },
                 ];
 
+                console.log('format', formatted);
                 setBooking(formatted);
-            }
+                }
         }
         loadData();
         },[orderID]);
     if (!booking) return null;
     return (
-        <View style = {{flex: 1}}>
-        <ImageBackground source ={BgImage} style = {{position: 'absolute', width: "100%", height: '100%'}} />
+        <ImageBackground source ={BgImage} style = {style.background}>
+            <View style = {style.container}>
+                <View style = {style.headerContainer}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style = {style.backButton}>
+                        <Ionicons name = 'chevron-back' size = {24} color= {black} />
+                    </TouchableOpacity>
 
-        <View style = {style.headerContainer}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style = {style.backButton}>
-                <Ionicons name = 'chevron-back' size = {24} color= {black} />
-            </TouchableOpacity>
+                    <Text style = {style.headerTitle}>Order Summary</Text>
 
-            <Text style = {style.title}>Order Summary</Text>
+                    {/* place holder to balance the space*/}
+                    <View style = {styles.backButton} /> 
+                </View>
 
-            {/* place holder to balance the space*/}
-            <View style = {styles.backButton} /> 
-        </View>
 
-        <ScrollView style = {{flex: 1, padding:20}}>
-
-            {/* category container */}
-            <View style = {style.categoryContainer}>
-                <Image 
-                    style = {style.image} 
-                    source= {bannerImageMap[booking.find(item => item.type === 'category')?.image]} />
-                
+                <ScrollView style = {{flex: 1, padding:20}}>
+                {/* category container */}
                 {categoryItem && (
-                    <View style = {style.overlay}>
-                        <Text style = {style.overlayTitle}>{categoryItem.title}</Text>
-                    </View>
+                <View style = {style.categoryContainer}>
+                    <ImageBackground
+                        style = {style.image} 
+                        source= {categoryItem.image}
+                        imageStyle = {{ borderRadius: 15}}>
+                    
+                    {categoryItem && (
+                        <View style = {style.overlay}>
+                            <Text style = {style.overlayTitle}>{categoryItem.title}</Text>
+                        </View>
+                    )}
+                    </ImageBackground>
+                </View>
                 )}
-            </View>
 
-            {/* order details */}
-            <Text style = {style.titleBelow}>Order Details</Text>
+                {/* order details */}
+                <Text style = {style.titleBelow}>Order Details</Text>
 
-            {/* <View style = {style.cardContainer}>
-                <View style = {style.taskIconWrap}>
-                    <FontAwesome5 name = {getActionFromState(.icon)}
-                </View> */}
+                {/* <View style = {style.cardContainer}>
+                    <View style = {style.taskIconWrap}>
+                        <FontAwesome5 name = {getActionFromState(.icon)}
+                    </View> */}
+                
+                </ScrollView>
+                </View>
+            </ImageBackground>
+
+
             
-            </ScrollView>
-        </View>
+        );
 
-
-        
-    );
-
-};
- 
+    };
+    

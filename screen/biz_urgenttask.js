@@ -150,9 +150,9 @@ export default function UrgentTask() {
         </View>
       </View>
       <TouchableOpacity
-        onPress={() => acceptBooking(item.id, auth.currentUser.uid)}
+        onPress ={() => navigation.navigate('Business Order Summary', { orderID: item.id })}
       >
-        <Text style={style.viewText}>Accept</Text>
+        <Text style={style.viewText}>View Details</Text>
       </TouchableOpacity>
     </View>
   );

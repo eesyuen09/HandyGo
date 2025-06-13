@@ -16,20 +16,21 @@ import Biz_ordersummary from './screen/biz_ordersummary';
 
 import { NavigationContainer } from '@react-navigation/native';
 // react navigation stack
-// import RootStack from './navigator/RootStack.js';
+import RootStack from './navigator/RootStack.js';
 
 
 
 
 export default function App() {
   return (
-  //   <>
-  //   <PrepopulateWorkerMaps/>
-  //   <NavigationContainer>
-  //   <RootStack/>
-  // </NavigationContainer>
-  // </>
-  <Biz_ordersummary/>
+    <>
+    <PrepopulateWorkerMaps/>
+    <NavigationContainer>
+    <RootStack/>
+  </NavigationContainer>
+  </>
+
+  
   
   );
 }

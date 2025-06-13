@@ -65,7 +65,7 @@ const RootStack = () => {
         <Stack.Screen name = "Add Details" component={Biz_adddetails}/>
         <Stack.Screen name = 'Business Urgent Task' component ={Biz_urgentTask}/>
         <Stack.Screen name = 'Forgot Password' component={ForgotPassword}/>
-        <Stack.Screen name = 'Business Order Summary' component = {Biz_ordersummary}/>
+        <Stack.Screen name = 'Business Order Summary' component = {Biz_ordersummary} options={{headerShown: false}}/>
 
       </Stack.Navigator>
       </>

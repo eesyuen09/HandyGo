@@ -1,4 +1,7 @@
 import { StyleSheet } from 'react-native';
+import Constants from 'expo-constants';
+
+
 
 // import { Sora_400Regular, Sora_600SemiBold } from '@expo-google-fonts/sora';
 
@@ -23,26 +26,42 @@ const {
 } = colours;
 
 export const style = StyleSheet.create({
+    background:{
+        flex:1,
+        resizeMode: 'cover',
+        width : '100%',
+        height:'100%',
+        
+    },    
+
+    container: {
+    flex: 1,
+    padding: 25,
+    paddingTop: Constants.statusBarHeight + 10,
+
+    },
     headerContainer: {
         height: 60,
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 15,
-        backgroundColor: white,
+        justifyContent: 'space-between',   
+        backgroundColor: 'transparent',
     },
 
     backButton: {
-        width: 24,
-        height: 24,
+        width: 22,
+        height: 22,
+        marginTop: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
 
-    title : {
-        fontSize: 24,
+    headerTitle : {
+        fontSize: 22,
         fontWeight: '600',
         marginTop: 10,
+        color: black,
+        fontFamily: "Sora",
 
     },
 
@@ -100,7 +119,7 @@ export const style = StyleSheet.create({
 
     },
 
-        taskIconWrap: {
+    taskIconWrap: {
         width: 30,
         height: 30,
         justifyContent: 'center',
