@@ -36,7 +36,7 @@ export const style = StyleSheet.create({
 
     container: {
     flex: 1,
-    padding: 25,
+    padding: 10,
     paddingTop: Constants.statusBarHeight + 10,
 
     },
@@ -79,7 +79,7 @@ export const style = StyleSheet.create({
      },
 
     overlay: {
-        backgroundColor: beige,
+        backgroundColor: main_coco,
         paddingVertical: 12,
         paddingHorizontal: 15,
         borderBottomLeftRadius: 15,
@@ -91,6 +91,7 @@ export const style = StyleSheet.create({
         fontSize: 18,
         paddingLeft: 10,
         paddingBottom: 5,
+        color: white,
     },
 
     overlaySubtitle:{
@@ -199,13 +200,13 @@ export const style = StyleSheet.create({
     },
 
     button:{
-        width: '50%',
+        width: '70%',
         backgroundColor: main_coco,
         borderRadius: 20,
         paddingVertical: 25,
         paddingHorizontal:20,
         alignSelf: 'center',
-        marginVertical: 20,
+        marginVertical: 10,
         marginBottom: 40,
     },
     buttonText: {
