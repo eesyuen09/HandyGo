@@ -28,13 +28,9 @@ import {
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { Formik, FieldArray } from "formik";
-import * as Yup from "yup";
-import DropDownPicker from "react-native-dropdown-picker";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { getDoc, doc} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot} from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { db, app } from "../firebaseConfig";
+import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
 import {style} from '../components/style_b_ordersummary.js'
@@ -127,19 +123,57 @@ export default function OrderSummary({navigation}){
                 )}
         </View>
     </View>
-);
+    );
+
+    const acceptBooking = async (bookingId, currentWorkerId) => {
+    try {
+        const bookingRef = doc(db, "booking", bookingId);
+
+        //check if current booking data exist
+        const bookingSnap = await getDoc(bookingRef);
+        if(!bookingSnap.exists()) {
+            Alert.alert('Error, Booking does not exist.');
+            return;
+        }
+
+        const bookingData = bookingSnap.data();
+
+        if(bookingData.status === 'accepted'){
+            Alert.alert("Error! This booking has already been accepted.");
+            return;
+        }
+        
+        await updateDoc(bookingRef, {
+        status: "accepted",
+        workerId: currentWorkerId,
+        acceptedAt: new Date(),
+        });
+
+        Alert.alert("Booking accepted!");
+        navigation.goBack();
+
+        // Optional: re-fetch the tasks to refresh the UI
+        // setTasks((prevTasks) =>
+        // prevTasks.filter((task) => task.id !== bookingId)
+        // );
+    } catch (err) {
+        console.error("Failed to accept booking:", err);
+        Alert.alert("Error", "Failed to accept booking.");
+    }
+    };
+
+    
 
     useEffect(() => {
+        const docRef = doc(db, "booking", orderID);
 
-        async function loadData(){
-            const data = await fetchBooking(orderID);
+        function handleDocUpdate(docSnap) {
+            if(docSnap.exists()) {
+                const data = docSnap.data();
 
-            if (data) {
                 const matched_cat = services_categories.find(cat => cat.title === data.serviceType);
-                const image = matched_cat.bannerImage;
-                if (!image) {
-                    console.warn(`No banner image found for type: ${data.type}`);
-                }
+                console.log('matched_cat',matched_cat);
+                const image = matched_cat?.bannerImage;
 
                 const formatted = [
                     {
@@ -148,13 +182,13 @@ export default function OrderSummary({navigation}){
                     image: image,
                     },
                     {
-                    type : 'availability',
+                    type: 'availability',
                     icon: 'clock',
                     title: `${data.duration} hours`,
                     content: data.availability || [],
                     },
                     {
-                    type : 'location',
+                    type: 'location',
                     title: data.state,
                     icon: 'map-marker-alt',
                     content: `${data.address || ''}, ${data.postcode || ''}, ${data.state || ''}`,
@@ -173,13 +207,15 @@ export default function OrderSummary({navigation}){
                     },
                 ];
 
-          
                 setBooking(formatted);
-                }
+                } else {
+                console.log("Document does not exist");
+            }
         }
-        loadData();
-        },[orderID]);
-    if (!booking) return null;
+        const unsubscribe = onSnapshot(docRef,handleDocUpdate);
+
+        return() => unsubscribe();
+    },[orderID]);
     return (
         <ImageBackground source ={BgImage} style = {style.background}>
             <View style = {style.container}>
@@ -226,11 +262,15 @@ export default function OrderSummary({navigation}){
                 {/* Divider */}
                 <View style={style.line} />
 
-                <TouchableOpacity style = {style.button}>
+                <TouchableOpacity 
+                    style = {style.button}
+                    onPress={() => acceptBooking(orderID,auth.currentUser.uid)}>
                     <Text style = {style.buttonText}>Accept Booking</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style = {style.button}>
+                <TouchableOpacity 
+                    style = {style.button}
+                    onPress={() => navigation.goBack()}>
                     <Text style = {style.buttonText}>Back</Text>
                 </TouchableOpacity>
 

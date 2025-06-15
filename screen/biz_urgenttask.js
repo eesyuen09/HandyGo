@@ -13,7 +13,7 @@ import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation , useFocusEffect} from "@react-navigation/native";
 import { auth, getAuth } from "../firebaseConfig";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -33,72 +33,71 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
-  const acceptBooking = async (bookingId, currentWorkerId) => {
-    try {
-      const bookingRef = doc(db, "booking", bookingId);
-      await updateDoc(bookingRef, {
-        status: "accepted",
-        workerId: currentWorkerId,
-        acceptedAt: new Date(),
-      });
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchUrgentTasks();
+    },[])
+  );
+  
 
-      Alert.alert("Booking accepted!");
+  // const acceptBooking = async (bookingId, currentWorkerId) => {
+  //   try {
+  //     const bookingRef = doc(db, "booking", bookingId);
+  //     await updateDoc(bookingRef, {
+  //       status: "accepted",
+  //       workerId: currentWorkerId,
+  //       acceptedAt: new Date(),
+  //     });
+
+  //     Alert.alert("Booking accepted!");
+  //     navigation.goBack();
 
       // Optional: re-fetch the tasks to refresh the UI
-      setTasks((prevTasks) =>
-        prevTasks.filter((task) => task.id !== bookingId)
-      );
-    } catch (err) {
-      console.error("Failed to accept booking:", err);
-      Alert.alert("Error", "Failed to accept booking.");
-    }
-  };
+      // setTasks((prevTasks) =>
+      //   prevTasks.filter((task) => task.id !== bookingId)
+  //     // );
+  //   } catch (err) {
+  //     console.error("Failed to accept booking:", err);
+  //     Alert.alert("Error", "Failed to accept booking.");
+  //   }
+  // };
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const fetchUrgentTasks = async () => {
+      const user = auth.currentUser;
       if (!user) return;
 
-      try {
-        // Get the worker's subcategories
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) return;
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      if (!userSnap.exists()) return;
 
-        const userData = userSnap.data();
-        const workerCategories = userData.subcategory || [];
+      const userData = userSnap.data();
+      const workerCategories = userData.subcategory || [];
 
-        const q = query(
-          collection(db, "booking"),
-          where("status", "==", "pending")
-        );
-        const querySnapshot = await getDocs(q);
+      const q = query(collection(db, "booking"), where("status", "==", "pending"));
+      const querySnapshot = await getDocs(q);
 
-        const formatted = [];
+      const formatted = [];
 
-        querySnapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          if (workerCategories.includes(data.type)) {
-            formatted.push({
-              id: data.orderID || docSnap.id,
-              category: data.type || "Unknown",
-              time: `${data.availability?.[0]?.date || "N/A"} | ${
-                data.availability?.[0]?.time || "N/A"
-              }`,
-              location: `${data.state || ""}, ${data.postcode || ""}`,
-              price: data.price || "35.99",
-              icon: getIcon(data.type),
-            });
-          }
-        });
+      querySnapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (workerCategories.includes(data.type)) {
+          formatted.push({
+            id: data.orderID || docSnap.id,
+            category: data.type || "Unknown",
+            time: `${data.availability?.[0]?.date || "N/A"} | ${
+              data.availability?.[0]?.time || "N/A"
+            }`,
+            location: `${data.state || ""}, ${data.postcode || ""}`,
+            price: data.price || "35.99",
+            icon: getIcon(data.type),
+          });
+        }
+      });
 
-        setTasks(formatted);
-      } catch (err) {
-        console.error("Error fetching urgent tasks:", err);
-      }
-    });
+      setTasks(formatted);
+      };
 
-    return () => unsubscribe();
-  }, []);
+  
   if (!fontsLoaded) return null;
 
   const getIcon = (type) => {
