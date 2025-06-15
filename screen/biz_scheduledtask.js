@@ -52,7 +52,7 @@ export default function UrgentTask() {
       const workerCategories = userData.subcategory || [];
 
       const q = query(collection(db, "booking"), where("status", "==", "pending"),
-        where('urgency', '==', true));
+        where('urgency', '==', false));
       const querySnapshot = await getDocs(q);
 
       const formatted = [];

@@ -19,6 +19,7 @@ import UserBooking from '../screen/user_booking';
 import Biz_adddetails from '../screen/moredetails';
 import Biz_homepage from '../screen/biz_homepage';
 import Biz_urgentTask from '../screen/biz_urgenttask';
+import Biz_scheduledTask from '../screen/biz_scheduledtask';
 import ForgotPassword from '../screen/forgotpassword';
 import Biz_ordersummary from '../screen/biz_ordersummary';
 
@@ -61,11 +62,13 @@ const RootStack = () => {
           },
         }}
        />
-        <Stack.Screen name= 'Business Home Page' component={Biz_homepage}/>
-        <Stack.Screen name = "Add Details" component={Biz_adddetails}/>
-        <Stack.Screen name = 'Business Urgent Task' component ={Biz_urgentTask}/>
-        <Stack.Screen name = 'Forgot Password' component={ForgotPassword}/>
+        <Stack.Screen name= 'Business Home Page' component={Biz_homepage} options={{headerShown: false}}/>
+        <Stack.Screen name = "Add Details" component={Biz_adddetails} options={{headerShown: false}}/>
+        <Stack.Screen name = 'Business Urgent Task' component ={Biz_urgentTask} options={{headerShown: false}}/>
+        <Stack.Screen name = 'Business Scheduled Task' component = {Biz_scheduledTask} options={{headerShown: false}}/>
+        <Stack.Screen name = 'Forgot Password' component={ForgotPassword} options={{headerShown: false}}/>
         <Stack.Screen name = 'Business Order Summary' component = {Biz_ordersummary} options={{headerShown: false}}/>
+        
 
       </Stack.Navigator>
       </>
