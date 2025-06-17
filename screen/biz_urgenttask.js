@@ -23,6 +23,9 @@ import { services_categories } from "../constants/category_constant";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
+
+
+
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
@@ -33,6 +36,9 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
+  // add search logic
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredTasks, setFilteredTasks] = useState([]);
   useFocusEffect(
     React.useCallback(() => {
       fetchUrgentTasks();
@@ -74,7 +80,23 @@ export default function UrgentTask() {
       });
 
       setTasks(formatted);
+      setFilteredTasks(formatted);
       };
+
+    function handleSearch(text){
+      if(text.trim() === ''){
+        setFilteredTasks(tasks);
+        return;
+      }
+
+      const filtered = tasks.filter((item) =>
+      item.category.toLowerCase().includes(text.toLowerCase()) ||
+      item.location.toLowerCase().includes(text.toLowerCase()) ||
+      item.time.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredTasks(filtered);
+    };
+
 
   
   if (!fontsLoaded) return null;
@@ -178,13 +200,18 @@ export default function UrgentTask() {
             placeholder="Searching for any services?"
             placeholderTextColor={colours.darkest_coco}
             style={style.searchInput}
+            value = { searchQuery }
+            onChangeText = {(text) => {
+              setSearchQuery(text);
+              handleSearch(text);
+            }}
           />
           <Feather name="filter" size={20} color={colours.darkest_coco} />
         </View>
 
         {/* to be amend!!!!!!!!*/}
         <FlatList
-          data={tasks}
+          data={filteredTasks}
           renderItem={showTask}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 100 }}
