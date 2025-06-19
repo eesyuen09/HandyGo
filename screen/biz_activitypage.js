@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList,ImageBackground } from 'react-native';
 import CalendarPicker from 'react-native-calendar-picker';
 import { Ionicons } from '@expo/vector-icons';
 import {colours,style} from '../components/style_bizactivitypage';
 import BgImage from '../assets/images/biz_activitypageBG.png';
+import {getDoc, doc, onSnapshot} from 'firebase/firestore';
+import {db, auth} from '../firebaseConfig';
+import { getDocs,collection } from 'firebase/firestore';
+import { useEffect } from 'react';
+
 
 const {
   darkest_coco,
@@ -12,16 +17,70 @@ const {
   grey,
   white,
   yellow_brown,
-  black
+  black,
+  purple
 } = colours;
 
-export default function CalendarScreen({ navigation }) {
+export default function Biz_activitypage({ navigation }) {
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const upcomingTasks = [
-    { id: '1', title: 'Cleaning', date: 'July 1, 2025', color: '#fcd6c5' },
-    { id: '2', title: 'Home Organising', date: 'July 26, 2025', color: '#d1a03f' },
-  ];
+  const [selectedTasks, setSelectedTasks] = useState([]);
+
+  const [markedDates, setMarkedDates] = useState([]);
+  
+
+
+
+  useEffect(() => {
+    const fetchSelectedTasks = async () => {
+        const user = auth.currentUser;
+        if (!user){return;}
+        
+        
+        const selectedTasksRef = collection(db,'users',user.uid,'schedules');
+        const selectedTasksSnap = await getDocs(selectedTasksRef);
+    
+
+
+        const tasksList = [];
+
+        selectedTasksSnap.forEach((docSnap) => {
+            const data = docSnap.data();
+            // console.log('data',data);
+            //add object into tasksList array
+            tasksList.push({
+                orderId: data.orderID,
+                type : data.type,
+                time : data.availability,
+            
+            });
+        });     
+        setSelectedTasks(tasksList);
+        
+
+        const marked = [];
+        tasksList.forEach(task => {
+            task.time.forEach(slot => {
+                const [dateOnly] = slot.split(" ");
+                marked.push({
+                    date: dateOnly,
+                    style:{
+                        backgroundColor: colours.purple,
+                        borderRadius: 20,
+                    },
+                    textStyle: {
+                        color: colours.purple,
+                    },
+                });
+            });
+        });
+        console.log('marked',marked);
+        setMarkedDates(marked);
+      
+        };
+        fetchSelectedTasks();
+    },[]);
+    
 
   return (
     <ImageBackground 
@@ -49,11 +108,12 @@ export default function CalendarScreen({ navigation }) {
                 todayBackgroundColor= {colours.main_coco}
                 selectedDayTextColor={colours.darkest_coco}
                 textStyle={{ color: colours.darkest_coco }}
+
                 monthTitleStyle={{ color: colours.darkest_coco, fontWeight: 'bold', fontSize: 18 }}
                 yearTitleStyle={{ color: colours.darkest_coco }}
                 previousComponent ={<Ionicons name = 'chevron-back' size = {20} color= {colours.darkest_coco}/>}
                 nextComponent = {<Ionicons name = 'chevron-forward' size = {20} color= {colours.darkest_coco}/>}
-              
+                customDatesStyles = {markedDates}
                 width={350}
             />
         </View>

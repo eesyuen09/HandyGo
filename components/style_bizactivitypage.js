@@ -14,6 +14,7 @@ export const colours = {
   white: '#FFFFFF',
   yellow_brown: '#DDA853',
   black: "#000000",
+  purple: '#898AC4',
 };
 
 const {
@@ -23,7 +24,8 @@ const {
   grey,
   white,
   yellow_brown,
-  black
+  black,
+  purple,
 } = colours;
 
 export const style = StyleSheet.create({

@@ -24,13 +24,12 @@ import RootStack from './navigator/RootStack.js';
 
 export default function App() {
   return (
-    <Biz_activitypage/>
-  //   <>
-  //   <PrepopulateWorkerMaps/>
-  //   <NavigationContainer>
-  //   <RootStack/>
-  // </NavigationContainer>
-  // </>
+    <>
+    <PrepopulateWorkerMaps/>
+    <NavigationContainer>
+    <RootStack/>
+  </NavigationContainer>
+  </>
 
   );
 }
