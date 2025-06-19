@@ -37,35 +37,53 @@ export const style = StyleSheet.create({
     container: {
         flex: 1,
         padding: 25,
-        paddingTop: Constants.statusBarHeight + 30,
+        paddingTop: Constants.statusBarHeight + 10,
     },
-
-    headerTitle: {
-        fontSize: 22,
-        fontWeight: '600',
-        color: darkest_coco,
-        fontFamily: 'Sora',
-        textAlign: 'center',
+    headerContainer: {
+        height: 60,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',   
+        backgroundColor: 'transparent',
         marginBottom: 10,
     },
 
+    backButton: {
+        width: 22,
+        height: 22,
+        marginTop: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+
+    headerTitle : {
+        fontSize: 22,
+        fontWeight: '600',
+        marginTop: 10,
+        color: black,
+        fontFamily: "Sora",
+
+    },
+
+
     calendarContainer: {
-        borderRadius: 12,
+        borderRadius: 19,
         overflow: 'hidden',
         //Ensures that any content (like calendar elements or shadows) doesn’t spill outside the rounded corners
         shadowColor: '#000',
+        padding: 16,
         shadowOpacity: 0.05,
         shadowOffset: {width: 0, height: 2},
         shadowRadius: 8,
         elevation: 2,
         marginBottom: 20,
-
+        backgroundColor: colours.beige,
     },
 
     subHeader: {
         fontSize: 16,
         fontWeight: '500',
-        color: main_coco,
+        color: colours.main_coco,
         marginBottom: 10,
     },
 
