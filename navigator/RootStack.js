@@ -70,7 +70,7 @@ function BottomTabs() {
         component={Biz_adddetails}
         options={{
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="clipboard-edit-outline" size={24} color={color} />
+            <MaterialCommunityIcons name="calendar" size={24} color={color} />
           ),
           tabBarLabel: '',
         }}
