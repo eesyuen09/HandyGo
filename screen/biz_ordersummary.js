@@ -29,7 +29,6 @@ import {
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
 import { getDoc, doc, updateDoc, onSnapshot} from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
