@@ -29,7 +29,7 @@ import {
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot, collection, addDoc} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -74,7 +74,7 @@ export default function OrderSummary({navigation}){
     console.log(bookingDetails); // array of availability, location, etc.
 
     //add schedule as subcollection in workers' firestore
-    const addScheduleForWorker = async (workerID, orderID) =>{
+    const addScheduleForWorker = async (workerId, orderID) =>{
         // const scheduleRef = collection(db, 'users', workerId, 'schedules');
         const docRef = doc(db,'booking',orderID);
         //creates reference to the document you want to retrieve
@@ -85,12 +85,12 @@ export default function OrderSummary({navigation}){
             console.log("No such booking!");
            return;
         }
-        const data = docSnap.data();
-        const scheduleDocRef = doc(db, 'users', workerID,'schedules',orderID);
+        const scheduleDocRef = doc(db, 'users', userID,'schedules',orderID);
 
 
         
-        await setDoc(scheduleDocRef, {
+        const data = docSnap.data();
+        await addDoc(scheduleRef, {
             address: data.address,
             availability: selectedTime,
             duration: data.duration,
@@ -320,3 +320,4 @@ export default function OrderSummary({navigation}){
 
     };
     
+

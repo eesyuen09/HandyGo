@@ -58,7 +58,10 @@ export default function Biz_activitypage({ navigation }) {
 
     return (
         <TouchableOpacity 
-            onPress={() => navigation.navigate('Business Order Summary', {orderID: item.orderID})}
+            onPress={() => navigation.navigate('Accepted Order Summary', {
+                orderID: item.orderID,
+                userID: auth.currentUser.uid,
+            })}
             
             style = {[{backgroundColor: colours.grey},style.card]}>
         <View style = {{flexDirection: 'row', alignItems: 'center'}}>
