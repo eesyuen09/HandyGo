@@ -25,7 +25,6 @@ import { db } from "../firebaseConfig";
 
 
 
-
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
@@ -36,9 +35,11 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
-  // add search logic
+  //search logic function
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTasks, setFilteredTasks] = useState([]);
+
+
   useFocusEffect(
     React.useCallback(() => {
       fetchUrgentTasks();
@@ -58,7 +59,7 @@ export default function UrgentTask() {
       const workerCategories = userData.subcategory || [];
 
       const q = query(collection(db, "booking"), where("status", "==", "pending"),
-        where('urgency', '==', true));
+        where('urgency', '==', false));
       const querySnapshot = await getDocs(q);
 
       const formatted = [];
@@ -83,18 +84,18 @@ export default function UrgentTask() {
       setFilteredTasks(formatted);
       };
 
-    function handleSearch(text){
-      if(text.trim() === ''){
-        setFilteredTasks(tasks);
-        return;
-      }
+      function handleSearch(text){
+        if(text.trim() === ''){
+            setFilteredTasks(tasks);
+            return;
+        }
 
-      const filtered = tasks.filter((item) =>
-      item.category.toLowerCase().includes(text.toLowerCase()) ||
-      item.location.toLowerCase().includes(text.toLowerCase()) ||
-      item.time.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredTasks(filtered);
+        const filtered = tasks.filter((item) =>
+        item.category.toLowerCase().includes(text.toLowerCase()) ||
+        item.location.toLowerCase().includes(text.toLowerCase()) ||
+        item.time.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredTasks(filtered);
     };
 
 
@@ -190,7 +191,7 @@ export default function UrgentTask() {
               color={colours.darkest_coco}
             />
           </TouchableOpacity>
-          <Text style={style.headerTitle}>Urgent Task</Text>
+          <Text style={style.headerTitle}>Scheduled Task</Text>
           {/* <View style = {style.backButton}/> */}
         </View>
 
@@ -200,10 +201,10 @@ export default function UrgentTask() {
             placeholder="Searching for any services?"
             placeholderTextColor={colours.darkest_coco}
             style={style.searchInput}
-            value = { searchQuery }
-            onChangeText = {(text) => {
-              setSearchQuery(text);
-              handleSearch(text);
+            value = {searchQuery}
+            onChangeText ={(text) =>{
+                setSearchQuery(text);
+                handleSearch(text);
             }}
           />
           <Feather name="filter" size={20} color={colours.darkest_coco} />

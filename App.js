@@ -10,12 +10,13 @@ import Signup from './screen/signup';
 import Moredetails from './screen/moredetails';
 import Biz_homepage from './screen/biz_homepage';
 import UrgentTask from './screen/biz_urgenttask';
+import Biz_ordersummary from './screen/biz_ordersummary';
 
 
 
 import { NavigationContainer } from '@react-navigation/native';
 // react navigation stack
-import RootStack from './navigator/RootStack';
+import RootStack from './navigator/RootStack.js';
 
 
 
@@ -28,6 +29,6 @@ export default function App() {
     <RootStack/>
   </NavigationContainer>
   </>
-  
+
   );
 }
