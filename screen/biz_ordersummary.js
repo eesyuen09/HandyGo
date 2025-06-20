@@ -12,7 +12,8 @@ import {
   ImageBackground,
 } from "react-native";
 import { colours, styles } from "../components/style_u_booking.js";
-
+//for date time dropdown picker
+import DropDownPicker from "react-native-dropdown-picker";
 
 //Keyboard Avoiding Wrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper.js";
@@ -28,8 +29,7 @@ import {
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot} from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getDoc, doc, updateDoc, onSnapshot, collection, addDoc} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -53,45 +53,17 @@ const {
 
 
 export default function OrderSummary({navigation}){
+    const [booking, setBooking] = useState([]);
+    const [openDate, setOpenDate] = useState(false);
+    const [selectedTime, setSelectedTime] = useState(null);
+    const [open,setOpen] = useState(false);
+    const [value,setValue] = useState(null);
 
-     const serviceBanners = [
-        { image: "cleaning_banner.png", label: "Cleaning" },
-        { image: "home_organization.png", label: "Cleaning" },
-        { image: "aircond_repair.png", label: "Repair" },
-        { image: "Moving.png", label: "Moving" },
-        { image: "gasleak.png", label: "Maintenance" },
-        { image: "outdoor_banner.png", label: "Outdoor Services" },
-    ];
-
-    const bannerImageMap = {
-        "Moving.png": require("../assets/images/Moving.png"),
-        "home_organization.png": require("../assets/images/home_organization.png"),
-        "aircond_repair.png": require("../assets/images/aircond_repair.png"),
-        "cleaning_banner.png": require("../assets/images/cleaning_banner.png"),
-        "gasleak.png": require("../assets/images/gasleak.png"),
-        "outdoor_banner.png": require("../assets/images/outdoor_banner.png"),
-    };
-
-    async function fetchBooking(orderID) {
-        const docRef = doc(db,'booking',orderID);
-        //creates reference to the document you want to retrieve
-        const docSnap = await getDoc(docRef);
-        //getDoc is the function to retrieve data from the document reference
-
-        if (docSnap.exists()){
-            // console.log('Booking Info',docSnap.data());
-            const data = docSnap.data();
-            return data;
-        }else{
-            console.log("No such booking!");
-            return;
-        }
-        };
     const route = useRoute();
     const { orderID } = route.params;
     
 
-    const [booking, setBooking] = useState([]);
+    
 
     //find category with data array
     
@@ -101,29 +73,86 @@ export default function OrderSummary({navigation}){
     const bookingDetails = booking.filter(item => item.type !== 'category');
     console.log(bookingDetails); // array of availability, location, etc.
 
-    const renderCard = ({ item }) => (
-    <View style={style.cardContainer}>
-        <View style={style.taskIconWrap}>
-            <FontAwesome5 name={item.icon} size={18} color={main_coco} />
+    //add schedule as subcollection in workers' firestore
+    const addScheduleForWorker = async (workerId, orderID) =>{
+        const scheduleRef = collection(db, 'users', workerId, 'schedules');
+        const docRef = doc(db,'booking',orderID);
+        //creates reference to the document you want to retrieve
+        const docSnap = await getDoc(docRef);
+        //getDoc is the function to retrieve data from the document reference
+        
+        const data = docSnap.data();
+        await addDoc(scheduleRef, {
+            address: data.address,
+            availability: selectedTime,
+            duration: data.duration,
+            gender: data.gender,
+            notes: data.notes,
+            orderID: data.orderID,
+            postcode: data.postcode,
+            rating: data.rating,
+            serviceType: data.serviceType,
+            state: data.state,
+            status: data.status,
+            type: data.type,
+            userId: data.userId,
+            workerId: data.workerId,
+        });
+    };
+
+    const renderCard = (item , index, openDate,setOpenDate,selectedTime, setSelectedTime) => {
+        
+
+        const isAvailabilityCard = item.type === 'availability';
+        //convert availability array to dropdown items
+        const availabilityOptions = isAvailabilityCard ?
+            item.content.map((slot, index) => ({
+                label: `${slot.date} | ${slot.time}`,
+                value: `${slot.date} ${slot.time}`,
+                key: index.toString(),
+            }))
+            :[];
+
+        return (
+        <View style={style.cardContainer}>
+            <View style={style.taskIconWrap}>
+                <FontAwesome5 name={item.icon} size={18} color={main_coco} />
+            </View>
+            <View style={style.taskInfo}>
+                <Text style={style.cardTitle}>{item.title}</Text>
+                {isAvailabilityCard ? (
+                    <DropDownPicker
+                        open = {openDate}
+                        value = {selectedTime}
+                        items = {availabilityOptions}
+                        setOpen={setOpenDate}
+                        setValue={setSelectedTime}
+                        setItems ={() =>{}}
+                        placeholder="Select a time slot"
+                        zIndex={1000}
+                        style = {style.dropdownContainer}
+                        textStyle = {style.cardContent}
+                    />
+                ):(
+                    Array.isArray(item.content) ? (
+                        item.content.map((entry, index) => (
+                            typeof entry === 'object' ? (
+                            <Text key={index} style={style.cardContent}>
+                                {entry.date} | {entry.time}
+                            </Text>
+                            ) : (
+                            <Text key={index} style={style.cardContent}>{entry}</Text>
+                            )
+                        ))
+                        ) : (
+                        <Text style={style.cardContent}>{item.content}</Text>
+                        )
+                    )}
+
+            </View>
         </View>
-        <View style={style.taskInfo}>
-            <Text style={style.cardTitle}>{item.title}</Text>
-            {Array.isArray(item.content) ? (
-                item.content.map((entry, index) => (
-                    typeof entry === 'object' ? (
-                    <Text key={index} style={style.cardContent}>
-                        {entry.date} | {entry.time}
-                    </Text>
-                    ) : (
-                    <Text key={index} style={style.cardContent}>{entry}</Text>
-                    )
-                ))
-                ) : (
-                <Text style={style.cardContent}>{item.content}</Text>
-                )}
-        </View>
-    </View>
-    );
+        );
+    };
 
     const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
@@ -144,23 +173,24 @@ export default function OrderSummary({navigation}){
         }
         
         await updateDoc(bookingRef, {
-        status: "accepted",
-        workerId: currentWorkerId,
-        acceptedAt: new Date(),
-        });
+            status: "accepted",
+            workerId: currentWorkerId,
+            acceptedAt: new Date(),
+            });
 
-        Alert.alert("Booking accepted!");
-        navigation.goBack();
+            Alert.alert("Booking accepted!");
+            addScheduleForWorker(currentWorkerId,orderID);
+            navigation.goBack();
 
         // Optional: re-fetch the tasks to refresh the UI
         // setTasks((prevTasks) =>
         // prevTasks.filter((task) => task.id !== bookingId)
         // );
-    } catch (err) {
-        console.error("Failed to accept booking:", err);
-        Alert.alert("Error", "Failed to accept booking.");
-    }
-    };
+        } catch (err) {
+            console.error("Failed to accept booking:", err);
+            Alert.alert("Error", "Failed to accept booking.");
+        }
+        };
 
     
 
@@ -253,7 +283,7 @@ export default function OrderSummary({navigation}){
 
                 <FlatList
                     data = {bookingDetails}
-                    renderItem = {renderCard}
+                    renderItem = {({item, index})=>renderCard(item, index, openDate, setOpenDate, selectedTime, setSelectedTime)}
                     keyExtractor={(item,index) => index.toString()}
                     contentContainerStyle = {{paddingBottom: 100}}
                     scrollEnabled = {false}
