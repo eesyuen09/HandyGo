@@ -10,7 +10,7 @@ export const colours = {
   darkest_coco: "#704F38",
   main_coco: "#A76545",
   beige: "#F9F2ED",
-  grey: "E3E3E3",
+  grey: "#EFEFEF",
   white: '#FFFFFF',
   yellow_brown: '#DDA853',
   black: "#000000",
@@ -83,14 +83,16 @@ export const style = StyleSheet.create({
     },
 
     subHeader: {
-        fontSize: 16,
+        fontSize: 20,
+
+
         fontWeight: '500',
         color: colours.main_coco,
         marginBottom: 10,
     },
 
     card: {
-        color: grey,
+        backgroundColor: grey,
         borderRadius: 20,
         padding: 16,
         marginBottom: 12,
@@ -99,11 +101,14 @@ export const style = StyleSheet.create({
         alignItems: 'center',
     },
 
-    dot: {
-        height: 10,
-        width: 10,
-        boederRadius: 5,
+    cardTitle: {
+        color: colours.darkest_coco,
+        fontFamily: 'Sora',
+        fontSize: 16,
+        fontWeight: '600',
     },
+
+
 
     date: {
         fontSize: 14,
