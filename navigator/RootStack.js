@@ -38,7 +38,7 @@ import ForgotPassword from '../screen/forgotpassword';
 import Biz_ordersummary from '../screen/biz_ordersummary';
 import Moredetails from '../screen/moredetails';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
+import Biz_activitypage from '../screen/biz_activitypage'
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -66,11 +66,11 @@ function BottomTabs() {
         }}
       />
       <Tab.Screen
-        name="Orders"
-        component={Biz_adddetails}
+        name="Activity"
+        component={Biz_activitypage}
         options={{
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="clipboard-edit-outline" size={24} color={color} />
+            <MaterialCommunityIcons name="calendar" size={24} color={color} />
           ),
           tabBarLabel: '',
         }}
