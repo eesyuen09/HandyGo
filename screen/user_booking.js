@@ -97,6 +97,7 @@ export default function UserBooking() {
         rating: "",
         notif: false,
         notes: "",
+        isCompleted: false,
         status: "pending",
       }}
       validationSchema={Yup.object({
@@ -131,6 +132,7 @@ export default function UserBooking() {
           notif,
           notes,
           status,
+          isCompletedStatus,
         } = values;
 
         try {
