@@ -40,45 +40,47 @@ export const styles = StyleSheet.create({
 
   //container for search bar
   container: {
-    backgroundColor: main_coco,
-    flexDirection: "column",
-    borderBottomLeftRadius: 0,
-    borderBottomRightRadius: 0,
-    paddingTop: Platform.OS === "android" ? 16 : Constants.statusBarHeight + 8,
+    // backgroundColor: beige,
+    // flexDirection: "column",
+
+    // paddingTop: Platform.OS === "android" ? 16 : Constants.statusBarHeight + 8,
     // height: Constants.statusBarHeight + 75,
-    minHeight: 100,
-    paddingHorizontal: 0,
-    paddingBottom: 10,
-    marginHorizontal: 0,
+    // minHeight: 100,
+    paddingVertical: 10,
+    // paddingHorizontal: 20,
+    // marginHorizontal: 0,
   },
 
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: light_coco,
+    // backgroundColor: light_coco,
     borderRadius: 30,
     paddingHorizontal: 26,
+    borderColor: main_coco,
+    borderWidth: 1,
     // paddingVertical: 8,
     marginHorizontal: 25,
-    marginBottom: 8,
-    height: 45,
+    marginVertical: 0,
+    // marginBottom: 8,
+    // height: 45,
   },
 
   searchIcon: {
     width: 24,
     height: 24,
-    color: white,
+    color: main_coco,
   },
 
   searchInput: {
     marginLeft: 10,
     fontFamily: "Sora",
-    color: white,
+    color: main_coco,
     // lineHeight: 25,
     fontSize: 15,
     flex: 1,
-    zIndex: 100,
-    lineHeight: 25,
+    zIndex: 1000,
+    lineHeight: 30,
   },
 
   section: {
@@ -114,11 +116,14 @@ export const styles = StyleSheet.create({
   },
 
   iconRow: {
-    // flexDirection: 'row',
+    flexDirection: "row",
     // justifyContent: 'space-between',
     alignItems: "baseline",
     paddingHorizontal: 16,
     gap: 23,
+    // backgroundColor: darkest_coco,
+    minWidth: Dimensions.get("window").width + 10,
+    zIndex: 1000,
     // marginBottom: 0,
   },
 
