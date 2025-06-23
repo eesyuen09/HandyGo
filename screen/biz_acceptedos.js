@@ -56,7 +56,8 @@ export default function OrderSummary({navigation}){
     const [booking, setBooking] = useState([]);
     const [openDate, setOpenDate] = useState(false);
     const [selectedTime, setSelectedTime] = useState(null);
-    
+
+
 
     //new
     const [schedule, setSchedule] = useState(null);
@@ -75,40 +76,6 @@ export default function OrderSummary({navigation}){
     const bookingDetails = booking.filter(item => item.type !== 'category');
     console.log(bookingDetails); // array of availability, location, etc.
 
-    //add schedule as subcollection in workers' firestore
-    // const addScheduleForWorker = async (workerId, orderID) =>{
-    //     // const scheduleRef = collection(db, 'users', workerId, 'schedules');
-    //     const docRef = doc(db,'booking',orderID);
-    //     //creates reference to the document you want to retrieve
-    //     const docSnap = await getDoc(docRef);
-    //     //getDoc is the function to retrieve data from the document reference
-
-    //     if (!docSnap.exists()) {
-    //         console.log("No such booking!");
-    //        return;
-    //     }
-    //     const scheduleDocRef = doc(db, 'users', userID,'schedules',orderID);
-
-
-        
-    //     const data = docSnap.data();
-    //     await addDoc(scheduleRef, {
-    //         address: data.address,
-    //         availability: selectedTime,
-    //         duration: data.duration,
-    //         gender: data.gender,
-    //         notes: data.notes,
-    //         orderID: data.orderID,
-    //         postcode: data.postcode,
-    //         rating: data.rating,
-    //         serviceType: data.serviceType,
-    //         state: data.state,
-    //         status: data.status,
-    //         type: data.type,
-    //         userId: data.userId,
-    //         workerId: data.workerId,
-    //     });
-    // };
 
     const renderCard = (item , index, openDate,setOpenDate,selectedTime, setSelectedTime) => {
         
@@ -149,8 +116,9 @@ export default function OrderSummary({navigation}){
         );
     };
 
-    const acceptBooking = async (bookingId, currentWorkerId) => {
+    const changeIsComplete = async (bookingId) => {
     try {
+
         const bookingRef = doc(db, "booking", bookingId);
 
         //check if current booking data exist
@@ -162,28 +130,22 @@ export default function OrderSummary({navigation}){
 
         const bookingData = bookingSnap.data();
 
-        if(bookingData.status === 'accepted'){
-            Alert.alert("Error! This booking has already been accepted.");
+        if(bookingData.isCompleted){
+            Alert.alert("Error! This booking has already been completed.");
             return;
         }
         
         await updateDoc(bookingRef, {
-            status: "accepted",
-            workerId: currentWorkerId,
-            acceptedAt: new Date(),
+            isCompleted: true,
+            completedAt: new Date(),
             });
 
-            Alert.alert("Booking accepted!");
-            addScheduleForWorker(currentWorkerId,orderID);
+            Alert.alert("Booking Completed!");
             navigation.goBack();
 
-        // Optional: re-fetch the tasks to refresh the UI
-        // setTasks((prevTasks) =>
-        // prevTasks.filter((task) => task.id !== bookingId)
-        // );
         } catch (err) {
-            console.error("Failed to accept booking:", err);
-            Alert.alert("Error", "Failed to accept booking.");
+            console.error("Failed to complete booking:", err);
+            Alert.alert("Error", "Failed to complete booking.");
         }
         };
 
@@ -284,6 +246,14 @@ export default function OrderSummary({navigation}){
 
                 {/* Divider */}
                 <View style={style.line} />
+                <TouchableOpacity
+                    style = {style.button}
+                    onPress={() => changeIsComplete(orderID)}
+                >
+                    <Text style = {style.buttonText}>Completed Task</Text>
+                    </TouchableOpacity>
+
+
 
                 <TouchableOpacity 
                     style = {style.button}
