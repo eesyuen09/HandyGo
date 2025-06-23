@@ -246,6 +246,7 @@ export default function OrderSummary({navigation}){
 
                 {/* Divider */}
                 <View style={style.line} />
+
                 <TouchableOpacity
                     style = {style.button}
                     onPress={() => changeIsComplete(orderID)}
