@@ -60,7 +60,7 @@ export default function OrderSummary({navigation}){
 
 
     //new
-    const [schedule, setSchedule] = useState(null);
+    const [isCompleted, setIsCompleted] = useState(false);
 
     const route = useRoute();
     const { orderID, userID} = route.params;
@@ -75,6 +75,8 @@ export default function OrderSummary({navigation}){
 
     const bookingDetails = booking.filter(item => item.type !== 'category');
     console.log(bookingDetails); // array of availability, location, etc.
+
+
 
 
     const renderCard = (item , index, openDate,setOpenDate,selectedTime, setSelectedTime) => {
@@ -116,6 +118,7 @@ export default function OrderSummary({navigation}){
         );
     };
 
+
     const changeIsComplete = async (bookingId) => {
     try {
 
@@ -153,6 +156,10 @@ export default function OrderSummary({navigation}){
 
     useEffect(() => {  
         const scheduleRef = doc(db, 'users', userID, 'schedules', orderID);
+
+        //fetch is completed status
+        const bookingRef = doc(db,'booking',orderID);
+        
 
         const unsubscribe = onSnapshot(scheduleRef, (docSnap) => {
             if (docSnap.exists()) {
@@ -198,6 +205,14 @@ export default function OrderSummary({navigation}){
                 console.log("Schedule document does not exist");
             }
         });
+        const fetchBookingStatus = async () => {
+            const bookingSnap = await getDoc(bookingRef);
+            if (bookingSnap.exists()) {
+                const bookingData = bookingSnap.data();
+                setIsCompleted(bookingData.isCompleted); // ✅ set state
+            }
+        };
+        fetchBookingStatus();
 
         return () => unsubscribe();
     }, [orderID, userID]);
@@ -247,20 +262,24 @@ export default function OrderSummary({navigation}){
                 {/* Divider */}
                 <View style={style.line} />
 
-                <TouchableOpacity
+                {!isCompleted && (
+                    <TouchableOpacity
                     style = {style.button}
                     onPress={() => changeIsComplete(orderID)}
                 >
                     <Text style = {style.buttonText}>Completed Task</Text>
                     </TouchableOpacity>
+                )}
 
 
 
+               
                 <TouchableOpacity 
                     style = {style.button}
                     onPress={() => navigation.goBack()}>
                     <Text style = {style.buttonText}>Back</Text>
                 </TouchableOpacity>
+               
 
                 </ScrollView>
                 </View>
