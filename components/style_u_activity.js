@@ -36,11 +36,11 @@ export const style = StyleSheet.create({
     marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 28,
+    fontFamily: "Sora",
     padding: 16,
     fontWeight: "bold",
     color: colours.main_coco,
-    fontFamily: "Sora",
     marginBottom: 10,
   },
   sectionHeader: {
@@ -86,7 +86,9 @@ export const style = StyleSheet.create({
   },
   taskDetailsText: {
     marginLeft: 6,
-    fontSize: 14,
+    fontSize: 13,
+    textAlign: "left",
+    fontFamily: "Sora",
     color: colours.light_coco,
   },
   taskIcon: {
@@ -100,6 +102,7 @@ export const style = StyleSheet.create({
   viewText: {
     fontSize: 14,
     color: colours.main_coco,
+    fontFamily: "Sora",
     textDecorationLine: "underline",
   },
   header: {
@@ -127,9 +130,10 @@ export const style = StyleSheet.create({
     marginLeft: 10,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "bold",
     color: colours.darkest_coco,
+    fontFamily: "Sora",
     marginBottom: 8,
   },
   cardPrice: {
@@ -146,11 +150,7 @@ export const style = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 4,
   },
-  taskDetailsText: {
-    marginLeft: 6,
-    fontSize: 14,
-    color: colours.light_coco,
-  },
+
   statusRow: {
     flexDirection: "row",
     justifyContent: "space-between",
