@@ -113,6 +113,7 @@ export default function UrgentTask() {
   if (!fontsLoaded) return null;
 
   const getIcon = (serviceType) => {
+
       switch (serviceType) {
         case "Cleaning":
           return { name: "cleaning-services", family: "MaterialIcons" };
@@ -142,6 +143,7 @@ export default function UrgentTask() {
         return <Feather name={iconName} size={size} color={color} />;
       case "Ionicons":
         return <Ionicons name={iconName} size={size} color={color} />;
+
       default:
         return <Feather name="alert-circle" size={size} color={color} />;
     }
