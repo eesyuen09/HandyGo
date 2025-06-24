@@ -14,9 +14,7 @@ import { Formik } from "formik";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Octicons, Ionicons } from "@expo/vector-icons";
 
-
 import { colours, globalStyles } from "../components/style_loginsignup";
-
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
@@ -25,7 +23,10 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
+import { auth } from "../firebaseConfig";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+const db = getFirestore();
+connectFirestoreEmulator(db, "localhost", 8080);
 
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);

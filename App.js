@@ -11,6 +11,7 @@ import Moredetails from './screen/moredetails';
 import Biz_homepage from './screen/biz_homepage';
 import UrgentTask from './screen/biz_urgenttask';
 import Biz_ordersummary from './screen/biz_ordersummary';
+import Biz_activitypage from './screen/biz_activitypage.js';
 
 
 

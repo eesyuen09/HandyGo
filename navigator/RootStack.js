@@ -27,6 +27,7 @@ import Login from "../screen/login";
 import Signup from "../screen/signup";
 import UserHome from "../screen/user_home";
 import UserBooking from "../screen/user_booking";
+import UserActivity from "../screen/user_activity";
 import Biz_adddetails from "../screen/moredetails";
 import Biz_homepage from "../screen/biz_homepage";
 import Biz_urgentTask from "../screen/biz_urgenttask";
@@ -66,8 +67,8 @@ function BottomTabs() {
         }}
       />
       <Tab.Screen
-        name="Orders"
-        component={Biz_adddetails}
+        name="Activity"
+        component={Biz_activitypage}
         options={{
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
@@ -157,7 +158,7 @@ const RootStack = () => {
             },
           }}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           name="UserActivity"
           component={UserActivity}
           options={{
@@ -173,7 +174,7 @@ const RootStack = () => {
               color: darkest_coco,
             },
           }}
-        /> */}
+        />
         <Stack.Screen name="Business Home Page" component={Biz_homepage} />
         <Stack.Screen name="Add Details" component={Biz_adddetails} />
         <Stack.Screen name="Business Urgent Task" component={Biz_urgentTask} />

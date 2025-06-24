@@ -23,7 +23,10 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
+import { auth } from "../firebaseConfig";
+import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+const db = getFirestore();
+connectFirestoreEmulator(db, "localhost", 8080);
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -214,10 +217,10 @@ export default function Login({ navigation }) {
                   </View>
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('Forgot Password')}
-                    style = {globalStyles.forgotPasswordLink}
-                    >
-                      <Text style ={globalStyles.linkText} >Forgot Password?</Text>
+                    onPress={() => navigation.navigate("Forgot Password")}
+                    style={globalStyles.forgotPasswordLink}
+                  >
+                    <Text style={globalStyles.linkText}>Forgot Password?</Text>
                   </TouchableOpacity>
                 </View>
 

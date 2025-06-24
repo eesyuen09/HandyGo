@@ -223,4 +223,16 @@ export const style = StyleSheet.create({
         marginVertical: 5,
         alignSelf: 'center',
     },
+
+    dropdownContainer: {
+        borderWidth: 1,
+        width: "100%",
+        borderColor: colours.darkest_coco,
+        backgroundColor: colours.white,
+        borderRadius: 10,
+        fontFamily: "Sora",
+        fontSize: 14,
+        color: colours.darkest_coco,
+        zIndex: 100,
+    },
 }) 
