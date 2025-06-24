@@ -9,7 +9,7 @@ import {
   Alert,
 } from "react-native";
 
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { FontAwesome5, Feather, MaterialIcons, FontAwesome6, Ionicons} from '@expo/vector-icons';
 import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
@@ -63,6 +63,8 @@ export default function UrgentTask() {
 
       const formatted = [];
 
+      const iconData = getIcon(data.serviceType);
+
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         if (workerCategories.includes(data.type)) {
@@ -74,7 +76,8 @@ export default function UrgentTask() {
             }`,
             location: `${data.state || ""}, ${data.postcode || ""}`,
             price: data.price || "35.99",
-            icon: getIcon(data.serviceType),
+            icon: iconData.name,
+            iconFamily: iconData.family,
           });
         }
       });
@@ -104,28 +107,38 @@ export default function UrgentTask() {
   const getIcon = (serviceType) => {
       switch (serviceType) {
         case "Cleaning":
-          return "broom";
+          return { name: "broom", family: "MaterialIcons" };
         case "Repair":
-          return 'tool';
-        case 'Maintenance':
-          return 'hands-holding';
-        case 'Moving':
-          return 'truck-moving';
-        case 'Outdoor Services':
-          return "tree";
+          return { name: "tool", family: "Feather" };
+        case "Maintenance":
+          return { name: "hands-holding", family: "FontAwesome6" };
+        case "Moving":
+          return { name: "truck-moving", family: "FontAwesome5" };
+        case "Outdoor Services":
+          return { name: "tree", family: "FontAwesome5" };
         default:
-          return "wrench";
+          return { name: "wrench", family: "Feather" };
+      }
+  };
+  const renderIcon = (iconName, iconFamily, color, size) => {
+    switch (iconFamily) {
+      case "MaterialCommunityIcons":
+        return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+      case "Feather":
+        return <Feather name={iconName} size={size} color={color} />;
+      case "Ionicons":
+        return <Ionicons name={iconName} size={size} color={color} />;
+      default:
+        return <Feather name="alert-circle" size={size} color={color} />;
     }
   };
+
+  
 
   const showTask = ({ item }) => (
     <View style={style.card}>
       <View style={style.taskIconWrap}>
-        <MaterialCommunityIcons
-          name={item.icon}
-          size={30}
-          color={colours.main_coco}
-        />
+        {renderIcon(item.icon,item.iconFamily,colours.main_coco,30)}
       </View>
 
       <View style={style.taskInfo}>
