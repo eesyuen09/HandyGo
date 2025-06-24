@@ -43,6 +43,13 @@ export const style = StyleSheet.create({
     color: colours.main_coco,
     marginBottom: 10,
   },
+  bigTitle: {
+    fontSize: 34,
+    fontFamily: "Sora",
+    paddingLeft: 16,
+    fontWeight: "bold",
+    color: colours.darkest_coco,
+  },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -112,14 +119,7 @@ export const style = StyleSheet.create({
     paddingTop: Constants.statusBarHeight + 10,
     paddingBottom: 10,
   },
-  backButton: {
-    paddingHorizontal: 10,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: colours.darkest_coco,
-  },
+
   taskIconWrap: {
     position: "relative",
     // top: 16,

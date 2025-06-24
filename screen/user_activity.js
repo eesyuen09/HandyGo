@@ -292,6 +292,9 @@ export default function UserActivity({ navigation }) {
       <ScrollView contentContainerStyle={style.container}>
         {/* In Progress Section */}
         <View style={style.section}>
+          <Text style={style.bigTitle}>Activity</Text>
+        </View>
+        <View style={style.section}>
           <Text style={style.sectionTitle}>In Progress</Text>
           {incompletedTasks.length === 0 ? (
             <Text style={style.emptyText}>No ongoing bookings</Text>
