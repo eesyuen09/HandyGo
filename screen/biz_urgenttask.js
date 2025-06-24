@@ -68,7 +68,7 @@ export default function UrgentTask() {
             }`,
             location: `${data.state || ""}, ${data.postcode || ""}`,
             price: data.price || "35.99",
-            icon: getIcon(data.type),
+            icon: getIcon(data.serviceType),
           });
         }
       });
@@ -79,14 +79,18 @@ export default function UrgentTask() {
   
   if (!fontsLoaded) return null;
 
-  const getIcon = (type) => {
-    switch (type) {
-      case "General House Cleaning":
+  const getIcon = (serviceType) => {
+    switch (serviceType) {
+      case "Cleaning":
         return "broom";
-      case "Home Organising":
-        return "tshirt-crew";
-      case "Air Conditioner Repair":
-        return "air-conditioner";
+      case "Repair":
+        return 'tool';
+      case 'Maintenance':
+        return 'hands-holding';
+      case 'Moving':
+        return 'truck-moving';
+      case 'Outdoor Services':
+        return "tree";
       default:
         return "wrench";
     }
