@@ -3,33 +3,21 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ScrollView,
   Alert,
-  Switch,
-  KeyboardAvoidingView,
-  Platform,
   ImageBackground,
 } from "react-native";
 import { colours, styles } from "../components/style_u_booking.js";
 //for date time dropdown picker
 import DropDownPicker from "react-native-dropdown-picker";
-
-//Keyboard Avoiding Wrapper
-import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper.js";
 import {
   FontAwesome5,
-  AntDesign,
-  MaterialIcons,
-  Entypo,
-  FontAwesome,
   Feather,
-  FontAwesome6,
   Ionicons,
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, deleteField} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -56,11 +44,9 @@ export default function OrderSummary({navigation}){
     const [booking, setBooking] = useState([]);
     const [openDate, setOpenDate] = useState(false);
     const [selectedTime, setSelectedTime] = useState(null);
-    const [open,setOpen] = useState(false);
-    const [value,setValue] = useState(null);
 
     const route = useRoute();
-    const { orderID } = route.params;
+    const { orderID, userID } = route.params || {};
     
 
     
@@ -68,10 +54,8 @@ export default function OrderSummary({navigation}){
     //find category with data array
     
     const categoryItem = booking.find(item => item.type === 'category');
-    // console.log('categoryItem:',categoryItem); // { type: 'category', title: 'Plumbing Services', image: '...' }
-
     const bookingDetails = booking.filter(item => item.type !== 'category');
-    console.log(bookingDetails); // array of availability, location, etc.
+
 
     //add schedule as subcollection in workers' firestore
     const addScheduleForWorker = async (workerID, orderID) =>{
@@ -109,8 +93,6 @@ export default function OrderSummary({navigation}){
     };
 
     const renderCard = (item , index, openDate,setOpenDate,selectedTime, setSelectedTime) => {
-        
-
         const isAvailabilityCard = item.type === 'availability';
         //convert availability array to dropdown items
         const availabilityOptions = isAvailabilityCard ?
@@ -184,16 +166,13 @@ export default function OrderSummary({navigation}){
             status: "accepted",
             workerId: currentWorkerId,
             acceptedAt: new Date(),
+            scheduledTime: selectedTime,
+            availability: deleteField(),
             });
 
             Alert.alert("Booking accepted!");
             addScheduleForWorker(currentWorkerId,orderID);
             navigation.goBack();
-
-        // Optional: re-fetch the tasks to refresh the UI
-        // setTasks((prevTasks) =>
-        // prevTasks.filter((task) => task.id !== bookingId)
-        // );
         } catch (err) {
             console.error("Failed to accept booking:", err);
             Alert.alert("Error", "Failed to accept booking.");
