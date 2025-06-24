@@ -39,12 +39,12 @@ export const style = StyleSheet.create({
       },
     
       header: {//include title, backbutton, icon..
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingTop: 60,
-        paddingHorizontal: 20,
-        marginBottom: 10,
+        // flexDirection: 'row',r
+        position: 'relative',
+        height :60,
+        marginBottom: 20,
         justifyContent: 'center',
+        alignItems: 'center',
       },
 
    
@@ -52,9 +52,20 @@ export const style = StyleSheet.create({
         fontSize: 22,
         fontWeight: '600',
         color: darkest_coco,
-        justifyContent: 'center',
-        textAlign: 'center',
+        fontFamily: 'Sora',
+        // justifyContent: 'center',
+        // textAlign: 'center',
+        
 
+    },
+    backButton: {
+      width: 30, // same size as the icon
+      alignItems: 'center',
+      position: 'absolute',
+      left: '20',
+      top: '50%',
+      
+      transform: [{ translateY: -12 }],
     },
 
     searchContainer: {

@@ -25,7 +25,6 @@ import { db } from "../firebaseConfig";
 
 
 
-
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
@@ -36,9 +35,11 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
-  // add search logic
+  //search logic function
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTasks, setFilteredTasks] = useState([]);
+
+
   useFocusEffect(
     React.useCallback(() => {
       fetchUrgentTasks();
@@ -58,7 +59,7 @@ export default function UrgentTask() {
       const workerCategories = userData.subcategory || [];
 
       const q = query(collection(db, "booking"), where("status", "==", "pending"),
-        where('urgency', '==', true));
+        where('urgency', '==', false));
       const querySnapshot = await getDocs(q);
 
       const formatted = [];
@@ -74,7 +75,7 @@ export default function UrgentTask() {
             }`,
             location: `${data.state || ""}, ${data.postcode || ""}`,
             price: data.price || "35.99",
-            icon: getIcon(data.serviceType),
+            icon: getIcon(data.type),
           });
         }
       });
@@ -83,38 +84,34 @@ export default function UrgentTask() {
       setFilteredTasks(formatted);
       };
 
-    function handleSearch(text){
-      if(text.trim() === ''){
-        setFilteredTasks(tasks);
-        return;
-      }
+      function handleSearch(text){
+        if(text.trim() === ''){
+            setFilteredTasks(tasks);
+            return;
+        }
 
-      const filtered = tasks.filter((item) =>
-      item.category.toLowerCase().includes(text.toLowerCase()) ||
-      item.location.toLowerCase().includes(text.toLowerCase()) ||
-      item.time.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredTasks(filtered);
+        const filtered = tasks.filter((item) =>
+        item.category.toLowerCase().includes(text.toLowerCase()) ||
+        item.location.toLowerCase().includes(text.toLowerCase()) ||
+        item.time.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredTasks(filtered);
     };
 
 
   
   if (!fontsLoaded) return null;
 
-  const getIcon = (serviceType) => {
-      switch (serviceType) {
-        case "Cleaning":
-          return "broom";
-        case "Repair":
-          return 'tool';
-        case 'Maintenance':
-          return 'hands-holding';
-        case 'Moving':
-          return 'truck-moving';
-        case 'Outdoor Services':
-          return "tree";
-        default:
-          return "wrench";
+  const getIcon = (type) => {
+    switch (type) {
+      case "General House Cleaning":
+        return "broom";
+      case "Home Organising":
+        return "tshirt-crew";
+      case "Air Conditioner Repair":
+        return "air-conditioner";
+      default:
+        return "wrench";
     }
   };
 
@@ -161,6 +158,25 @@ export default function UrgentTask() {
     </View>
   );
 
+  //example structure of order summary
+  // const dummytasks = [
+  //   {
+  //     id: "1",
+  //     category: "Cleaning",
+  //     time: "19 May 2025 | 5.00pm",
+  //     location: "Penang GeorgeTown",
+  //     price: "$35.99",
+  //     icon: "broom",
+  //   },
+  //   {
+  //     id: "2",
+  //     category: "Home Organising",
+  //     time: "19 May 2025 | 5.00pm",
+  //     location: "Penang GeorgeTown",
+  //     price: "$35.99",
+  //     icon: "tshirt-crew",
+  //   },
+  // ];
   return (
     <ImageBackground source={bg} style={style.background}>
       <View style={style.container}>
@@ -175,7 +191,7 @@ export default function UrgentTask() {
               color={colours.darkest_coco}
             />
           </TouchableOpacity>
-          <Text style={style.headerTitle}>Urgent Task</Text>
+          <Text style={style.headerTitle}>Scheduled Task</Text>
           {/* <View style = {style.backButton}/> */}
         </View>
 
@@ -185,10 +201,10 @@ export default function UrgentTask() {
             placeholder="Searching for any services?"
             placeholderTextColor={colours.darkest_coco}
             style={style.searchInput}
-            value = { searchQuery }
-            onChangeText = {(text) => {
-              setSearchQuery(text);
-              handleSearch(text);
+            value = {searchQuery}
+            onChangeText ={(text) =>{
+                setSearchQuery(text);
+                handleSearch(text);
             }}
           />
           <Feather name="filter" size={20} color={colours.darkest_coco} />
