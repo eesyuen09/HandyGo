@@ -9,7 +9,14 @@ import {
   Alert,
 } from "react-native";
 
-import { FontAwesome5, Feather, MaterialIcons, FontAwesome6, Ionicons} from '@expo/vector-icons';
+import {
+  Ionicons,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+  FontAwesome5,
+  FontAwesome6,
+} from "@expo/vector-icons";
 import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
@@ -63,11 +70,12 @@ export default function UrgentTask() {
 
       const formatted = [];
 
-      const iconData = getIcon(data.serviceType);
+      
 
       querySnapshot.forEach((docSnap) => {
         const data = docSnap.data();
         if (workerCategories.includes(data.type)) {
+          const iconData = getIcon(data.serviceType);
           formatted.push({
             id: data.orderID || docSnap.id,
             category: data.type || "Unknown",
@@ -107,7 +115,7 @@ export default function UrgentTask() {
   const getIcon = (serviceType) => {
       switch (serviceType) {
         case "Cleaning":
-          return { name: "broom", family: "MaterialIcons" };
+          return { name: "cleaning-services", family: "MaterialIcons" };
         case "Repair":
           return { name: "tool", family: "Feather" };
         case "Maintenance":
@@ -117,13 +125,19 @@ export default function UrgentTask() {
         case "Outdoor Services":
           return { name: "tree", family: "FontAwesome5" };
         default:
-          return { name: "wrench", family: "Feather" };
+          return { name: "wrench", family: "MaterialCommunityIcons" };
       }
   };
   const renderIcon = (iconName, iconFamily, color, size) => {
     switch (iconFamily) {
       case "MaterialCommunityIcons":
         return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+      case "MaterialIcons":
+        return <MaterialIcons name={iconName} size={size} color={color} />;
+      case "FontAwesome5":
+        return <FontAwesome5 name={iconName} size={size} color={color} />;
+      case "FontAwesome6":
+        return <FontAwesome6 name={iconName} size={size} color={color} />;
       case "Feather":
         return <Feather name={iconName} size={size} color={color} />;
       case "Ionicons":
@@ -132,7 +146,6 @@ export default function UrgentTask() {
         return <Feather name="alert-circle" size={size} color={color} />;
     }
   };
-
   
 
   const showTask = ({ item }) => (

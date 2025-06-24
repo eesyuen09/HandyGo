@@ -29,7 +29,7 @@ import { services_categories } from "../constants/category_constant";
 //extract data from firebase
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-import iconSet from "@expo/vector-icons/build/Fontisto";
+
 
 
 
@@ -125,7 +125,7 @@ export default function UrgentTask() {
         case "Outdoor Services":
           return { name: "tree", family: "FontAwesome5" };
         default:
-          return { name: "wrench", family: "MaterialComunityIcons" };
+          return { name: "wrench", family: "MaterialCommunityIcons" };
       }
   };
 
