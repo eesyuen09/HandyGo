@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import {
   Keyboard,
 } from "react-native";
 
-import { colours, styles } from "../components/style_u_activity";
+import { colours, styles } from "../components/style_u_activity.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //extract data from firebase
@@ -26,51 +26,121 @@ export default function UserActivity({ navigation }) {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [incompletedTasks, setIncompleteTasks] = useState([]);
 
-  const fetchTasks = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
+  // const fetchTasks = async () => {
+  //   const user = auth.currentUser;
+  //   if (!user) return;
 
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) return;
+  //   const userRef = doc(db, "users", user.uid);
+  //   const userSnap = await getDoc(userRef);
+  //   if (!userSnap.exists()) return;
 
-    const userData = userSnap.data();
+  //   const userData = userSnap.data();
 
-    const q = query(
-      collection(db, "booking"),
-      where("isCompleted", "==", "false"),
-      where("userID", "==", user.uid)
-    );
-    const querySnapshot = await getDocs(q);
+  //   const q = query(
+  //     collection(db, "booking"),
+  //     where("isCompleted", "==", "false"),
+  //     where("userID", "==", user.uid)
+  //   );
+  //   const querySnapshot = await getDocs(q);
 
-    const completedTasks = [];
-    const incompletedTasks = [];
+  //   const completedTasks = [];
+  //   const incompletedTasks = [];
 
-    querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      const task = {
-        id: data.orderID || docSnap.id,
-        category: data.type || "Unknown",
-        time: `${data.availability?.[0]?.date || "N/A"} | ${
-          data.availability?.[0]?.time || "N/A"
-        }`,
-        location: `${data.state || ""}, ${data.postcode || ""}`,
-        price: data.price || "35.99",
-        icon: getIcon(data.type),
-        isCompleted: data.isCompleted || false,
-        status: data.status || "Pending",
-      };
+  //   querySnapshot.forEach((docSnap) => {
+  //     const data = docSnap.data();
+  //     const task = {
+  //       id: data.orderID || docSnap.id,
+  //       category: data.type || "Unknown",
+  //       time: `${data.availability?.[0]?.date || "N/A"} | ${
+  //         data.availability?.[0]?.time || "N/A"
+  //       }`,
+  //       location: `${data.state || ""}, ${data.postcode || ""}`,
+  //       price: data.price || "35.99",
+  //       icon: getIcon(data.type),
+  //       isCompleted: data.isCompleted || false,
+  //       status: data.status || "Pending",
+  //     };
 
+  //     if (task.isCompleted) {
+  //       completedTasks.push(task);
+  //     } else {
+  //       incompletedTasks.push(task);
+  //     }
+  //   });
+
+  //   setCompletedTasks(completedTasks);
+  //   setIncompleteTasks(incompletedTasks);
+  // };
+
+  useEffect(() => {
+    // Mock data
+    const mockData = [
+      {
+        id: "1",
+        category: "Cleaning",
+        time: "19 May 2025 | 5.00pm",
+        location: "Penang GeorgeTown",
+        price: "35.99",
+        icon: getIcon("Cleaning"),
+        isCompleted: false,
+        status: "pending",
+      },
+      {
+        id: "2",
+        category: "Home Organizing",
+        time: "19 May 2025 | 5.00pm",
+        location: "Penang GeorgeTown",
+        price: "45.99",
+        icon: getIcon("Home Organizing"),
+        isCompleted: false,
+        status: "scheduled",
+      },
+      {
+        id: "3",
+        category: "Home Organizing",
+        time: "19 May 2025 | 5.00pm",
+        location: "Penang GeorgeTown",
+        price: "45.99",
+        icon: getIcon("Home Organizing"),
+        isCompleted: false,
+        status: "failed",
+      },
+      {
+        id: "4",
+        category: "Aircond Servicing",
+        time: "11 May 2025 | 5.00pm",
+        location: "Penang GeorgeTown",
+        price: "25.99",
+        icon: getIcon("Aircond Servicing"),
+        isCompleted: true,
+        status: "completed",
+      },
+      {
+        id: "5",
+        category: "Aircond Servicing",
+        time: "11 May 2025 | 5.00pm",
+        location: "Penang GeorgeTown",
+        price: "25.99",
+        icon: getIcon("Aircond Servicing"),
+        isCompleted: true,
+        status: "completed",
+      },
+    ];
+
+    const completed = [];
+    const incomplete = [];
+
+    mockData.forEach((task) => {
       if (task.isCompleted) {
-        completedTasks.push(task);
+        completed.push(task);
       } else {
-        incompletedTasks.push(task);
+        incomplete.push(task);
       }
     });
 
-    setCompletedTasks(completedTasks);
-    setIncompleteTasks(incompletedTasks);
-  };
+    setCompletedTasks(completed);
+    setIncompleteTasks(incomplete);
+  }, []);
 
   const showTask = ({ item }) => (
     <View style={style.card}>
@@ -116,21 +186,32 @@ export default function UserActivity({ navigation }) {
             <Text style={style.taskDetailsText}>{item.price}</Text>
           </View>
 
-          <View style={style.statusRow}>
-            <Text style={style.priceText}>${item.price}</Text>
-
-            <View
+          <View
+            style={[
+              style.statusBadge,
+              item.status === "scheduled"
+                ? style.statusScheduled
+                : item.status === "failed"
+                ? style.statusFailed
+                : item.status === "completed"
+                ? style.statusCompleted
+                : style.statusPending, // default
+            ]}
+          >
+            <Text
               style={[
-                style.statusBadge,
-                item.status === "Booking Confirmed"
-                  ? style.badgeConfirmed
-                  : item.status === "Booking Failed"
-                  ? style.badgeFailed
-                  : style.badgePending,
+                style.statusText,
+                item.status === "scheduled"
+                  ? style.textScheduled
+                  : item.status === "failed"
+                  ? style.textFailed
+                  : item.status === "completed"
+                  ? style.textCompleted
+                  : style.textPending,
               ]}
             >
-              <Text style={style.statusText}>{item.status}</Text>
-            </View>
+              {item.status}
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -156,11 +237,7 @@ export default function UserActivity({ navigation }) {
           </TouchableOpacity>
         </View>
       ) : (
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("BookingPage", { retryID: item.id })
-          }
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("UserBooking")}>
           <Text style={style.actionText}>Retry Booking</Text>
         </TouchableOpacity>
       )}

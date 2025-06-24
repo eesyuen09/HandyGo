@@ -120,7 +120,7 @@ const RootStack = () => {
     <>
       {/* <PrepopulateWorkerMaps/> */}
       <Stack.Navigator
-        initialRouteName="Onboard"
+        initialRouteName="UserActivity"
         screenOptions={{
           //  headerStyle: {
           //   backgroundColor: 'transparent'
