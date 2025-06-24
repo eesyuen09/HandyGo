@@ -9,9 +9,16 @@ import {
   Alert,
 } from "react-native";
 
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+  FontAwesome5,
+  FontAwesome6,
+} from "@expo/vector-icons";
 import bg from "../assets/bg_UrgentTask.png";
-import { style, colours } from "../components/style_u_activity";
+import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { auth, getAuth } from "../firebaseConfig";
@@ -65,6 +72,7 @@ export default function UrgentTask() {
     querySnapshot.forEach((docSnap) => {
       const data = docSnap.data();
       if (workerCategories.includes(data.type)) {
+        const iconData = getIcon(data.serviceType);
         formatted.push({
           id: data.orderID || docSnap.id,
           category: data.type || "Unknown",
@@ -73,7 +81,8 @@ export default function UrgentTask() {
           }`,
           location: `${data.state || ""}, ${data.postcode || ""}`,
           price: data.price || "35.99",
-          icon: getIcon(data.type),
+          icon: iconData.name,
+          iconFamily: iconData.family,
         });
       }
     });
@@ -99,85 +108,84 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
-  const getIcon = (type) => {
-    switch (type) {
-      case "General House Cleaning":
-        return "broom";
-      case "Home Organising":
-        return "tshirt-crew";
-      case "Air Conditioner Repair":
-        return "air-conditioner";
+  const getIcon = (serviceType) => {
+    switch (serviceType) {
+      case "Cleaning":
+        return { name: "cleaning-services", family: "MaterialIcons" };
+      case "Repair":
+        return { name: "tool", family: "Feather" };
+      case "Maintenance":
+        return { name: "hands-holding", family: "FontAwesome6" };
+      case "Moving":
+        return { name: "truck-moving", family: "FontAwesome5" };
+      case "Outdoor Services":
+        return { name: "tree", family: "FontAwesome5" };
       default:
-        return "wrench";
+        return { name: "wrench", family: "MaterialCommunityIcons" };
+    }
+  };
+  const renderIcon = (iconName, iconFamily, color, size) => {
+    switch (iconFamily) {
+      case "MaterialCommunityIcons":
+        return (
+          <MaterialCommunityIcons name={iconName} size={size} color={color} />
+        );
+      case "MaterialIcons":
+        return <MaterialIcons name={iconName} size={size} color={color} />;
+      case "FontAwesome5":
+        return <FontAwesome5 name={iconName} size={size} color={color} />;
+      case "FontAwesome6":
+        return <FontAwesome6 name={iconName} size={size} color={color} />;
+      case "Feather":
+        return <Feather name={iconName} size={size} color={color} />;
+      case "Ionicons":
+        return <Ionicons name={iconName} size={size} color={color} />;
+      default:
+        return <Feather name="alert-circle" size={size} color={color} />;
     }
   };
 
   const showTask = ({ item }) => (
     <View style={style.card}>
       <View style={style.taskIconWrap}>
-        <MaterialCommunityIcons
-          name={item.icon}
-          size={30}
-          color={colours.main_coco}
-        />
+        {renderIcon(item.icon, item.iconFamily, colours.main_coco, 30)}
+      </View>
+
+      <View style={style.taskInfo}>
+        <Text style={style.cardTitle}>{item.category}</Text>
+        <View style={style.taskDetails}>
+          <Ionicons
+            name="time-outline"
+            size={16}
+            color={colours.darkest_coco}
+          />
+          <Text style={style.taskDetailsText}>{item.time}</Text>
+        </View>
+
+        <View style={style.taskDetails}>
+          <Ionicons
+            name="location-outline"
+            size={16}
+            color={colours.darkest_coco}
+          />
+          <Text style={style.taskDetailsText}>{item.location}</Text>
+        </View>
+
+        <View style={style.taskDetails}>
+          <Feather name="dollar-sign" size={16} color={colours.darkest_coco} />
+          <Text style={style.taskDetailsText}>{item.price}</Text>
+        </View>
       </View>
       <TouchableOpacity
         onPress={() =>
           navigation.navigate("Business Order Summary", { orderID: item.id })
         }
       >
-        <View style={style.taskInfo}>
-          <Text style={style.cardTitle}>{item.category}</Text>
-          <View style={style.taskDetails}>
-            <Ionicons
-              name="time-outline"
-              size={16}
-              color={colours.darkest_coco}
-            />
-            <Text style={style.taskDetailsText}>{item.time}</Text>
-          </View>
-
-          <View style={style.taskDetails}>
-            <Ionicons
-              name="location-outline"
-              size={16}
-              color={colours.darkest_coco}
-            />
-            <Text style={style.taskDetailsText}>{item.location}</Text>
-          </View>
-
-          <View style={style.taskDetails}>
-            <Feather
-              name="dollar-sign"
-              size={16}
-              color={colours.darkest_coco}
-            />
-            <Text style={style.taskDetailsText}>{item.price}</Text>
-          </View>
-        </View>
+        <Text style={style.viewText}>View Details</Text>
       </TouchableOpacity>
     </View>
   );
 
-  //example structure of order summary
-  // const dummytasks = [
-  //   {
-  //     id: "1",
-  //     category: "Cleaning",
-  //     time: "19 May 2025 | 5.00pm",
-  //     location: "Penang GeorgeTown",
-  //     price: "$35.99",
-  //     icon: "broom",
-  //   },
-  //   {
-  //     id: "2",
-  //     category: "Home Organising",
-  //     time: "19 May 2025 | 5.00pm",
-  //     location: "Penang GeorgeTown",
-  //     price: "$35.99",
-  //     icon: "tshirt-crew",
-  //   },
-  // ];
   return (
     <ImageBackground source={bg} style={style.background}>
       <View style={style.container}>

@@ -177,10 +177,7 @@ export default function OrderSummary({navigation}){
             addScheduleForWorker(currentWorkerId,orderID);
             navigation.goBack();
 
-        // Optional: re-fetch the tasks to refresh the UI
-        // setTasks((prevTasks) =>
-        // prevTasks.filter((task) => task.id !== bookingId)
-        // );
+            
         } catch (err) {
             console.error("Failed to accept booking:", err);
             Alert.alert("Error", "Failed to accept booking.");
