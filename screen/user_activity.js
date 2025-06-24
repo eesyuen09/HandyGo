@@ -12,19 +12,64 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
+import {
+  Ionicons,
+  Feather,
+  MaterialCommunityIcons,
+  MaterialIcons,
+  FontAwesome5,
+  FontAwesome6,
+} from "@expo/vector-icons";
 
-import { colours, styles } from "../components/style_u_activity.js";
+import { colours, style } from "../components/style_u_activity.js";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFonts } from "expo-font";
 
-//extract data from firebase
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../firebaseConfig";
-import { auth, getAuth } from "../firebaseConfig";
-import { getDoc, doc, updateDoc } from "firebase/firestore";
+// //extract data from firebase
+// import { collection, getDocs, query, where } from "firebase/firestore";
+// import { db } from "../firebaseConfig";
+// import { auth, getAuth } from "../firebaseConfig";
+// import { getDoc, doc, updateDoc } from "firebase/firestore";
 
 export default function UserActivity({ navigation }) {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [incompletedTasks, setIncompleteTasks] = useState([]);
+  const getIcon = (serviceType) => {
+    switch (serviceType) {
+      case "Cleaning":
+        return { name: "cleaning-services", family: "MaterialIcons" };
+      case "Repair":
+        return { name: "tool", family: "Feather" };
+      case "Maintenance":
+        return { name: "hands-holding", family: "FontAwesome6" };
+      case "Moving":
+        return { name: "truck-moving", family: "FontAwesome5" };
+      case "Outdoor Services":
+        return { name: "tree", family: "FontAwesome5" };
+      default:
+        return { name: "wrench", family: "MaterialCommunityIcons" };
+    }
+  };
+  const renderIcon = (iconName, iconFamily, color, size) => {
+    switch (iconFamily) {
+      case "MaterialCommunityIcons":
+        return (
+          <MaterialCommunityIcons name={iconName} size={size} color={color} />
+        );
+      case "MaterialIcons":
+        return <MaterialIcons name={iconName} size={size} color={color} />;
+      case "FontAwesome5":
+        return <FontAwesome5 name={iconName} size={size} color={color} />;
+      case "FontAwesome6":
+        return <FontAwesome6 name={iconName} size={size} color={color} />;
+      case "Feather":
+        return <Feather name={iconName} size={size} color={color} />;
+      case "Ionicons":
+        return <Ionicons name={iconName} size={size} color={color} />;
+      default:
+        return <Feather name="alert-circle" size={size} color={color} />;
+    }
+  };
 
   // const fetchTasks = async () => {
   //   const user = auth.currentUser;
@@ -112,8 +157,8 @@ export default function UserActivity({ navigation }) {
         location: "Penang GeorgeTown",
         price: "25.99",
         icon: getIcon("Aircond Servicing"),
-        isCompleted: true,
-        status: "completed",
+        isCompleted: false,
+        status: "cancelled",
       },
       {
         id: "5",
@@ -142,78 +187,76 @@ export default function UserActivity({ navigation }) {
     setIncompleteTasks(incomplete);
   }, []);
 
+  const [fontsLoaded] = useFonts({
+    Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
+    Inter: require("../assets/fonts/Inter-regular.ttf"),
+  });
+
+  if (!fontsLoaded) return null;
+
   const showTask = ({ item }) => (
     <View style={style.card}>
-      <View style={style.taskIconWrap}>
-        <MaterialCommunityIcons
-          name={item.icon}
-          size={30}
-          color={colours.main_coco}
-        />
-      </View>
+      <View style={style.taskRow}>
+        <View style={style.taskIconWrap}>
+          {renderIcon(item.icon.name, item.icon.family, colours.main_coco, 28)}
+        </View>
 
-      <View style={style.taskInfo}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("Business Order Summary", { orderID: item.id })
-          }
-        >
-          <Text style={style.cardTitle}>{item.category}</Text>
-          <View style={style.taskDetails}>
-            <Ionicons
-              name="time-outline"
-              size={16}
-              color={colours.darkest_coco}
-            />
-            <Text style={style.taskDetailsText}>{item.time}</Text>
+        <View style={style.taskContent}>
+          <View style={style.taskInfo}>
+            <Text style={style.cardTitle}>{item.category}</Text>
+            <View style={style.taskDetails}>
+              <Ionicons
+                name="time-outline"
+                size={16}
+                color={colours.light_coco}
+              />
+              <Text style={style.taskDetailsText}>{item.time}</Text>
+            </View>
+            <View style={style.taskDetails}>
+              <FontAwesome6
+                name="location-dot"
+                size={16}
+                color={colours.light_coco}
+              />
+              <Text style={style.taskDetailsText}>{item.location}</Text>
+            </View>
           </View>
 
-          <View style={style.taskDetails}>
-            <Ionicons
-              name="location-outline"
-              size={16}
-              color={colours.darkest_coco}
-            />
-            <Text style={style.taskDetailsText}>{item.location}</Text>
-          </View>
-
-          <View style={style.taskDetails}>
-            <Feather
-              name="dollar-sign"
-              size={16}
-              color={colours.darkest_coco}
-            />
-            <Text style={style.taskDetailsText}>{item.price}</Text>
-          </View>
-
-          <View
-            style={[
-              style.statusBadge,
-              item.status === "scheduled"
-                ? style.statusScheduled
-                : item.status === "failed"
-                ? style.statusFailed
-                : item.status === "completed"
-                ? style.statusCompleted
-                : style.statusPending, // default
-            ]}
-          >
-            <Text
+          <View style={style.taskMeta}>
+            <Text style={style.cardPrice}>${item.price}</Text>
+            <View
               style={[
-                style.statusText,
+                style.statusBadge,
                 item.status === "scheduled"
-                  ? style.textScheduled
+                  ? style.statusScheduled
                   : item.status === "failed"
-                  ? style.textFailed
-                  : item.status === "completed"
-                  ? style.textCompleted
-                  : style.textPending,
+                  ? style.statusFailed
+                  : item.status === "cancelled"
+                  ? style.statusCancelled
+                  : item.status === "pending"
+                  ? style.statusPending
+                  : style.statusCompleted,
               ]}
             >
-              {item.status}
-            </Text>
+              <Text
+                style={[
+                  style.statusText,
+                  item.status === "scheduled"
+                    ? style.textScheduled
+                    : item.status === "failed"
+                    ? style.textFailed
+                    : item.status === "cancelled"
+                    ? style.textCancelled
+                    : item.status === "pending"
+                    ? style.textPending
+                    : style.textCompleted,
+                ]}
+              >
+                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+              </Text>
+            </View>
           </View>
-        </TouchableOpacity>
+        </View>
       </View>
 
       {/* Conditional Buttons */}
@@ -236,22 +279,22 @@ export default function UserActivity({ navigation }) {
             <Text style={style.actionText}>Rebook</Text>
           </TouchableOpacity>
         </View>
-      ) : (
+      ) : item.status === "failed" || item.status === "cancelled" ? (
         <TouchableOpacity onPress={() => navigation.navigate("UserBooking")}>
           <Text style={style.actionText}>Retry Booking</Text>
         </TouchableOpacity>
-      )}
+      ) : null}
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.frame}>
-      <ScrollView contentContainerStyle={styles.container}>
+    <SafeAreaView style={style.frame}>
+      <ScrollView contentContainerStyle={style.container}>
         {/* In Progress Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>In Progress</Text>
+        <View style={style.section}>
+          <Text style={style.sectionTitle}>In Progress</Text>
           {incompletedTasks.length === 0 ? (
-            <Text style={styles.emptyText}>No ongoing bookings</Text>
+            <Text style={style.emptyText}>No ongoing bookings</Text>
           ) : (
             incompletedTasks.map((task) => (
               <View key={task.id}>{showTask({ item: task })}</View>
@@ -260,9 +303,9 @@ export default function UserActivity({ navigation }) {
         </View>
 
         {/* Completed Section */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Recent</Text>
+        <View style={style.section}>
+          <View style={style.sectionHeader}>
+            <Text style={style.sectionTitle}>Recent</Text>
             <TouchableOpacity
               // onPress={() => navigation.navigate("AllReviewsPage")}
               onPress={() =>
@@ -272,12 +315,12 @@ export default function UserActivity({ navigation }) {
                 )
               }
             >
-              <Text style={styles.seeAllText}>See All ➝</Text>
+              <Text style={style.seeAllText}>See All ➝</Text>
             </TouchableOpacity>
           </View>
 
           {completedTasks.length === 0 ? (
-            <Text style={styles.emptyText}>No Completed Bookings yet</Text>
+            <Text style={style.emptyText}>No Completed Bookings yet</Text>
           ) : (
             completedTasks.map((task) => (
               <View key={task.id}>{showTask({ item: task })}</View>

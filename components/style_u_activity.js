@@ -23,7 +23,7 @@ const {
   black,
 } = colours;
 
-export const styles = StyleSheet.create({
+export const style = StyleSheet.create({
   frame: {
     flex: 1,
     backgroundColor: colours.white,
@@ -36,9 +36,11 @@ export const styles = StyleSheet.create({
     marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
+    padding: 16,
     fontWeight: "bold",
     color: colours.main_coco,
+    fontFamily: "Sora",
     marginBottom: 10,
   },
   sectionHeader: {
@@ -51,6 +53,7 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     color: colours.light_coco,
     textDecorationLine: "underline",
+    fontFamily: "Sora",
   },
   emptyText: {
     fontSize: 16,
@@ -61,16 +64,67 @@ export const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: colours.white,
-    padding: 16,
-    marginBottom: 16,
+    paddingLeft: 16,
+    marginBottom: 25,
+  },
+  taskRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+
+  taskMeta: {
+    flexDirection: "column",
+    alignItems: "flex-end",
+    // gap: 15,
+  },
+  taskDetails: {
+    flexDirection: "row",
+    flex: 1,
+    justifyContent: "space-between",
+    alignItems: "flex-end",
+  },
+  taskDetailsText: {
+    marginLeft: 6,
+    fontSize: 14,
+    color: colours.light_coco,
+  },
+  taskIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colours.main_coco,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  viewText: {
+    fontSize: 14,
+    color: colours.main_coco,
+    textDecorationLine: "underline",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: Constants.statusBarHeight + 10,
+    paddingBottom: 10,
+  },
+  backButton: {
+    paddingHorizontal: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: colours.darkest_coco,
   },
   taskIconWrap: {
-    position: "absolute",
-    top: 16,
-    right: 16,
+    position: "relative",
+    // top: 16,
+    // right: 16,
   },
   taskInfo: {
-    paddingRight: 40,
+    position: "relative",
+    marginLeft: 10,
   },
   cardTitle: {
     fontSize: 18,
@@ -78,9 +132,18 @@ export const styles = StyleSheet.create({
     color: colours.darkest_coco,
     marginBottom: 8,
   },
-  taskDetails: {
+  cardPrice: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: colours.darkest_coco,
+    marginBottom: 8,
+    alignSelf: "flex-end",
+  },
+  taskContent: {
+    flex: 1,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
     marginBottom: 4,
   },
   taskDetailsText: {
@@ -93,13 +156,15 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginTop: 12,
     alignItems: "center",
+    // alignSelf: "flex-end",
   },
   statusBadge: {
     borderRadius: 12,
-    paddingHorizontal: 10,
+    // paddingHorizontal: 10,
     paddingVertical: 4,
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "flex-end",
     minWidth: 80,
   },
 
@@ -111,20 +176,26 @@ export const styles = StyleSheet.create({
   },
 
   statusScheduled: {
-    backgroundColor: "#34A853",
+    backgroundColor: "#B5EAC2",
+  },
+  statusPending: {
+    backgroundColor: "#F8E4A1",
   },
   statusFailed: {
-    backgroundColor: "#EB4335",
+    backgroundColor: "#F9C2C2",
   },
   statusCompleted: {
     backgroundColor: "#D1D1F7",
   },
-  statusPending: {
-    backgroundColor: "#E6BA0A",
+  statusCancelled: {
+    backgroundColor: "#E2E2E2",
   },
 
   textScheduled: {
     color: "#399E50",
+  },
+  textPending: {
+    color: "#8A6C13",
   },
   textFailed: {
     color: "#EB3021",
@@ -132,18 +203,22 @@ export const styles = StyleSheet.create({
   textCompleted: {
     color: "#312E81",
   },
-  textPending: {
-    color: "#8A6C13",
+  textCancelled: {
+    color: "#4B5563",
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-evenly",
     marginTop: 12,
+    paddingLeft: 20,
   },
   actionText: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: colours.main_coco,
+    fontSize: 12,
+    // fontWeight: "bold",
+    color: colours.black,
     textDecorationLine: "underline",
+    justifyContent: "flex-end",
+    alignSelf: "center",
+    paddingVertical: 8,
   },
 });
