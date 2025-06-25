@@ -25,11 +25,19 @@ import { colours, style } from "../components/style_u_activity.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 
-// //extract data from firebase
-// import { collection, getDocs, query, where } from "firebase/firestore";
-// import { db } from "../firebaseConfig";
-// import { auth, getAuth } from "../firebaseConfig";
-// import { getDoc, doc, updateDoc } from "firebase/firestore";
+//fetch data from firebase
+import {getAuth} from 'firebase/auth';
+import {
+  getDoc,
+  doc,
+  getDocs,
+  collection,
+  query,
+  where,
+} from "firebase/firestore";
+import { db } from "../firebaseConfig";
+import { FlatList } from "react-native";
+
 
 export default function UserActivity({ navigation }) {
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -71,121 +79,59 @@ export default function UserActivity({ navigation }) {
     }
   };
 
-  // const fetchTasks = async () => {
-  //   const user = auth.currentUser;
-  //   if (!user) return;
+const fetchTasks = async () => {
+  const auth = getAuth();
+  const user = auth.currentUser;
+  if (!user) return;
+  try{
+    const q = query(
+      collection(db, "booking"),
+      where("userId", "==", user.uid)
+    );
+    const querySnapshot = await getDocs(q);
 
-  //   const userRef = doc(db, "users", user.uid);
-  //   const userSnap = await getDoc(userRef);
-  //   if (!userSnap.exists()) return;
+    const completedTasks = [];
+    const incompletedTasks = [];
 
-  //   const userData = userSnap.data();
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
 
-  //   const q = query(
-  //     collection(db, "booking"),
-  //     where("isCompleted", "==", "false"),
-  //     where("userID", "==", user.uid)
-  //   );
-  //   const querySnapshot = await getDocs(q);
+      // Split "YYYY-MM-DD HH:mm" format
+      let date = "N/A", time = "N/A";
+      if (typeof data.availability === "string" && data.availability.includes(" ")) {
+        [date, time] = data.availability.split(" ");
+      }
 
-  //   const completedTasks = [];
-  //   const incompletedTasks = [];
+      const task = {
+        id: data.orderID || docSnap.id,
+        category: data.type || "Unknown",
+        time: `${date} | ${time}`,
+        location: `${data.state || ""}, ${data.postcode || ""}`,
+        price: data.price || "35.99",
+        icon: getIcon(data.type),
+        isCompleted: data.isCompleted || false,
+        status: data.status || "pending",
+      };
 
-  //   querySnapshot.forEach((docSnap) => {
-  //     const data = docSnap.data();
-  //     const task = {
-  //       id: data.orderID || docSnap.id,
-  //       category: data.type || "Unknown",
-  //       time: `${data.availability?.[0]?.date || "N/A"} | ${
-  //         data.availability?.[0]?.time || "N/A"
-  //       }`,
-  //       location: `${data.state || ""}, ${data.postcode || ""}`,
-  //       price: data.price || "35.99",
-  //       icon: getIcon(data.type),
-  //       isCompleted: data.isCompleted || false,
-  //       status: data.status || "Pending",
-  //     };
-
-  //     if (task.isCompleted) {
-  //       completedTasks.push(task);
-  //     } else {
-  //       incompletedTasks.push(task);
-  //     }
-  //   });
-
-  //   setCompletedTasks(completedTasks);
-  //   setIncompleteTasks(incompletedTasks);
-  // };
-
-  useEffect(() => {
-    // Mock data
-    const mockData = [
-      {
-        id: "1",
-        category: "Cleaning",
-        time: "19 May 2025 | 5.00pm",
-        location: "Penang GeorgeTown",
-        price: "35.99",
-        icon: getIcon("Cleaning"),
-        isCompleted: false,
-        status: "pending",
-      },
-      {
-        id: "2",
-        category: "Home Organizing",
-        time: "19 May 2025 | 5.00pm",
-        location: "Penang GeorgeTown",
-        price: "45.99",
-        icon: getIcon("Home Organizing"),
-        isCompleted: false,
-        status: "scheduled",
-      },
-      {
-        id: "3",
-        category: "Home Organizing",
-        time: "19 May 2025 | 5.00pm",
-        location: "Penang GeorgeTown",
-        price: "45.99",
-        icon: getIcon("Home Organizing"),
-        isCompleted: false,
-        status: "failed",
-      },
-      {
-        id: "4",
-        category: "Aircond Servicing",
-        time: "11 May 2025 | 5.00pm",
-        location: "Penang GeorgeTown",
-        price: "25.99",
-        icon: getIcon("Aircond Servicing"),
-        isCompleted: false,
-        status: "cancelled",
-      },
-      {
-        id: "5",
-        category: "Aircond Servicing",
-        time: "11 May 2025 | 5.00pm",
-        location: "Penang GeorgeTown",
-        price: "25.99",
-        icon: getIcon("Aircond Servicing"),
-        isCompleted: true,
-        status: "completed",
-      },
-    ];
-
-    const completed = [];
-    const incomplete = [];
-
-    mockData.forEach((task) => {
       if (task.isCompleted) {
-        completed.push(task);
+        completedTasks.push(task);
       } else {
-        incomplete.push(task);
+        incompletedTasks.push(task);
       }
     });
 
-    setCompletedTasks(completed);
-    setIncompleteTasks(incomplete);
-  }, []);
+    setCompletedTasks(completedTasks);
+    setIncompleteTasks(incompletedTasks);
+  }catch (err){
+    console.error("Failed to fetch Firestore data:", err.message);
+    Alert.alert("Error", "Failed to load your bookings.");
+  }
+};
+  useEffect(() => {
+      fetchTasks();
+    }, []);
+
+
 
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
@@ -195,101 +141,41 @@ export default function UserActivity({ navigation }) {
   if (!fontsLoaded) return null;
 
   const showTask = ({ item }) => (
-    <View style={style.card}>
-      <View style={style.taskRow}>
-        <View style={style.taskIconWrap}>
-          {renderIcon(item.icon.name, item.icon.family, colours.main_coco, 28)}
-        </View>
+  <TouchableOpacity 
+    style={style.card}
+    onPress={() => navigation.navigate('Order Summary', {orderID: item.id})}>
 
-        <View style={style.taskContent}>
-          <View style={style.taskInfo}>
-            <Text style={style.cardTitle}>{item.category}</Text>
-            <View style={style.taskDetails}>
-              <Ionicons
-                name="time-outline"
-                size={16}
-                color={colours.light_coco}
-              />
-              <Text style={style.taskDetailsText}>{item.time}</Text>
-            </View>
-            <View style={style.taskDetails}>
-              <FontAwesome6
-                name="location-dot"
-                size={16}
-                color={colours.light_coco}
-              />
-              <Text style={style.taskDetailsText}>{item.location}</Text>
-            </View>
-          </View>
-
-          <View style={style.taskMeta}>
-            <Text style={style.cardPrice}>${item.price}</Text>
-            <View
-              style={[
-                style.statusBadge,
-                item.status === "scheduled"
-                  ? style.statusScheduled
-                  : item.status === "failed"
-                  ? style.statusFailed
-                  : item.status === "cancelled"
-                  ? style.statusCancelled
-                  : item.status === "pending"
-                  ? style.statusPending
-                  : style.statusCompleted,
-              ]}
-            >
-              <Text
-                style={[
-                  style.statusText,
-                  item.status === "scheduled"
-                    ? style.textScheduled
-                    : item.status === "failed"
-                    ? style.textFailed
-                    : item.status === "cancelled"
-                    ? style.textCancelled
-                    : item.status === "pending"
-                    ? style.textPending
-                    : style.textCompleted,
-                ]}
-              >
-                {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Conditional Buttons */}
-      {item.isCompleted ? (
-        <View style={style.buttonRow}>
-          <TouchableOpacity
-            onPress={
-              () => Alert.alert("Review Task", "please leave a review")
-              // navigation.navigate("ReviewPage", { orderID: item.id })
-            }
-          >
-            <Text style={style.actionText}>Review</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("UserBooking", { prefillData: item })
-            }
-          >
-            <Text style={style.actionText}>Rebook</Text>
-          </TouchableOpacity>
-        </View>
-      ) : item.status === "failed" || item.status === "cancelled" ? (
-        <TouchableOpacity onPress={() => navigation.navigate("UserBooking")}>
-          <Text style={style.actionText}>Retry Booking</Text>
-        </TouchableOpacity>
-      ) : null}
+    <View style={style.taskRow}>
+      {/* icon and text layout here */}
     </View>
-  );
 
-  return (
+    {/* CONDITIONAL BUTTONS placed inside showTask */}
+    {item.isCompleted ? (
+      <View style={style.buttonRow}>
+        <TouchableOpacity
+          onPress={() => Alert.alert("Review Task", "please leave a review")}
+        >
+          <Text style={style.actionText}>Review</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("UserBooking", { prefillData: item })}
+        >
+          <Text style={style.actionText}>Rebook</Text>
+        </TouchableOpacity>
+      </View>
+    ) : item.status === "failed" || item.status === "cancelled" ? (
+      <TouchableOpacity onPress={() => navigation.navigate("UserBooking")}>
+        <Text style={style.actionText}>Retry Booking</Text>
+      </TouchableOpacity>
+    ) : null}
+  </TouchableOpacity>
+);
+
+
+  return ( 
     <SafeAreaView style={style.frame}>
-      <ScrollView contentContainerStyle={style.container}>
+      <View style ={style.container}>
         {/* In Progress Section */}
         <View style={style.section}>
           <Text style={style.bigTitle}>Activity</Text>
@@ -299,9 +185,12 @@ export default function UserActivity({ navigation }) {
           {incompletedTasks.length === 0 ? (
             <Text style={style.emptyText}>No ongoing bookings</Text>
           ) : (
-            incompletedTasks.map((task) => (
-              <View key={task.id}>{showTask({ item: task })}</View>
-            ))
+            <FlatList
+              data = {incompletedTasks}
+              renderItem={showTask}
+              keyExtractor={(task) =>task.id}
+              contentContainerStyle = {{paddingBottom: 100}}
+              />
           )}
         </View>
 
@@ -325,12 +214,16 @@ export default function UserActivity({ navigation }) {
           {completedTasks.length === 0 ? (
             <Text style={style.emptyText}>No Completed Bookings yet</Text>
           ) : (
-            completedTasks.map((task) => (
-              <View key={task.id}>{showTask({ item: task })}</View>
-            ))
+            <FlatList
+              data = {completedTasks}
+              renderItem={showTask}
+              keyExtractor={(task) =>task.id}
+              contentContainerStyle = {{paddingBottom: 100}}
+              />
           )}
         </View>
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
+
