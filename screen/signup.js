@@ -23,10 +23,10 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth } from "../firebaseConfig";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-const db = getFirestore();
-connectFirestoreEmulator(db, "localhost", 8080);
+import { auth,db } from "../firebaseConfig";
+
+
+
 
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);

@@ -1,6 +1,6 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
 import { colours } from "../components/style_loginsignup";
 
 import Biz_homepage from "../screen/biz_homepage";
@@ -31,7 +31,7 @@ export default function workerTabs() {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="Biz_homepage"
         component={Biz_homepage}
         options={{
           tabBarIcon: ({ color }) => (

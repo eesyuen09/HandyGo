@@ -29,7 +29,7 @@ export default function UserTabs() {
       }}
     >
       <Tab.Screen
-        name="Home"
+        name="UserHome"
         component={UserHome}
         options={{
           tabBarIcon: ({ color }) => (

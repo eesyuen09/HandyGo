@@ -39,7 +39,7 @@ import Biz_scheduledTask from "../screen/biz_scheduledtask";
 import ForgotPassword from "../screen/forgotpassword";
 import Biz_ordersummary from "../screen/biz_ordersummary";
 import UserTabs from "./userTabs";
-import workerTabs from "./workerTabs";
+import WorkerTabs from "./workerTabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const stack = createNativeStackNavigator();
@@ -78,7 +78,7 @@ const RootStack = () => {
 
         <Stack.Screen name="Onboard" component={Onboard} />
         <Stack.Screen name="UserTabs" component={UserTabs} />
-        <Stack.Screen name="WorkerTabs" component={workerTabs} />
+        <Stack.Screen name="WorkerTabs" component={WorkerTabs} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="Signup" component={Signup} />

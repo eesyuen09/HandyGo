@@ -7,10 +7,6 @@ import {
   Image,
   ScrollView,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
 import {
   Ionicons,

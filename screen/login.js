@@ -23,11 +23,11 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth } from "../firebaseConfig";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { auth,db } from "../firebaseConfig";
+import { getFirestore } from "firebase/firestore";
 
-const db = getFirestore();
-connectFirestoreEmulator(db, "localhost", 8080);
+
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -53,7 +53,7 @@ export default function Login({ navigation }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === "business") {
-              navigation.navigate("workerTabs");
+              navigation.navigate("WorkerTabs");
             } else {
               navigation.navigate("UserTabs");
             }
@@ -137,7 +137,7 @@ export default function Login({ navigation }) {
                     ) {
                       navigation.navigate("Add Details");
                     } else {
-                      navigation.replace("workerTabs");
+                      navigation.replace("WorkerTabs");
                     }
                   } else if (userData.role == "user") {
                     navigation.replace("UserTabs");
