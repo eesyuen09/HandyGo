@@ -9,18 +9,11 @@ import {
   Alert,
 } from "react-native";
 
-import {
-  Ionicons,
-  Feather,
-  MaterialCommunityIcons,
-  MaterialIcons,
-  FontAwesome5,
-  FontAwesome6,
-} from "@expo/vector-icons";
+import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
-import { useNavigation , useFocusEffect} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { auth, getAuth } from "../firebaseConfig";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -29,9 +22,6 @@ import { services_categories } from "../constants/category_constant";
 //extract data from firebase
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-
-
-
 
 export default function UrgentTask() {
   const navigation = useNavigation();
@@ -43,115 +33,164 @@ export default function UrgentTask() {
 
   if (!fontsLoaded) return null;
 
-  // add search logic
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredTasks, setFilteredTasks] = useState([]);
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchUrgentTasks();
-    },[])
-  );
+  // useEffect(() => {
+  //   const unsubscribe = onAuthStateChanged(
+  //     auth,
+  //     async (user) => {
+  //       if (!user) return;
 
+  //       const fetchUrgentTasks = async () => {
+  //         try {
+  //           const user = auth.currentUser;
+  //           if (!user) return;
 
-    const fetchUrgentTasks = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+  //           //get worker category
+  //           const userRef = doc(db, "users", user.uid);
+  //           const userSnap = await getDoc(userRef);
+  //           if (!userSnap.exists()) return;
 
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) return;
+  //           const userData = userSnap.data();
+  //           const workerCategories = userData.subcategory || [];
+  //           console.log(workerCategories);
+  //           const q = query(
+  //             collection(db, "booking"),
+  //             where("status", "==", "pending")
+  //           ); //, where("urgency", "==", true)
+  //           const querySnapshot = await getDocs(q);
+  //           const formatted = [];
+  //           const auth = getAuth();
 
-      const userData = userSnap.data();
-      const workerCategories = userData.subcategory || [];
+  //           const acceptBooking = async (bookingId, currentWorkerId) => {
+  //             const bookingRef = doc(db, "bookings", bookingId);
 
-      const q = query(collection(db, "booking"), where("status", "==", "pending"),
-        where('urgency', '==', true));
-      const querySnapshot = await getDocs(q);
+  //             await updateDoc(bookingRef, {
+  //               status: "accepted",
+  //               workerId: currentWorkerId,
+  //               acceptedAt: new Date(),
+  //             });
 
-      const formatted = [];
+  //             Alert.alert("Booking accepted!");
+  //           };
 
-      
+  //           querySnapshot.forEach((doc) => {
+  //             const data = doc.data();
+  //             // const avail = data.availability?.[0] || {};
+  //             if (workerCategories.includes(data.type)) {
+  //               formatted.push({
+  //                 id: data.orderID || doc.id,
+  //                 category: data.type || "Unknown",
+  //                 time: `${data.availability.date || "N/A"} | ${
+  //                   data.availability.time || "N/A"
+  //                 }`,
+  //                 location: `${data.state || ""}, ${data.postcode || ""}`,
+  //                 price: data.price,
+  //                 icon: services_categories.find(
+  //                   (category) => category.title === data.type
+  //                 )?.icon,
+  //               });
+  //             }
+  //           });
 
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (workerCategories.includes(data.type)) {
-          const iconData = getIcon(data.serviceType);
-          formatted.push({
-            id: data.orderID || docSnap.id,
-            category: data.type || "Unknown",
-            time: `${data.availability?.[0]?.date || "N/A"} | ${
-              data.availability?.[0]?.time || "N/A"
-            }`,
-            location: `${data.state || ""}, ${data.postcode || ""}`,
-            price: data.price || "35.99",
-            icon: iconData.name,
-            iconFamily: iconData.family,
-          });
-        }
+  //           setTasks(formatted);
+  //         } catch (err) {
+  //           console.error("Error fetching urgent tasks:", err);
+  //         }
+  //         fetchUrgentTasks();
+  //       };
+  //       return () => unsubscribe();
+  //     },
+  //     []
+  //   );
+  // }, []);
+  const acceptBooking = async (bookingId, currentWorkerId) => {
+    try {
+      const bookingRef = doc(db, "booking", bookingId);
+      await updateDoc(bookingRef, {
+        status: "accepted",
+        workerId: currentWorkerId,
+        acceptedAt: new Date(),
       });
 
-      setTasks(formatted);
-      setFilteredTasks(formatted);
-      };
+      Alert.alert("Booking accepted!");
 
-    function handleSearch(text){
-      if(text.trim() === ''){
-        setFilteredTasks(tasks);
-        return;
-      }
-
-      const filtered = tasks.filter((item) =>
-      item.category.toLowerCase().includes(text.toLowerCase()) ||
-      item.location.toLowerCase().includes(text.toLowerCase()) ||
-      item.time.toLowerCase().includes(text.toLowerCase())
+      // Optional: re-fetch the tasks to refresh the UI
+      setTasks((prevTasks) =>
+        prevTasks.filter((task) => task.id !== bookingId)
       );
-      setFilteredTasks(filtered);
-    };
-
-
-  
-  if (!fontsLoaded) return null;
-
-  const getIcon = (serviceType) => {
-      switch (serviceType) {
-        case "Cleaning":
-          return { name: "cleaning-services", family: "MaterialIcons" };
-        case "Repair":
-          return { name: "tool", family: "Feather" };
-        case "Maintenance":
-          return { name: "hands-holding", family: "FontAwesome6" };
-        case "Moving":
-          return { name: "truck-moving", family: "FontAwesome5" };
-        case "Outdoor Services":
-          return { name: "tree", family: "FontAwesome5" };
-        default:
-          return { name: "wrench", family: "MaterialCommunityIcons" };
-      }
-  };
-  const renderIcon = (iconName, iconFamily, color, size) => {
-    switch (iconFamily) {
-      case "MaterialCommunityIcons":
-        return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-      case "MaterialIcons":
-        return <MaterialIcons name={iconName} size={size} color={color} />;
-      case "FontAwesome5":
-        return <FontAwesome5 name={iconName} size={size} color={color} />;
-      case "FontAwesome6":
-        return <FontAwesome6 name={iconName} size={size} color={color} />;
-      case "Feather":
-        return <Feather name={iconName} size={size} color={color} />;
-      case "Ionicons":
-        return <Ionicons name={iconName} size={size} color={color} />;
-      default:
-        return <Feather name="alert-circle" size={size} color={color} />;
+    } catch (err) {
+      console.error("Failed to accept booking:", err);
+      Alert.alert("Error", "Failed to accept booking.");
     }
   };
-  
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+
+      try {
+        // Get the worker's subcategories
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) return;
+
+        const userData = userSnap.data();
+        const workerCategories = userData.subcategory || [];
+
+        const q = query(
+          collection(db, "booking"),
+          where("status", "==", "pending")
+        );
+        const querySnapshot = await getDocs(q);
+
+        const formatted = [];
+
+        querySnapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          if (workerCategories.includes(data.type)) {
+            formatted.push({
+              id: data.orderID || docSnap.id,
+              category: data.type || "Unknown",
+              time: `${data.availability?.[0]?.date || "N/A"} | ${
+                data.availability?.[0]?.time || "N/A"
+              }`,
+              location: `${data.state || ""}, ${data.postcode || ""}`,
+              price: data.price || "35.99",
+              icon: getIcon(data.type),
+            });
+          }
+        });
+
+        setTasks(formatted);
+      } catch (err) {
+        console.error("Error fetching urgent tasks:", err);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+  if (!fontsLoaded) return null;
+
+  const getIcon = (type) => {
+    switch (type) {
+      case "General House Cleaning":
+        return "broom";
+      case "Home Organising":
+        return "tshirt-crew";
+      case "Air Conditioner Repair":
+        return "air-conditioner";
+      default:
+        return "wrench";
+    }
+  };
 
   const showTask = ({ item }) => (
     <View style={style.card}>
       <View style={style.taskIconWrap}>
-        {renderIcon(item.icon,item.iconFamily,colours.main_coco,30)}
+        <MaterialCommunityIcons
+          name={item.icon}
+          size={30}
+          color={colours.main_coco}
+        />
       </View>
 
       <View style={style.taskInfo}>
@@ -180,13 +219,32 @@ export default function UrgentTask() {
         </View>
       </View>
       <TouchableOpacity
-        onPress ={() => navigation.navigate('Business Order Summary', { orderID: item.id })}
+        onPress={() => acceptBooking(item.id, auth.currentUser.uid)}
       >
-        <Text style={style.viewText}>View Details</Text>
+        <Text style={style.viewText}>Accept</Text>
       </TouchableOpacity>
     </View>
   );
 
+  //example structure of order summary
+  // const dummytasks = [
+  //   {
+  //     id: "1",
+  //     category: "Cleaning",
+  //     time: "19 May 2025 | 5.00pm",
+  //     location: "Penang GeorgeTown",
+  //     price: "$35.99",
+  //     icon: "broom",
+  //   },
+  //   {
+  //     id: "2",
+  //     category: "Home Organising",
+  //     time: "19 May 2025 | 5.00pm",
+  //     location: "Penang GeorgeTown",
+  //     price: "$35.99",
+  //     icon: "tshirt-crew",
+  //   },
+  // ];
   return (
     <ImageBackground source={bg} style={style.background}>
       <View style={style.container}>
@@ -211,18 +269,13 @@ export default function UrgentTask() {
             placeholder="Searching for any services?"
             placeholderTextColor={colours.darkest_coco}
             style={style.searchInput}
-            value = { searchQuery }
-            onChangeText = {(text) => {
-              setSearchQuery(text);
-              handleSearch(text);
-            }}
           />
           <Feather name="filter" size={20} color={colours.darkest_coco} />
         </View>
 
         {/* to be amend!!!!!!!!*/}
         <FlatList
-          data={filteredTasks}
+          data={tasks}
           renderItem={showTask}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 100 }}

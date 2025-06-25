@@ -38,9 +38,9 @@ export default function Biz_homepage({ navigation }) {
 
       <TouchableOpacity
         style={style.button}
-        onPress={() => navigation.navigate("Business Scheduled Task")}
+        onPress={() => navigation.navigate("Signup")}
       >
-        <Text style={style.buttonText}>Scheduled Task</Text>
+        <Text style={style.buttonText}>Booking Request</Text>
       </TouchableOpacity>
     </ImageBackground>
   );

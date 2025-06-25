@@ -49,7 +49,7 @@ export default function Login({ navigation }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === "business") {
-              navigation.navigate("MainApp");
+              navigation.navigate("Business Home Page");
             } else {
               navigation.navigate("user_home");
             }
@@ -133,7 +133,7 @@ export default function Login({ navigation }) {
                     ) {
                       navigation.navigate("Add Details");
                     } else {
-                      navigation.navigate("MainApp");
+                      navigation.navigate("Business Home Page");
                     }
                   } else if (userData.role == "user") {
                     navigation.navigate("UserHome");
