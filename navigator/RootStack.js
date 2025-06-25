@@ -115,6 +115,71 @@ function BottomTabs() {
   );
 }
 
+function userBottomTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        tabBarActiveTintColor: colours.darkest_coco,
+        tabBarInactiveTintColor: colours.main_coco,
+        tabBarStyle: {
+          height: 70,
+          paddingBottom: 8,
+          paddingTop: 6,
+          backgroundColor: beige,
+        },
+        headerShown: false,
+      }}
+    >
+      <Tab.Screen
+        name="Home"
+        component={UserHome}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="home" size={24} color={color} />
+          ),
+          tabBarLabel: "",
+        }}
+      />
+      <Tab.Screen
+        name="Activity"
+        component={UserActivity}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="clipboard-edit-outline"
+              size={24}
+              color={color}
+            />
+          ),
+          tabBarLabel: "",
+        }}
+      />
+
+      {/* <Tab.Screen
+        name="Chat"
+        component={Login} // placeholder
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="chatbubble-outline" size={24} color={color} />
+          ),
+          tabBarLabel: "",
+        }} 
+      /> */}
+
+      <Tab.Screen
+        name="Profile"
+        component={Signup} // placeholder
+        options={{
+          tabBarIcon: ({ color }) => (
+            <Feather name="user" size={24} color={color} />
+          ),
+          tabBarLabel: "",
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
 const RootStack = () => {
   return (
     <>
