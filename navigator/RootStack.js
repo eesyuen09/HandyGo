@@ -39,7 +39,7 @@ import Biz_ordersummary from '../screen/biz_ordersummary';
 import Moredetails from '../screen/moredetails';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Biz_activitypage from '../screen/biz_activitypage'
-import AcceptedOrderSummary from '../screen/biz_acceptedos';
+// import AcceptedOrderSummary from '../screen/biz_acceptedos';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -156,7 +156,7 @@ const RootStack = () => {
         <Stack.Screen name = 'Business Scheduled Task' component = {Biz_scheduledTask} />
         <Stack.Screen name = 'Forgot Password' component={ForgotPassword} />
         <Stack.Screen name = 'Business Order Summary' component = {Biz_ordersummary}/>
-        <Stack.Screen name = 'Accepted Order Summary' component={AcceptedOrderSummary}/>
+        {/* <Stack.Screen name = 'Accepted Order Summary' component={AcceptedOrderSummary}/> */}
 
       </Stack.Navigator>
       </>
