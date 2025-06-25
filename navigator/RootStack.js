@@ -1,9 +1,11 @@
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { View, ActivityIndicator } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import React from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
+import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-import { View } from "react-native";
 import {
   FontAwesome5,
   AntDesign,
@@ -16,6 +18,8 @@ import {
 } from "@expo/vector-icons";
 
 import { colours } from "../components/style_loginsignup";
+
+const Stack = createNativeStackNavigator();
 
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
@@ -34,158 +38,19 @@ import Biz_urgentTask from "../screen/biz_urgenttask";
 import Biz_scheduledTask from "../screen/biz_scheduledtask";
 import ForgotPassword from "../screen/forgotpassword";
 import Biz_ordersummary from "../screen/biz_ordersummary";
-// import UserActivity from "../screen/user_activity";
-import Moredetails from "../screen/moredetails";
+import UserTabs from "./userTabs";
+import workerTabs from "./workerTabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const Stack = createNativeStackNavigator();
+const stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-
-function BottomTabs() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: colours.darkest_coco,
-        tabBarInactiveTintColor: colours.main_coco,
-        tabBarStyle: {
-          height: 70,
-          paddingBottom: 8,
-          paddingTop: 6,
-          backgroundColor: beige,
-        },
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen
-        name="Home"
-        component={Biz_homepage}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-      <Tab.Screen
-        name="Activity"
-        component={Biz_activitypage}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="clipboard-edit-outline"
-              size={24}
-              color={color}
-            />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-      <Tab.Screen
-        name="UrgentTask"
-        component={Biz_urgentTask}
-        options={{
-          //options meaning: to customize the tab appearance or behaviour
-          tabBarIcon: ({ color }) => (
-            <FontAwesome5 name="wallet" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-      <Tab.Screen
-        name="Chat"
-        component={Login} // placeholder
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="chatbubble-outline" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-      <Tab.Screen
-        name="Profile"
-        component={Signup} // placeholder
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Feather name="user" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
-
-function userBottomTabs() {
-  return (
-    <Tab.Navigator
-      screenOptions={{
-        tabBarActiveTintColor: colours.darkest_coco,
-        tabBarInactiveTintColor: colours.main_coco,
-        tabBarStyle: {
-          height: 70,
-          paddingBottom: 8,
-          paddingTop: 6,
-          backgroundColor: beige,
-        },
-        headerShown: false,
-      }}
-    >
-      <Tab.Screen
-        name="Home"
-        component={UserHome}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-      <Tab.Screen
-        name="Activity"
-        component={UserActivity}
-        options={{
-          tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons
-              name="clipboard-edit-outline"
-              size={24}
-              color={color}
-            />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-
-      {/* <Tab.Screen
-        name="Chat"
-        component={Login} // placeholder
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="chatbubble-outline" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }} 
-      /> */}
-
-      <Tab.Screen
-        name="Profile"
-        component={Signup} // placeholder
-        options={{
-          tabBarIcon: ({ color }) => (
-            <Feather name="user" size={24} color={color} />
-          ),
-          tabBarLabel: "",
-        }}
-      />
-    </Tab.Navigator>
-  );
-}
 
 const RootStack = () => {
   return (
     <>
       {/* <PrepopulateWorkerMaps/> */}
       <Stack.Navigator
-        initialRouteName="UserActivity"
+        initialRouteName="Onboard"
         screenOptions={{
           //  headerStyle: {
           //   backgroundColor: 'transparent'
@@ -199,11 +64,23 @@ const RootStack = () => {
           headerShown: false,
         }}
       >
-        {/* Main App (after login) */}
-        <Stack.Screen name="MainApp" component={BottomTabs} />
+        {/* {!user ? (
+          <>
+            <Stack.Screen name="Login" component={Login} />
+            <Stack.Screen name="Signup" component={Signup} />
+            
+          </>
+        ) : role === "business" ? (
+          <Stack.Screen name="workerTabs" component={workerTabs} />
+        ) : (
+          <Stack.Screen name="UserTabs" component={UserTabs} />
+        )} */}
 
         <Stack.Screen name="Onboard" component={Onboard} />
+        <Stack.Screen name="UserTabs" component={UserTabs} />
+        <Stack.Screen name="WorkerTabs" component={workerTabs} />
         <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="UserHome" component={UserHome} />
         <Stack.Screen
