@@ -58,7 +58,7 @@ export default function Biz_activitypage({ navigation }) {
 
     return (
         <TouchableOpacity 
-            onPress={() => navigation.navigate('Accepted Order Summary', {
+            onPress={() => navigation.navigate('Business Order Summary', {
                 orderID: item.orderID,
                 userID: auth.currentUser.uid,
             })}
