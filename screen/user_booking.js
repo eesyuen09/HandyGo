@@ -88,6 +88,7 @@ export default function UserBooking() {
         serviceType: serviceType,
         type: subcategory,
         urgency: false,
+        isCompleted: false,
         duration: "",
         availability: [{ date: "", time: "" }],
         state: "",
@@ -131,6 +132,7 @@ export default function UserBooking() {
           notif,
           notes,
           status,
+          isCompleted,
         } = values;
 
         try {
