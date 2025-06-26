@@ -3,33 +3,21 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ScrollView,
   Alert,
-  Switch,
-  KeyboardAvoidingView,
-  Platform,
   ImageBackground,
 } from "react-native";
 import { colours, styles } from "../components/style_u_booking.js";
 //for date time dropdown picker
 import DropDownPicker from "react-native-dropdown-picker";
-
-//Keyboard Avoiding Wrapper
-import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper.js";
 import {
   FontAwesome5,
-  AntDesign,
-  MaterialIcons,
-  Entypo,
-  FontAwesome,
   Feather,
-  FontAwesome6,
   Ionicons,
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, deleteField} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -56,11 +44,12 @@ export default function OrderSummary({navigation}){
     const [booking, setBooking] = useState([]);
     const [openDate, setOpenDate] = useState(false);
     const [selectedTime, setSelectedTime] = useState(null);
-    const [open,setOpen] = useState(false);
-    const [value,setValue] = useState(null);
+    const [isCompleted, setIsCompleted] = useState(false);
 
     const route = useRoute();
-    const { orderID } = route.params;
+    const { orderID, userID } = route.params || {};
+
+    const [bookingData, setBookingData] = useState(null); // reused booking snapshot
     
 
     
@@ -68,10 +57,8 @@ export default function OrderSummary({navigation}){
     //find category with data array
     
     const categoryItem = booking.find(item => item.type === 'category');
-    // console.log('categoryItem:',categoryItem); // { type: 'category', title: 'Plumbing Services', image: '...' }
-
     const bookingDetails = booking.filter(item => item.type !== 'category');
-    console.log(bookingDetails); // array of availability, location, etc.
+
 
     //add schedule as subcollection in workers' firestore
     const addScheduleForWorker = async (workerID, orderID) =>{
@@ -109,11 +96,9 @@ export default function OrderSummary({navigation}){
     };
 
     const renderCard = (item , index, openDate,setOpenDate,selectedTime, setSelectedTime) => {
-        
-
         const isAvailabilityCard = item.type === 'availability';
         //convert availability array to dropdown items
-        const availabilityOptions = isAvailabilityCard ?
+        const availabilityOptions = isAvailabilityCard && Array.isArray(item.content)?
             item.content.map((slot, index) => ({
                 label: `${slot.date} | ${slot.time}`,
                 value: `${slot.date} ${slot.time}`,
@@ -128,42 +113,70 @@ export default function OrderSummary({navigation}){
             </View>
             <View style={style.taskInfo}>
                 <Text style={style.cardTitle}>{item.title}</Text>
-                {isAvailabilityCard ? (
-                    <DropDownPicker
-                        open = {openDate}
-                        value = {selectedTime}
-                        items = {availabilityOptions}
-                        setOpen={setOpenDate}
-                        setValue={setSelectedTime}
-                        setItems ={() =>{}}
-                        placeholder="Select a time slot"
-                        zIndex={1000}
-                        style = {style.dropdownContainer}
-                        textStyle = {style.cardContent}
-                    />
-                ):(
-                    Array.isArray(item.content) ? (
-                        item.content.map((entry, index) => (
-                            typeof entry === 'object' ? (
-                            <Text key={index} style={style.cardContent}>
-                                {entry.date} | {entry.time}
-                            </Text>
-                            ) : (
-                            <Text key={index} style={style.cardContent}>{entry}</Text>
-                            )
-                        ))
-                        ) : (
-                        <Text style={style.cardContent}>{item.content}</Text>
-                        )
-                    )}
+            {isAvailabilityCard && Array.isArray(item.content) && bookingData?.status !== 'accepted' ? (
+                <DropDownPicker
+                    open={openDate}
+                    value={selectedTime}
+                    items={availabilityOptions}
+                    setOpen={setOpenDate}
+                    setValue={setSelectedTime}
+                    setItems={() => {}}
+                    placeholder="Select a time slot"
+                    zIndex={1000}
+                    style={style.dropdownContainer}
+                    textStyle={style.cardContent}
+                />
+                ) : isAvailabilityCard ? (
+                // Show selected time string when accepted
+                <Text style={style.cardContent}>
+                {typeof bookingData?.availability === 'object'
+                    ? `${bookingData.availability.date} | ${bookingData.availability.time}`
+                    : bookingData?.availability || "No time selected"}
+                </Text>
+                ) : (
+                // For non-availability items
+                <Text style={style.cardContent}>{item.content}</Text>
+                )}
 
             </View>
         </View>
         );
     };
+    const changeIsComplete = async (bookingId) => {
+        
+            if(!bookingData) {
+                Alert.alert('Data not ready yet.');
+                return;
+            }
+            if(bookingData.isCompleted){
+                Alert.alert("Error! This booking has already been completed.");
+                return;
+            }
+        try {
+
+            const bookingRef = doc(db, "booking", bookingId);
+            await updateDoc(bookingRef, {
+                isCompleted: true,
+                completedAt: new Date(),
+                });
+
+                Alert.alert("Booking Completed!");
+                navigation.goBack();
+
+            } catch (err) {
+                console.error("Failed to complete booking:", err);
+                Alert.alert("Error", "Failed to complete booking.");
+            }
+            };
+
 
     const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
+        if (!selectedTime) {
+            Alert.alert("Please select a time slot before accepting the booking.");
+            return;
+        }
+
         const bookingRef = doc(db, "booking", bookingId);
 
         //check if current booking data exist
@@ -172,8 +185,6 @@ export default function OrderSummary({navigation}){
             Alert.alert('Error, Booking does not exist.');
             return;
         }
-
-        const bookingData = bookingSnap.data();
 
         if(bookingData.status === 'accepted'){
             Alert.alert("Error! This booking has already been accepted.");
@@ -184,76 +195,45 @@ export default function OrderSummary({navigation}){
             status: "accepted",
             workerId: currentWorkerId,
             acceptedAt: new Date(),
+            availability: selectedTime,
             });
 
             Alert.alert("Booking accepted!");
             addScheduleForWorker(currentWorkerId,orderID);
             navigation.goBack();
-
-        // Optional: re-fetch the tasks to refresh the UI
-        // setTasks((prevTasks) =>
-        // prevTasks.filter((task) => task.id !== bookingId)
-        // );
         } catch (err) {
             console.error("Failed to accept booking:", err);
             Alert.alert("Error", "Failed to accept booking.");
         }
         };
 
-    
+useEffect(() => {
+    const bookingRef = doc(db,'booking', orderID);
 
-    useEffect(() => {
-        const docRef = doc(db, "booking", orderID);
+    const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
+      if (!docSnap.exists()) return;
+      const data = docSnap.data();
 
-        function handleDocUpdate(docSnap) {
-            if(docSnap.exists()) {
-                const data = docSnap.data();
+      setBookingData(data);
+      setIsCompleted(data.isCompleted || false);
 
-                const matched_cat = services_categories.find(cat => cat.title === data.serviceType);
-                console.log('matched_cat',matched_cat);
-                const image = matched_cat?.bannerImage;
+      const matched_cat = services_categories.find((cat) => cat.title === data.serviceType);
+      const image = matched_cat?.bannerImage;
 
-                const formatted = [
-                    {
-                    type: 'category',
-                    title: data.type,
-                    image: image,
-                    },
-                    {
-                    type: 'availability',
-                    icon: 'clock',
-                    title: `${data.duration} hours`,
-                    content: data.availability || [],
-                    },
-                    {
-                    type: 'location',
-                    title: data.state,
-                    icon: 'map-marker-alt',
-                    content: `${data.address || ''}, ${data.postcode || ''}, ${data.state || ''}`,
-                    },
-                    {
-                    type: 'note',
-                    title: data.notes || "No notes",
-                    icon: 'file-alt',
-                    content: 'To be uploaded picture',
-                    },
-                    {
-                    type: 'price',
-                    title: "Price",
-                    icon: 'dollar-sign',
-                    content: `$${data.price || '35.99'}`,
-                    },
-                ];
+      const formatted = [
+        { type: "category", title: data.type, image },
+        { type: "availability", icon: "clock", title: `${data.duration} hours`, content: data.availability || [] },
+        { type: "location", title: data.state, icon: "map-marker-alt", content: `${data.address}, ${data.postcode}, ${data.state}` },
+        { type: "note", title: data.notes || "No notes", icon: "file-alt", content: "To be uploaded picture" },
+        { type: "price", title: "Price", icon: "dollar-sign", content: `$${data.price || "35.99"}` },
+      ];
+      setBooking(formatted);
+ 
+    });
 
-                setBooking(formatted);
-                } else {
-                console.log("Document does not exist");
-            }
-        }
-        const unsubscribe = onSnapshot(docRef,handleDocUpdate);
+    return () => unsubscribe();
+  }, [orderID, userID]);
 
-        return() => unsubscribe();
-    },[orderID]);
     return (
         <ImageBackground source ={BgImage} style = {style.background}>
             <View style = {style.container}>
@@ -276,12 +256,10 @@ export default function OrderSummary({navigation}){
                         style = {style.image} 
                         source= {categoryItem.image}
                         imageStyle = {{ borderRadius: 15}}>
-                    
-                    {categoryItem && (
                         <View style = {style.overlay}>
                             <Text style = {style.overlayTitle}>{categoryItem.title}</Text>
                         </View>
-                    )}
+                    
                     </ImageBackground>
                 </View>
                 )}
@@ -300,17 +278,29 @@ export default function OrderSummary({navigation}){
                 {/* Divider */}
                 <View style={style.line} />
 
+                {!userID && (
                 <TouchableOpacity 
                     style = {style.button}
                     onPress={() => acceptBooking(orderID,auth.currentUser.uid)}>
                     <Text style = {style.buttonText}>Accept Booking</Text>
                 </TouchableOpacity>
+                )}
+                
+                {userID && !isCompleted && (
+                    <TouchableOpacity
+                    style = {style.button}
+                    onPress={() => changeIsComplete(orderID)}
+                >
+                    <Text style = {style.buttonText}>Completed Task</Text>
+                    </TouchableOpacity>
+                )}
 
                 <TouchableOpacity 
                     style = {style.button}
                     onPress={() => navigation.goBack()}>
                     <Text style = {style.buttonText}>Back</Text>
                 </TouchableOpacity>
+                
 
                 </ScrollView>
                 </View>
