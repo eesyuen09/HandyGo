@@ -23,11 +23,8 @@ import {
   signInWithEmailAndPassword,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth,db } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
 import { getFirestore } from "firebase/firestore";
-
-
-
 
 WebBrowser.maybeCompleteAuthSession();
 
