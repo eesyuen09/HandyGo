@@ -1,16 +1,20 @@
-import React, { use, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList,ImageBackground } from 'react-native';
-import CalendarPicker from 'react-native-calendar-picker';
-import { Ionicons } from '@expo/vector-icons';
-import {colours,style} from '../components/style_bizactivitypage';
-import BgImage from '../assets/images/biz_activitypageBG.png';
-import {getDoc, doc, onSnapshot} from 'firebase/firestore';
-import {db, auth} from '../firebaseConfig';
-import { getDocs,collection } from 'firebase/firestore';
-import { useEffect } from 'react';
+import React, { use, useState } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  ImageBackground,
+} from "react-native";
+// import CalendarPicker from 'react-native-calendar-picker';
+import { Ionicons } from "@expo/vector-icons";
+import { colours, style } from "../components/style_bizactivitypage";
+import BgImage from "../assets/images/biz_activitypageBG.png";
+import { getDoc, doc, onSnapshot } from "firebase/firestore";
+import { db, auth } from "../firebaseConfig";
+import { getDocs, collection } from "firebase/firestore";
+import { useEffect } from "react";
 import { useFonts } from "expo-font";
-
-  
 
 const {
   darkest_coco,
@@ -20,7 +24,7 @@ const {
   white,
   yellow_brown,
   black,
-  purple
+  purple,
 } = colours;
 
 export default function Biz_activitypage({ navigation }) {
@@ -38,127 +42,128 @@ export default function Biz_activitypage({ navigation }) {
   if (!fontsLoaded) return null;
 
   const typeColorMap = {
-        'Cleaning': '#fcd6c5',
-        'Home Organising': '#d1a03f',
-        'Air Conditioner Repair': '#a6d1e6',
-        'Plumbing Services': '#b0e0a8',
-        'Moving Services': '#f5c16c',
-    };
+    Cleaning: "#fcd6c5",
+    "Home Organising": "#d1a03f",
+    "Air Conditioner Repair": "#a6d1e6",
+    "Plumbing Services": "#b0e0a8",
+    "Moving Services": "#f5c16c",
+  };
 
-    console.log('grey', colours.grey);
+  console.log("grey", colours.grey);
 
-  const renderUpcomingTask = ({item}) => {
+  const renderUpcomingTask = ({ item }) => {
     const date = new Date(item.time);
-    const formattedDate = date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
+    const formattedDate = date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
     const dotColor = typeColorMap[item.type] || colours.darkest_coco;
 
     return (
-        <TouchableOpacity 
-            onPress={() => navigation.navigate('Business Order Summary', {
-                orderID: item.orderID,
-                userID: auth.currentUser.uid,
-            })}
-            
-            style = {[{backgroundColor: colours.grey},style.card]}>
-        <View style = {{flexDirection: 'row', alignItems: 'center'}}>
-            <View style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: dotColor,
-                marginRight: 10,
-            }} />
-            <View>
-                <Text style = {style.cardTitle}>{item.type}</Text>
-                <Text style = {style.date}>{formattedDate}</Text>
-            </View>  
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate("Business Order Summary", {
+            orderID: item.orderID,
+            userID: auth.currentUser.uid,
+          })
+        }
+        style={[{ backgroundColor: colours.grey }, style.card]}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: dotColor,
+              marginRight: 10,
+            }}
+          />
+          <View>
+            <Text style={style.cardTitle}>{item.type}</Text>
+            <Text style={style.date}>{formattedDate}</Text>
+          </View>
         </View>
-        <Ionicons name = 'chevron-forward' size ={20} color={colours.darkest_coco}/>
-    </TouchableOpacity>
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          color={colours.darkest_coco}
+        />
+      </TouchableOpacity>
     );
   };
 
-  
+  useEffect(() => {
+    const fetchSelectedTasks = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        return;
+      }
 
+      const selectedTasksRef = collection(db, "users", user.uid, "schedules");
+      const selectedTasksSnap = await getDocs(selectedTasksRef);
 
+      const tasksList = [];
+
+      selectedTasksSnap.forEach((docSnap) => {
+        const data = docSnap.data();
+        // console.log('data',data);
+        //add object into tasksList array
+        tasksList.push({
+          orderID: data.orderID,
+          type: data.type,
+          time: data.availability,
+        });
+      });
+      setSelectedTasks(tasksList);
+
+      const marked = [];
+      tasksList.forEach((task) => {
+        const dotColor = typeColorMap[task.type] || colours.darkest_coco;
+        const [dateOnly] = task.time.split(" ");
+        marked.push({
+          date: dateOnly,
+          style: {
+            backgroundColor: dotColor,
+            borderRadius: 20,
+          },
+          textStyle: {
+            color: colours.white,
+          },
+        });
+      });
+      setMarkedDates(marked);
+      console.log("markedDates state updated", marked);
+    };
+    fetchSelectedTasks();
+  }, []);
 
   useEffect(() => {
-    
-    const fetchSelectedTasks = async () => {
-        const user = auth.currentUser;
-        if (!user){return;}
-        
-        const selectedTasksRef = collection(db,'users',user.uid,'schedules');
-        const selectedTasksSnap = await getDocs(selectedTasksRef);
-    
-        const tasksList = [];
+    console.log("State changed - selectedTasks:", selectedTasks);
+  }, [selectedTasks]);
 
-        selectedTasksSnap.forEach((docSnap) => {
-            const data = docSnap.data();
-            // console.log('data',data);
-            //add object into tasksList array
-            tasksList.push({
-                orderID: data.orderID,
-                type : data.type,
-                time : data.availability,
-            
-            });
-        });     
-        setSelectedTasks(tasksList);
-        
-        const marked = [];
-        tasksList.forEach(task => {
-            const dotColor = typeColorMap[task.type] || colours.darkest_coco;
-            const [dateOnly] = task.time.split(" ");
-            marked.push({
-                date: dateOnly,
-                style:{
-                    backgroundColor: dotColor,
-                    borderRadius: 20,
-                },
-                textStyle: {
-                    color: colours.white,
-                },
-            });
-        });
-        setMarkedDates(marked);
-        console.log('markedDates state updated',marked);
-        };
-        fetchSelectedTasks();
-    },[]);
-
-    useEffect(() => {
-        console.log("State changed - selectedTasks:", selectedTasks);
-        }, [selectedTasks]);
-
-        useEffect(() => {
-        console.log("State changed - markedDates:", markedDates);
-        }, [markedDates]);
-    
+  useEffect(() => {
+    console.log("State changed - markedDates:", markedDates);
+  }, [markedDates]);
 
   return (
-    <ImageBackground 
-        style = {style.background}
-        source = {BgImage}
-    >
-        <View style = {style.container}>
-    
-
+    <ImageBackground style={style.background} source={BgImage}>
+      <View style={style.container}>
         {/* Calendar Title */}
-        <View style = {style.headerContainer}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style = {style.backButton}>
-                <Ionicons name = 'chevron-back' size ={24} color ={black}/>
-            </TouchableOpacity>
+        <View style={style.headerContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={style.backButton}
+          >
+            <Ionicons name="chevron-back" size={24} color={black} />
+          </TouchableOpacity>
 
-            <Text style = {style.headerTitle}>Calendar</Text>
-            <View style = {style.backButton}/>
+          <Text style={style.headerTitle}>Calendar</Text>
+          <View style={style.backButton} />
         </View>
 
-        {/* Calendar Component */}
+        {/* Calendar Component
         <View style = {style.calendarContainer}>
             <CalendarPicker
                 onDateChange={setSelectedDate}
@@ -174,17 +179,17 @@ export default function Biz_activitypage({ navigation }) {
                 customDatesStyles = {markedDates}
                 width={360}
             />
-        </View>
+        </View> */}
 
         {/* Upcoming Section */}
-        <Text style = {style.subHeader}>Upcoming</Text>
+        <Text style={style.subHeader}>Upcoming</Text>
 
         <FlatList
-            data= {selectedTasks}
-            keyExtractor={(item) => item.orderID}
-            renderItem={renderUpcomingTask}
+          data={selectedTasks}
+          keyExtractor={(item) => item.orderID}
+          renderItem={renderUpcomingTask}
         />
-        </View>
+      </View>
     </ImageBackground>
-    );
-    }
+  );
+}
