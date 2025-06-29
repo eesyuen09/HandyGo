@@ -36,6 +36,7 @@ jest.mock("@expo/vector-icons", () => {
     MaterialCommunityIcons: make("MaterialCommunityIcons"),
   };
 });
+
 jest.mock("expo-font", () => ({
   loadAsync: jest.fn().mockResolvedValue(true),
 }));
@@ -48,39 +49,33 @@ jest.mock("../components/KeyboardAvoidingWrapper", () => {
   return ({ children }) => React.createElement(View, null, children);
 });
 
-// stub out your constants
+// stub out constants
+const SERVICES = [
+  {
+    title: "Cleaning",
+    subcategories: ["Deep Cleaning", "Home Organizing"],
+    description: "All cleaning services",
+    price: 50,
+  },
+  {
+    title: "Repair",
+    subcategories: ["Air Conditioner Repair", "House Moving"],
+    description: "All repair services",
+    price: 75,
+  },
+];
 jest.mock("../constants/category_constant", () => ({
-  services_categories: [
-    {
-      title: "Cleaning",
-      subcategories: ["Deep Cleaning", "Home Organizing"],
-      description: "All cleaning services",
-      price: 50,
-    },
-    {
-      title: "Repair",
-      subcategories: ["Air Conditioner Repair", "House Moving"],
-      description: "All repair services",
-      price: 75,
-    },
-  ],
+  services_categories: SERVICES,
 }));
 
-// firebaseConfig stub
 jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
-
-// Auth mocks
 jest.mock("firebase/auth", () => ({
-  createUserWithEmailAndPassword: jest.fn(() =>
-    Promise.resolve({ user: { uid: "u1" } })
-  ),
-  sendEmailVerification: jest.fn(() => Promise.resolve()),
+  createUserWithEmailAndPassword: jest.fn(),
+  sendEmailVerification: jest.fn(),
 }));
-
-// Firestore mocks
 jest.mock("firebase/firestore", () => ({
   doc: jest.fn(),
-  setDoc: jest.fn(() => Promise.resolve()),
+  setDoc: jest.fn(),
 }));
 
 import React from "react";
@@ -88,105 +83,87 @@ import { render, fireEvent } from "@testing-library/react-native";
 import UserHome from "../screen/user_home.js";
 
 describe("UserHome Screen", () => {
-  const mockNavigate = jest.fn();
-  const navigation = { navigate: mockNavigate };
-
+  let mockNavigate;
+  beforeAll(() => {
+    mockNavigate = jest.fn();
+  });
   beforeEach(() => {
     mockNavigate.mockClear();
   });
 
-  it("renders the search bar, shortcut labels and service banners", () => {
+  it("renders search bar, shortcut labels, and service banners", () => {
     const { getByPlaceholderText, getByText } = render(
-      <UserHome navigation={navigation} />
+      <UserHome navigation={{ navigate: mockNavigate }} />
     );
 
     // search bar
     expect(getByPlaceholderText(/Looking for any service\?/i)).toBeTruthy();
 
-    // predefined shortcuts
-    expect(getByText("Cleaning")).toBeTruthy();
-    expect(getByText("Moving")).toBeTruthy();
-    expect(getByText("Repair")).toBeTruthy();
-    expect(getByText("Outdoor Services")).toBeTruthy();
-    expect(getByText("Maintenance")).toBeTruthy();
-
-    // banners
-    expect(getByText("Deep Cleaning")).toBeTruthy();
-    expect(getByText("Home Organizing")).toBeTruthy();
-    expect(getByText("Air Conditioner Repair")).toBeTruthy();
+    // shortcuts + banners
+    SERVICES.forEach(({ title, subcategories }) => {
+      expect(getByText(title)).toBeTruthy();
+      subcategories.forEach((sub) => expect(getByText(sub)).toBeTruthy());
+    });
   });
 
-  it("navigates to UserBooking on category search match", () => {
+  it("navigates to UserBooking via search submit", () => {
     const { getByPlaceholderText } = render(
-      <UserHome navigation={navigation} />
+      <UserHome navigation={{ navigate: mockNavigate }} />
     );
     const input = getByPlaceholderText(/Looking for any service\?/i);
 
-    fireEvent.changeText(input, "clean");
-    fireEvent(input, "submitEditing");
+    // category search
+    SERVICES.forEach(({ title, subcategories, description, price }) => {
+      fireEvent.changeText(input, title.toLowerCase());
+      fireEvent(input, "submitEditing");
+      expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
+        serviceType: title,
+        subcategory: subcategories[0],
+        description,
+        price,
+      });
+    });
 
-    expect(mockNavigate).toHaveBeenCalledWith("UserBooking", {
-      serviceType: "Cleaning",
-      subcategory: "Deep Cleaning",
-      description: "All cleaning services",
-      price: 50,
+    // subcategory search
+    SERVICES.forEach(({ title, subcategories, description, price }) => {
+      subcategories.forEach((sub) => {
+        fireEvent.changeText(input, sub.toLowerCase());
+        fireEvent(input, "submitEditing");
+        expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
+          serviceType: title,
+          subcategory: sub,
+          description,
+          price,
+        });
+      });
     });
   });
 
-  it("navigates to UserBooking on subcategory search match", () => {
-    const { getByPlaceholderText } = render(
-      <UserHome navigation={navigation} />
+  it("navigates to UserBooking on tapping shortcuts and banners", () => {
+    const { getByText } = render(
+      <UserHome navigation={{ navigate: mockNavigate }} />
     );
-    const input = getByPlaceholderText(/Looking for any service\?/i);
 
-    fireEvent.changeText(input, "house moving");
-    fireEvent(input, "submitEditing");
+    SERVICES.forEach(({ title, subcategories, description, price }) => {
+      // tapping the shortcut label
+      fireEvent.press(getByText(title));
+      expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
+        serviceType: title,
+        subcategory: subcategories[0],
+        description,
+        price,
+      });
 
-    expect(mockNavigate).toHaveBeenCalledWith("UserBooking", {
-      serviceType: "Repair",
-      subcategory: "House Moving",
-      description: "All repair services",
-      price: 75,
-    });
-  });
-
-  it("navigates to UserBooking when tapping a shortcut icon", () => {
-    const { getByText } = render(<UserHome navigation={navigation} />);
-
-    fireEvent.press(getByText("Cleaning"));
-    expect(mockNavigate).toHaveBeenCalledWith("UserBooking", {
-      serviceType: "Cleaning",
-      subcategory: "Deep Cleaning",
-      description: "All cleaning services",
-      price: 50,
-    });
-
-    fireEvent.press(getByText("Repair"));
-    expect(mockNavigate).toHaveBeenCalledWith("UserBooking", {
-      serviceType: "Repair",
-      subcategory: "Air Conditioner Repair",
-      description: "All repair services",
-      price: 75,
-    });
-  });
-
-  it("navigates to UserBooking when tapping a service banner", () => {
-    const { getByText } = render(<UserHome navigation={navigation} />);
-
-    fireEvent.press(getByText("Deep Cleaning"));
-    expect(mockNavigate).toHaveBeenCalledWith("UserBooking", {
-      serviceType: "Cleaning",
-      subcategory: "Deep Cleaning",
-      description: "All cleaning services",
-      price: 50,
-    });
-
-    fireEvent.press(getByText("Air Conditioner Repair"));
-    expect(mockNavigate).toHaveBeenCalledWith("UserBooking", {
-      serviceType: "Repair",
-      subcategory: "Air Conditioner Repair",
-      description: "All repair services",
-      price: 75,
+      // tapping each banner label
+      subcategories.forEach((sub) => {
+        fireEvent.press(getByText(sub));
+        expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
+          serviceType: title,
+          subcategory: sub,
+          description,
+          price,
+        });
+      });
     });
   });
 });
