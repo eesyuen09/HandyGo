@@ -2,9 +2,12 @@
  * @jest-environment jsdom
  */
 jest.mock("@react-native-community/datetimepicker", () => {
-  // Immediately invoke onChange so dob is set before submit
+  const React = require("react");
+  // defer calling onChange until *after* the first render
   return (props) => {
-    props.onChange(null, new Date(2000, 0, 1));
+    React.useEffect(() => {
+      props.onChange(null, new Date(2000, 0, 1));
+    }, []);
     return null;
   };
 });
