@@ -38,42 +38,42 @@ import { FlatList } from "react-native";
 export default function UserActivity({ navigation }) {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [incompletedTasks, setIncompleteTasks] = useState([]);
-  const getIcon = (serviceType) => {
-    switch (serviceType) {
-      case "Cleaning":
-        return { name: "cleaning-services", family: "MaterialIcons" };
-      case "Repair":
-        return { name: "tool", family: "Feather" };
-      case "Maintenance":
-        return { name: "hands-holding", family: "FontAwesome6" };
-      case "Moving":
-        return { name: "truck-moving", family: "FontAwesome5" };
-      case "Outdoor Services":
-        return { name: "tree", family: "FontAwesome5" };
-      default:
-        return { name: "wrench", family: "MaterialCommunityIcons" };
-    }
-  };
-  const renderIcon = (iconName, iconFamily, color, size) => {
-    switch (iconFamily) {
-      case "MaterialCommunityIcons":
-        return (
-          <MaterialCommunityIcons name={iconName} size={size} color={color} />
-        );
-      case "MaterialIcons":
-        return <MaterialIcons name={iconName} size={size} color={color} />;
-      case "FontAwesome5":
-        return <FontAwesome5 name={iconName} size={size} color={color} />;
-      case "FontAwesome6":
-        return <FontAwesome6 name={iconName} size={size} color={color} />;
-      case "Feather":
-        return <Feather name={iconName} size={size} color={color} />;
-      case "Ionicons":
-        return <Ionicons name={iconName} size={size} color={color} />;
-      default:
-        return <Feather name="alert-circle" size={size} color={color} />;
-    }
-  };
+    const getIcon = (serviceType) => {
+      switch (serviceType) {
+        case "Cleaning":
+          return { name: "cleaning-services", family: "MaterialIcons" };
+        case "Repair":
+          return { name: "tool", family: "Feather" };
+        case "Maintenance":
+          return { name: "hands-holding", family: "FontAwesome6" };
+        case "Moving":
+          return { name: "truck-moving", family: "FontAwesome5" };
+        case "Outdoor Services":
+          return { name: "tree", family: "FontAwesome5" };
+        default:
+          return { name: "wrench", family: "MaterialCommunityIcons" };
+      }
+    };
+    const renderIcon = (iconName, iconFamily, color, size) => {
+      switch (iconFamily) {
+        case "MaterialCommunityIcons":
+          return (
+            <MaterialCommunityIcons name={iconName} size={size} color={color} />
+          );
+        case "MaterialIcons":
+          return <MaterialIcons name={iconName} size={size} color={color} />;
+        case "FontAwesome5":
+          return <FontAwesome5 name={iconName} size={size} color={color} />;
+        case "FontAwesome6":
+          return <FontAwesome6 name={iconName} size={size} color={color} />;
+        case "Feather":
+          return <Feather name={iconName} size={size} color={color} />;
+        case "Ionicons":
+          return <Ionicons name={iconName} size={size} color={color} />;
+        default:
+          return <Feather name="alert-circle" size={size} color={color} />;
+      }
+    };
 
 const fetchTasks = async () => {
   const auth = getAuth();
@@ -104,13 +104,15 @@ const fetchTasks = async () => {
         time: `${date} | ${time}`,
         location: `${data.state || ""}, ${data.postcode || ""}`,
         price: data.price || "35.99",
-        icon: getIcon(data.type),
+        icon: getIcon(data.serviceType).name,
+        iconFamily: getIcon(data.serviceType).family,
         isCompleted: data.isCompleted || false,
         status: data.status || "pending",
       };
 
       if (task.isCompleted) {
         completedTasks.push(task);
+        console.log(completedTasks);
       } else {
         incompletedTasks.push(task);
       }
@@ -118,6 +120,7 @@ const fetchTasks = async () => {
 
     setCompletedTasks(completedTasks);
     setIncompleteTasks(incompletedTasks);
+    console.log('completedtask',completedTasks);
   }catch (err){
     console.error("Failed to fetch Firestore data:", err.message);
     Alert.alert("Error", "Failed to load your bookings.");
@@ -142,32 +145,87 @@ const fetchTasks = async () => {
     onPress={() => navigation.navigate('Order Summary', {orderID: item.id})}>
 
     <View style={style.taskRow}>
-      {/* icon and text layout here */}
-    </View>
+      <View style = {style.taskIconWrap}>
+
+        {renderIcon(item.icon, item.iconFamily,colours.main_coco,24)}
+      
+      </View>
+      <View style = {style.taskInfo}>
+          <Text style = {style.cardTitle}>{item.category}</Text>
+          <Text style = {style.taskDetailsText}>{item.time}</Text>
+          <Text style = {style.taskDetailsText}>{item.location}</Text>
+      </View>
 
     {/* CONDITIONAL BUTTONS placed inside showTask */}
-    {item.isCompleted ? (
+    {/* Price */}
+      <View style={style.taskMeta}>
+        <Text style={style.cardPrice}>${item.price}</Text>
+      </View>
+    </View>
+
+     {/* Status Row */}
+    {!item.isCompleted && (
+      <View style={style.statusRow}>
+        <View
+          style={[
+            style.statusBadge,
+            item.status === "pending"
+              ? style.statusPending
+              : item.status === "confirmed"
+              ? style.statusScheduled
+              : style.statusFailed,
+          ]}
+        >
+          <Text
+            style={[
+              style.statusText,
+              item.status === "pending"
+                ? style.textPending
+                : item.status === "confirmed" || item.status === "scheduled"
+                ? style.textScheduled
+                :item.status === 'cancelled'
+                ? style.textCancelled
+                : style.textFailed,
+            ]}
+          >
+            {item.status === "pending"
+              ? "Pending"
+              : item.status === "confirmed" || item.status === "scheduled"
+              ? "Confirmed"
+              :item.status === 'cancelled'
+              ? 'Cancelled'
+              : "Failed"}
+          </Text>
+        </View>
+
+        {item.status === "failed" && (
+          <TouchableOpacity onPress={() => navigation.navigate("UserBooking")}>
+            <Text style={style.viewText}>Retry Booking</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    )}
+
+    {/* Completed Task Actions */}
+    {item.isCompleted && (
       <View style={style.buttonRow}>
         <TouchableOpacity
-          onPress={() => Alert.alert("Review Task", "please leave a review")}
+          onPress={() => Alert.alert("Review Task", "Please leave a review")}
         >
-          <Text style={style.actionText}>Review</Text>
+          <Text style={style.actionText}>👍 Review</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => navigation.navigate("UserBooking", { prefillData: item })}
+          onPress={() =>
+            navigation.navigate("UserBooking", { prefillData: item })
+          }
         >
-          <Text style={style.actionText}>Rebook</Text>
+          <Text style={style.actionText}>🔁 Rebook</Text>
         </TouchableOpacity>
       </View>
-    ) : item.status === "failed" || item.status === "cancelled" ? (
-      <TouchableOpacity onPress={() => navigation.navigate("UserBooking")}>
-        <Text style={style.actionText}>Retry Booking</Text>
-      </TouchableOpacity>
-    ) : null}
+    )}
   </TouchableOpacity>
 );
-
 
   return ( 
     <SafeAreaView style={style.frame}>

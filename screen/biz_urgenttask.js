@@ -178,7 +178,7 @@ export default function UrgentTask() {
       </View>
       <TouchableOpacity
         onPress={() =>
-          navigation.navigate("Business Order Summary", { orderID: item.id })
+          navigation.navigate("Order Summary", { orderID: item.id })
         }
       >
         <Text style={style.viewText}>View Details</Text>

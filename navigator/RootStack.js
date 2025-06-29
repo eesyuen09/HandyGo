@@ -126,7 +126,7 @@ const RootStack = () => {
         />
         <Stack.Screen name="Forgot Password" component={ForgotPassword} />
         <Stack.Screen
-          name="Business Order Summary"
+          name="Order Summary"
           component={Biz_ordersummary}
         />
       </Stack.Navigator>
