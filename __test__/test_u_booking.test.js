@@ -6,7 +6,7 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert, Text } from "react-native";
 
-// 1) Mock react-navigation’s useRoute to supply our params
+// Mock react-navigation’s useRoute to supply params
 jest.mock("@react-navigation/native", () => ({
   useRoute: () => ({
     params: {
@@ -18,7 +18,6 @@ jest.mock("@react-navigation/native", () => ({
   }),
 }));
 
-// 2) Stub out your style module so it doesn’t crash on import
 jest.mock("../components/style_u_booking.js", () => ({
   colours: {},
   styles: {},
@@ -28,14 +27,12 @@ jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
 
-// 3) Stub KeyboardAvoidingWrapper
 jest.mock("../components/KeyboardAvoidingWrapper.js", () => {
   const React = require("react");
   const { View } = require("react-native");
   return ({ children }) => React.createElement(View, null, children);
 });
 
-// 4) Stub the icon library
 jest.mock("@expo/vector-icons", () => {
   const React = require("react");
   const { Text } = require("react-native");
@@ -51,14 +48,11 @@ jest.mock("@expo/vector-icons", () => {
   };
 });
 
-// 5) Stub pickers & date‐time
 jest.mock("react-native-dropdown-picker", () => "DropDownPicker");
 jest.mock("@react-native-community/datetimepicker", () => "DateTimePicker");
 
-// firebaseConfig stub
 jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
 
-// Auth mocks
 jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(() => ({ currentUser: { uid: "u1" } })),
   onAuthStateChanged: jest.fn((auth, cb) => {
@@ -67,24 +61,21 @@ jest.mock("firebase/auth", () => ({
   }),
 }));
 
-// Firestore mocks
 jest.mock("firebase/firestore", () => ({
   addDoc: jest.fn(() => Promise.resolve({ id: "fakeId" })),
   collection: jest.fn(),
   setDoc: jest.fn(() => Promise.resolve()),
 }));
 
-// 7) Spy on Alert.alert
 Alert.alert = jest.fn();
 
-// 8) Bring in the component + its helpers
 import UserBooking, {
   calculateEndTime,
   handleBookingSubmit,
 } from "../screen/user_booking.js";
 
 describe("UserBooking Screen", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     Alert.alert.mockClear();
   });
 
