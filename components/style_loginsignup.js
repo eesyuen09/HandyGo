@@ -132,6 +132,12 @@ export const globalStyles = StyleSheet.create({
     fontFamily: "Inter",
   },
 
+  rightIconRow: {
+    marginLeft: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   // Google Sign In Button Content
   googleButtonContent: {
     flexDirection: "row",
@@ -157,13 +163,8 @@ export const globalStyles = StyleSheet.create({
   },
 
   forgotPasswordLink: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 20,
     paddingVertical: 5,
-
   },
-
-  
-
-
 });

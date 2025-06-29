@@ -9,6 +9,11 @@ jest.mock("expo-status-bar", () => ({
   StatusBar: () => null,
 }));
 
+jest.mock("expo-constants", () => ({
+  manifest: {},
+  statusBarHeight: 0,
+}));
+
 // 2) Mock @expo/vector-icons
 jest.mock("@expo/vector-icons", () => {
   const React = require("react");

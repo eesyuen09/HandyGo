@@ -3,6 +3,8 @@ module.exports = {
   preset: "jest-expo",
   testEnvironment: "jsdom",
 
+  setupFilesAfterEnv: ["@testing-library/jest-native/extend-expect"],
+
   // Transpile your JS/TS files via babel-jest
   transform: {
     "^.+\\.(js|jsx|ts|tsx)$": "babel-jest",
