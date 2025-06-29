@@ -90,6 +90,14 @@ export const styles = StyleSheet.create({
     fontFamily: "Sora",
   },
 
+  backButton: {
+    width: 22,
+    height: 22,
+    marginTop: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
   bannerPrice: {
     color: "white",
     fontSize: 14,

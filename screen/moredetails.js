@@ -34,8 +34,8 @@ import { useNavigation } from "@react-navigation/native";
 
 // route: contain parameters passed from the previous screen
 export default function Moredetails({ navigation }) {
-  const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
-    colours;
+  // const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
+  //   colours;
 
   useEffect(() => {
     const checkIfDetailsExist = async () => {
