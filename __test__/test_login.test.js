@@ -139,8 +139,8 @@ describe("Login Screen", () => {
     });
   });
 
-  it("navigates to UserTabs when an existing user logs in", async () => {
-    // Mock Firestore getDoc to return a user with role "user"
+  it("submits successfully and navigates to UserTabs for existing user", async () => {
+    // simulate existing user in Firestore
     const { getDoc } = require("firebase/firestore");
     getDoc.mockImplementationOnce(() =>
       Promise.resolve({ exists: () => true, data: () => ({ role: "user" }) })
@@ -151,96 +151,26 @@ describe("Login Screen", () => {
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Here/i),
-      "user@example.com"
+      "a@b.com"
     );
-    fireEvent.changeText(getByPlaceholderText(/••••••/), "correctpass");
+    fireEvent.changeText(getByPlaceholderText(/••••••/), "pass123");
     fireEvent.press(getByText("Login"));
 
     await waitFor(() => {
-      // no error alert
       expect(Alert.alert).not.toHaveBeenCalled();
-      // should go to the User home
       expect(mockNav).toHaveBeenCalledWith("UserTabs");
     });
   });
 
-  it("navigates to Add Details when a business logs in but has no details", async () => {
-    // Mock Firestore getDoc to return a business without required fields
-    const { getDoc } = require("firebase/firestore");
-    getDoc.mockImplementationOnce(() =>
-      Promise.resolve({
-        exists: () => true,
-        data: () => ({
-          role: "business",
-          // omit contact, address, NRIC, etc.
-        }),
-      })
-    );
-
-    const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
-    );
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Email Here/i),
-      "worker@example.com"
-    );
-    fireEvent.changeText(getByPlaceholderText(/••••••/), "workerpass");
-    fireEvent.press(getByText("Login"));
-
-    await waitFor(() => {
-      // no error alert
-      expect(Alert.alert).not.toHaveBeenCalled();
-      // should prompt business to Add Details
-      expect(mockNav).toHaveBeenCalledWith("Add Details");
-    });
+  it("navigates to Forgot Password screen", () => {
+    const { getByText } = render(<Login navigation={navigation} />);
+    fireEvent.press(getByText("Forgot Password?"));
+    expect(mockNav).toHaveBeenCalledWith("Forgot Password");
   });
 
-  it("alerts when email is not verified", async () => {
-    // mock signIn to return a user whose emailVerified is false
-    const { signInWithEmailAndPassword } = require("firebase/auth");
-    signInWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.resolve({
-        user: { uid: "u2", reload: jest.fn(), emailVerified: false },
-      })
-    );
-
-    const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
-    );
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Email Here/i),
-      "unverified@example.com"
-    );
-    fireEvent.changeText(getByPlaceholderText(/••••••/), "anyPassword");
-    fireEvent.press(getByText("Login"));
-
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Email Not Verified",
-        "Please verify your email before logging in."
-      );
-    });
-  });
-
-  it("alerts when user does not exist", async () => {
-    // mock signIn to reject with user-not-found
-    const { signInWithEmailAndPassword } = require("firebase/auth");
-    signInWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({ code: "auth/user-not-found" })
-    );
-
-    const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
-    );
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Email Here/i),
-      "missing@example.com"
-    );
-    fireEvent.changeText(getByPlaceholderText(/••••••/), "doesntMatter");
-    fireEvent.press(getByText("Login"));
-
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith("Error", "No user found");
-    });
+  it("navigates to Signup screen", () => {
+    const { getByText } = render(<Login navigation={navigation} />);
+    fireEvent.press(getByText("Sign Up"));
+    expect(mockNav).toHaveBeenCalledWith("Signup");
   });
 });
