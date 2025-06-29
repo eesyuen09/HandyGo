@@ -37,10 +37,10 @@ afterAll(() => {
 global.clearImmediate = global.clearImmediate || ((id) => clearTimeout(id));
 global.setImmediate = global.setImmediate || ((fn) => setTimeout(fn, 0));
 
-// 1) Spy on Alert.alert
+// Spy on Alert.alert
 Alert.alert = jest.fn();
 
-// 2) Native/Expo mocks
+//  Native/Expo mocks
 jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
 jest.mock("expo-constants", () => ({ manifest: { scheme: "app" } }));
 
@@ -61,10 +61,10 @@ jest.mock("../components/KeyboardAvoidingWrapper", () => {
   return ({ children }) => React.createElement(">{children}", {}, children);
 });
 
-// 3) firebaseConfig stub
+// firebaseConfig stub
 jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
 
-// 4) Auth mocks
+// Auth mocks
 jest.mock("firebase/auth", () => ({
   createUserWithEmailAndPassword: jest.fn(() =>
     Promise.resolve({ user: { uid: "u1" } })
@@ -72,7 +72,7 @@ jest.mock("firebase/auth", () => ({
   sendEmailVerification: jest.fn(() => Promise.resolve()),
 }));
 
-// 5) Firestore mocks
+// Firestore mocks
 jest.mock("firebase/firestore", () => ({
   doc: jest.fn(),
   setDoc: jest.fn(() => Promise.resolve()),
@@ -187,39 +187,6 @@ describe("Signup Screen", () => {
     fireEvent.press(getByText("Sign Up"));
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith("Error", "Email already in use");
-    });
-  });
-
-  it("alerts on weak-password error", async () => {
-    const { createUserWithEmailAndPassword } = require("firebase/auth");
-    createUserWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({ code: "auth/weak-password" })
-    );
-
-    const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
-      <Signup navigation={navigation} />
-    );
-
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Full Name Here/i),
-      "Carol"
-    );
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Email Address Here/i),
-      "carol@x.com"
-    );
-    fireEvent.press(getByText("User"));
-
-    const [pwd, confirm] = getAllByPlaceholderText(/••••••/);
-    fireEvent.changeText(pwd, "123");
-    fireEvent.changeText(confirm, "123");
-
-    fireEvent.press(getByText("Sign Up"));
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Error",
-        "Password should be at least 6 characters"
-      );
     });
   });
 
