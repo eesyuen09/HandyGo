@@ -59,7 +59,7 @@ const SERVICES = [
   },
   {
     title: "Repair",
-    subcategories: ["Air Conditioner Repair", "House Moving"],
+    subcategories: ["Air Conditioner Repair", "Plumbing Services"],
     description: "All repair services",
     price: 75,
   },
