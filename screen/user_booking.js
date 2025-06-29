@@ -52,6 +52,7 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
+export { calculateEndTime, handleBookingSubmit };
 export default function UserBooking() {
   const route = useRoute();
   const { serviceType, subcategory, description, price } = route.params || {};
