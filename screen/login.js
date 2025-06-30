@@ -49,9 +49,9 @@ export default function Login({ navigation }) {
           if (userDoc.exists()) {
             const userData = userDoc.data();
             if (userData.role === "business") {
-              navigation.navigate("MainApp");
+              navigation.navigate("WorkerTabs");
             } else {
-              navigation.navigate("user_home");
+              navigation.navigate("UserTabs");
             }
           } else {
             // First-time Google login — ask role or default
@@ -62,7 +62,7 @@ export default function Login({ navigation }) {
               role: "user", // or ask user for role
               createdAt: new Date().toISOString(),
             });
-            navigation.navigate("user_home");
+            navigation.navigate("UserTabs");
           }
         })
         .catch((error) => {
@@ -133,10 +133,10 @@ export default function Login({ navigation }) {
                     ) {
                       navigation.navigate("Add Details");
                     } else {
-                      navigation.navigate("MainApp");
+                      navigation.navigate("WorkerTabs");
                     }
                   } else if (userData.role == "user") {
-                    navigation.navigate("UserHome");
+                    navigation.navigate("UserTabs");
                   } else {
                     Alert.alert("Error", "No role assigned");
                   }

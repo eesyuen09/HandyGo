@@ -63,7 +63,7 @@ export default function Biz_activitypage({ navigation }) {
     return (
       <TouchableOpacity
         onPress={() =>
-          navigation.navigate("Business Order Summary", {
+          navigation.navigate("Order Summary", {
             orderID: item.orderID,
             userID: auth.currentUser.uid,
           })
@@ -116,6 +116,8 @@ export default function Biz_activitypage({ navigation }) {
           time: data.availability,
         });
       });
+      tasksList.sort((a, b) => new Date(a.time) - new Date(b.time));
+      
       setSelectedTasks(tasksList);
 
       const marked = [];
