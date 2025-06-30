@@ -21,6 +21,7 @@ import { colours, style } from "../components/style_u_activity.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 
+
 //fetch data from firebase
 import {getAuth} from 'firebase/auth';
 import {
@@ -229,7 +230,7 @@ const fetchTasks = async () => {
 
   return ( 
     <SafeAreaView style={style.frame}>
-      <View style ={style.container}>
+      <ScrollView contentContainerStyle ={style.container}>
         {/* In Progress Section */}
         <View style={style.section}>
           <Text style={style.bigTitle}>Activity</Text>
@@ -244,6 +245,8 @@ const fetchTasks = async () => {
               renderItem={showTask}
               keyExtractor={(task) =>task.id}
               contentContainerStyle = {{paddingBottom: 100}}
+              scrollEnabled = {false}
+              
               />
           )}
         </View>
@@ -273,10 +276,11 @@ const fetchTasks = async () => {
               renderItem={showTask}
               keyExtractor={(task) =>task.id}
               contentContainerStyle = {{paddingBottom: 100}}
+              scrollEnabled={false}
               />
           )}
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

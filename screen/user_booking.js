@@ -698,3 +698,5 @@ export default function UserBooking() {
     </Formik>
   );
 }
+
+export { calculateEndTime, handleBookingSubmit };
