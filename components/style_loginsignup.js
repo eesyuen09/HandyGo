@@ -157,13 +157,8 @@ export const globalStyles = StyleSheet.create({
   },
 
   forgotPasswordLink: {
-    alignSelf: 'flex-end',
+    alignSelf: "flex-end",
     marginBottom: 20,
     paddingVertical: 5,
-
   },
-
-  
-
-
 });

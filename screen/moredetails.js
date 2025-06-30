@@ -60,7 +60,7 @@ export default function Moredetails({ navigation }) {
           data.introduction;
 
         if (hasAllDetails) {
-          navigation.replace("Business Dashboard");
+          navigation.replace("WorkerTabs");
         }
       }
     };
