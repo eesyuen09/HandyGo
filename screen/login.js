@@ -30,47 +30,47 @@ WebBrowser.maybeCompleteAuthSession();
 export default function Login({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
   const { white, grey } = colours;
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    clientId:
-      "158473300904-4qg6m53aic6gtp2ttjlcg19b0rihshhi.apps.googleusercontent.com",
-  });
+  // const [request, response, promptAsync] = Google.useAuthRequest({
+  //   clientId:
+  //     "276468670800-gp4f3t3quuvlkri3fr6tcl0dhn6qbntk.apps.googleusercontent.com",
+  // });
 
-  useEffect(() => {
-    if (response?.type === "success") {
-      const { id_token } = response.params;
-      const credential = GoogleAuthProvider.credential(id_token);
+  // useEffect(() => {
+  //   if (response?.type === "success") {
+  //     const { id_token } = response.params;
+  //     const credential = GoogleAuthProvider.credential(id_token);
 
-      signInWithCredential(auth, credential)
-        .then(async (userCredential) => {
-          const user = userCredential.user;
-          const userDocRef = doc(db, "users", user.uid);
-          const userDoc = await getDoc(userDocRef);
+  //     signInWithCredential(auth, credential)
+  //       .then(async (userCredential) => {
+  //         const user = userCredential.user;
+  //         const userDocRef = doc(db, "users", user.uid);
+  //         const userDoc = await getDoc(userDocRef);
 
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            if (userData.role === "business") {
-              navigation.navigate("WorkerTabs");
-            } else {
-              navigation.navigate("UserTabs");
-            }
-          } else {
-            // First-time Google login — ask role or default
-            await setDoc(userDocRef, {
-              uid: user.uid,
-              email: user.email,
-              fullName: user.displayName,
-              role: "user", // or ask user for role
-              createdAt: new Date().toISOString(),
-            });
-            navigation.navigate("UserTabs");
-          }
-        })
-        .catch((error) => {
-          console.error("Firebase login error:", error);
-          Alert.alert("Login Error", error.message);
-        });
-    }
-  }, [response]);
+  //         if (userDoc.exists()) {
+  //           const userData = userDoc.data();
+  //           if (userData.role === "business") {
+  //             navigation.navigate("WorkerTabs");
+  //           } else {
+  //             navigation.navigate("UserTabs");
+  //           }
+  //         } else {
+  //           // First-time Google login — ask role or default
+  //           await setDoc(userDocRef, {
+  //             uid: user.uid,
+  //             email: user.email,
+  //             fullName: user.displayName,
+  //             role: "user", // or ask user for role
+  //             createdAt: new Date().toISOString(),
+  //           });
+  //           navigation.navigate("UserTabs");
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.error("Firebase login error:", error);
+  //         Alert.alert("Login Error", error.message);
+  //       });
+  //   }
+  // }, [response]);
 
   return (
     <KeyboardAvoidingWrapper>
@@ -214,10 +214,10 @@ export default function Login({ navigation }) {
                   </View>
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('Forgot Password')}
-                    style = {globalStyles.forgotPasswordLink}
-                    >
-                      <Text style ={globalStyles.linkText} >Forgot Password?</Text>
+                    onPress={() => navigation.navigate("Forgot Password")}
+                    style={globalStyles.forgotPasswordLink}
+                  >
+                    <Text style={globalStyles.linkText}>Forgot Password?</Text>
                   </TouchableOpacity>
                 </View>
 
@@ -233,20 +233,22 @@ export default function Login({ navigation }) {
                 <View style={globalStyles.line} />
 
                 {/* Google Button */}
-                {/* <TouchableOpacity
-                style={globalStyles.button}
-                onPress={() => promptAsync()}
-              >
-                <View style={globalStyles.googleButtonContent}>
-                  <FontAwesome
-                    name="google"
-                    size={20}
-                    color={white}
-                    style={{ marginRight: 10 }}
-                  />
-                  <Text style={globalStyles.buttonText}>Sign In with Google</Text>
-                </View>
-              </TouchableOpacity> */}
+                <TouchableOpacity
+                  style={globalStyles.button}
+                  onPress={() => promptAsync()}
+                >
+                  <View style={globalStyles.googleButtonContent}>
+                    <FontAwesome
+                      name="google"
+                      size={20}
+                      color={white}
+                      style={{ marginRight: 10 }}
+                    />
+                    <Text style={globalStyles.buttonText}>
+                      Sign In with Google
+                    </Text>
+                  </View>
+                </TouchableOpacity>
 
                 {/* Sign Up Link */}
                 <View style={globalStyles.extraView}>
