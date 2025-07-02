@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
-  ScrollView,
   View,
   Text,
   TextInput,
@@ -9,7 +8,6 @@ import {
   Image,
   Alert,
 } from "react-native";
-import Constants from "expo-constants";
 import { Formik } from "formik";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Octicons, Ionicons } from "@expo/vector-icons";
@@ -332,3 +330,11 @@ export default function Signup({ navigation }) {
     </KeyboardAvoidingWrapper>
   );
 }
+
+import PropTypes from 'prop-types';
+
+UserHome.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+};

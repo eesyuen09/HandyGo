@@ -1,14 +1,15 @@
+import React from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   ImageBackground,
-  Button,
+
 } from "react-native";
 
 import { useFonts } from "expo-font";
 
-import { colours, globalStyles } from "../components/style_onboardingpg";
+import { globalStyles } from "../components/style_onboardingpg";
 
 import bg from "../assets/onboardingbg.png";
 
@@ -46,3 +47,11 @@ export default function Onboarding({ navigation }) {
     </ImageBackground>
   );
 }
+
+import PropTypes from 'prop-types';
+
+Onboarding.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+};

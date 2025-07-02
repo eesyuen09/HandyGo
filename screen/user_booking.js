@@ -11,17 +11,14 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { colours, styles } from "../components/style_u_booking.js";
-//Keyboard Avoiding Wrapper
-import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper.js";
+import {styles } from "../components/style_u_booking.js";
+
 import {
   FontAwesome5,
   AntDesign,
   MaterialIcons,
   Entypo,
   FontAwesome,
-  Feather,
-  FontAwesome6,
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";

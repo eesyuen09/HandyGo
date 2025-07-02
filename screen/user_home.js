@@ -6,37 +6,29 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
   TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
+
 
 import { colours, styles } from "../components/style_u_home";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 //fonts
-import { useFonts } from "expo-font";
 
-//firebase storage
-import { updateDoc, doc } from "firebase/firestore";
-import { db } from "../firebaseConfig";
 
 //category import
 import { services_categories } from "../constants/category_constant";
 
 //keyboardavoidingwrapper
-import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
+
 import {
   Feather,
   AntDesign,
   MaterialIcons,
   FontAwesome5,
   FontAwesome6,
-  MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { Picker } from "@react-native-picker/picker";
+
 
 export default function UserHome({ navigation }) {
   const services = [
@@ -252,3 +244,11 @@ export default function UserHome({ navigation }) {
     </SafeAreaView>
   );
 }
+
+import PropTypes from 'prop-types';
+
+UserHome.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+};

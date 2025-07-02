@@ -1,9 +1,8 @@
 // utils/googleSignIn.js
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import {signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebaseConfig';
 
 WebBrowser.maybeCompleteAuthSession();

@@ -15,11 +15,10 @@ import { colours, style } from "../components/style_adddetails";
 import { useFonts } from "expo-font";
 
 //firebase storage
-import { updateDoc, doc, arrayRemove, arrayUnion } from "firebase/firestore";
+import { updateDoc, doc, arrayUnion } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 //category import
-import { categoryMap } from "../constants/categorymap";
 import { services_categories } from "../constants/category_constant";
 
 import { auth } from "../firebaseConfig";
@@ -28,13 +27,12 @@ const uid = auth.currentUser?.uid;
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
-import { Octicons, Ionicons, FontAwesome } from "@expo/vector-icons";
+
 import { Picker } from "@react-native-picker/picker";
-import { useNavigation } from "@react-navigation/native";
 
 // route: contain parameters passed from the previous screen
 export default function Moredetails({ navigation }) {
-  const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
+  const { darkest_coco} =
     colours;
 
   useEffect(() => {
@@ -161,12 +159,12 @@ export default function Moredetails({ navigation }) {
     }
   };
 
-  const [step, setStep] = useState("title");
+  // const [step, setStep] = useState("title");
   const [showPickerIndex, setShowPickerIndex] = useState(null);
 
   const [category, setCategory] = useState([]);
   const [subcategory, setSubcategory] = useState([]);
-  const [selectedBank, setSelectedBank] = useState("");
+  // const [selectedBank, setSelectedBank] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),

@@ -3,7 +3,7 @@ import * as WebBrowser from "expo-web-browser";
 import React, { useState, useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik";
-import { Octicons, Ionicons, FontAwesome } from "@expo/vector-icons";
+import { Octicons, Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,

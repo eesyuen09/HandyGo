@@ -1,15 +1,10 @@
 import React from 'react';
-import { StatusBar } from 'expo-status-bar';
 
 
 //screen
 
 import PrepopulateWorkerMaps from './constants/categorymap';
-import Login from './screen/login';
-import Signup from './screen/signup';
-import Moredetails from './screen/moredetails';
-import Biz_homepage from './screen/biz_homepage';
-import UrgentTask from './screen/biz_urgenttask';
+
 
 
 

@@ -1,6 +1,13 @@
-// components/KeyboardAvoidingWrapper.js
 import React from 'react';
-import { KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform, View } from 'react-native';
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  View,
+} from 'react-native';
+import PropTypes from 'prop-types';
 
 const KeyboardAvoidingWrapper = ({ children }) => {
   return (
@@ -13,13 +20,15 @@ const KeyboardAvoidingWrapper = ({ children }) => {
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View>
-          {children}
-          </View>
+          <View>{children}</View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
+};
+
+KeyboardAvoidingWrapper.propTypes = {
+  children: PropTypes.node.isRequired, // or PropTypes.element
 };
 
 export default KeyboardAvoidingWrapper;

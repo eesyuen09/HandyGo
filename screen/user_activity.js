@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  Image,
   ScrollView,
   Alert,
 } from "react-native";
@@ -25,8 +23,6 @@ import { useFonts } from "expo-font";
 //fetch data from firebase
 import {getAuth} from 'firebase/auth';
 import {
-  getDoc,
-  doc,
   getDocs,
   collection,
   query,
@@ -284,3 +280,11 @@ const fetchTasks = async () => {
     </SafeAreaView>
   );
 }
+
+import PropTypes from 'prop-types';
+
+UserHome.propTypes = {
+  navigation: PropTypes.shape({
+    navigate: PropTypes.func.isRequired,
+  }).isRequired,
+};
