@@ -52,6 +52,18 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
+export async function submitBooking(values, userId) {
+  //  write the booking
+  const bookingRef = await addDoc(collection(db, "booking"), {
+    ...values,
+    createdAt: new Date(),
+    userId,
+  });
+  // stamp its generated ID back into the doc
+  await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
+  return bookingRef;
+}
+
 export default function UserBooking() {
   const route = useRoute();
   const { serviceType, subcategory, description, price } = route.params || {};

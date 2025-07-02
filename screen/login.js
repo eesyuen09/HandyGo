@@ -27,6 +27,39 @@ import { auth, db } from "../firebaseConfig";
 
 WebBrowser.maybeCompleteAuthSession();
 
+//signInWithEmailAndPassword
+export async function loginWithEmail(email, password) {
+  return signInWithEmailAndPassword(auth, email, password);
+}
+
+//emailVerified
+export async function ensureEmailVerified(user) {
+  await user.reload();
+  if (!user.emailVerified) {
+    const err = new Error("Email Not Verified");
+    err.code = "auth/email-not-verified";
+    throw err;
+  }
+}
+
+//getDoc
+export async function fetchUserDoc(uid) {
+  const ref = doc(db, "users", uid);
+  return getDoc(ref);
+}
+
+//setDoc
+export async function createUserDoc(user, role = "user") {
+  const ref = doc(db, "users", user.uid);
+  return setDoc(ref, {
+    uid: user.uid,
+    email: user.email,
+    fullName: user.displayName || null,
+    role,
+    createdAt: new Date().toISOString(),
+  });
+}
+
 export default function Login({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);
   const { white, grey } = colours;
