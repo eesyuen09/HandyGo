@@ -333,7 +333,7 @@ export default function Signup({ navigation }) {
 
 import PropTypes from 'prop-types';
 
-UserHome.propTypes = {
+Signup.propTypes = {
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,

@@ -283,7 +283,7 @@ const fetchTasks = async () => {
 
 import PropTypes from 'prop-types';
 
-UserHome.propTypes = {
+UserActivity.propTypes = {
   navigation: PropTypes.shape({
     navigate: PropTypes.func.isRequired,
   }).isRequired,
