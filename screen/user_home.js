@@ -110,7 +110,7 @@ export default function UserHome({ navigation }) {
   // category press
   const handleCategoryPress = (serviceType) => {
     const serviceData = services_categories.find(
-      (c) => c.title === serviceType
+      (c) => c.title === serviceType,
     );
     console.log(serviceData);
     navigation.navigate("UserBooking", {
@@ -126,7 +126,7 @@ export default function UserHome({ navigation }) {
   // subcategory press
   const handleSubcategoryPress = (subcategory) => {
     const serviceData = services_categories.find((category) =>
-      category.subcategories.includes(subcategory)
+      category.subcategories.includes(subcategory),
     );
 
     if (!serviceData) {

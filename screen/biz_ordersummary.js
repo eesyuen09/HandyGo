@@ -83,7 +83,7 @@ export default function OrderSummary({ navigation }) {
     openDate,
     setOpenDate,
     selectedTime,
-    setSelectedTime
+    setSelectedTime,
   ) => {
     const isAvailabilityCard = item.type === "availability";
     //convert availability array to dropdown items
@@ -185,7 +185,7 @@ export default function OrderSummary({ navigation }) {
         "users",
         workerID,
         "schedules",
-        bookingId
+        bookingId,
       ); // use bookingId
 
       // Update booking document
@@ -285,7 +285,7 @@ export default function OrderSummary({ navigation }) {
       }
 
       const matched_cat = services_categories.find(
-        (cat) => cat.title === data.serviceType
+        (cat) => cat.title === data.serviceType,
       );
       const image = matched_cat?.bannerImage;
 
@@ -366,7 +366,7 @@ export default function OrderSummary({ navigation }) {
                 openDate,
                 setOpenDate,
                 selectedTime,
-                setSelectedTime
+                setSelectedTime,
               )
             }
             keyExtractor={(item, index) => index.toString()}

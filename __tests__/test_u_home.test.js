@@ -35,7 +35,7 @@ jest.mock("expo-font", () => ({
   loadAsync: jest.fn().mockResolvedValue(true),
 }));
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 jest.mock("../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
@@ -114,7 +114,7 @@ describe("UserHome Screen", () => {
 
   it("renders search bar, shortcuts, and banners", () => {
     const { getByPlaceholderText, getByText } = render(
-      <UserHome navigation={{ navigate: mockNavigate }} />
+      <UserHome navigation={{ navigate: mockNavigate }} />,
     );
 
     // search
@@ -133,7 +133,7 @@ describe("UserHome Screen", () => {
 
   it("navigates via search (category → first subcategory)", () => {
     const { getByPlaceholderText } = render(
-      <UserHome navigation={{ navigate: mockNavigate }} />
+      <UserHome navigation={{ navigate: mockNavigate }} />,
     );
     const input = getByPlaceholderText(/Looking for any service\?/i);
 
@@ -151,7 +151,7 @@ describe("UserHome Screen", () => {
 
   it("navigates via search (matching subcategory)", () => {
     const { getByPlaceholderText } = render(
-      <UserHome navigation={{ navigate: mockNavigate }} />
+      <UserHome navigation={{ navigate: mockNavigate }} />,
     );
     const input = getByPlaceholderText(/Looking for any service\?/i);
 
@@ -171,7 +171,7 @@ describe("UserHome Screen", () => {
 
   it("navigates when tapping shortcuts", () => {
     const { getByText } = render(
-      <UserHome navigation={{ navigate: mockNavigate }} />
+      <UserHome navigation={{ navigate: mockNavigate }} />,
     );
 
     SERVICES.forEach(({ title, subcategories, description, price }) => {
@@ -187,7 +187,7 @@ describe("UserHome Screen", () => {
 
   it("navigates when tapping banners", () => {
     const { getByText } = render(
-      <UserHome navigation={{ navigate: mockNavigate }} />
+      <UserHome navigation={{ navigate: mockNavigate }} />,
     );
 
     // find which category each banner belongs to:

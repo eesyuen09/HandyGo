@@ -102,7 +102,7 @@ export default function Login({ navigation }) {
                 const userCredential = await signInWithEmailAndPassword(
                   auth,
                   email,
-                  password
+                  password,
                 );
                 const user = userCredential.user;
                 await user.reload();
@@ -110,7 +110,7 @@ export default function Login({ navigation }) {
                 if (!user.emailVerified) {
                   Alert.alert(
                     "Email Not Verified",
-                    "Please verify your email before logging in."
+                    "Please verify your email before logging in.",
                   );
                   return;
                 }
@@ -214,10 +214,10 @@ export default function Login({ navigation }) {
                   </View>
 
                   <TouchableOpacity
-                    onPress={() => navigation.navigate('Forgot Password')}
-                    style = {globalStyles.forgotPasswordLink}
-                    >
-                      <Text style ={globalStyles.linkText} >Forgot Password?</Text>
+                    onPress={() => navigation.navigate("Forgot Password")}
+                    style={globalStyles.forgotPasswordLink}
+                  >
+                    <Text style={globalStyles.linkText}>Forgot Password?</Text>
                   </TouchableOpacity>
                 </View>
 

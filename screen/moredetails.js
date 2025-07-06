@@ -26,7 +26,7 @@ import { auth } from "../firebaseConfig";
 
 const uid = auth.currentUser?.uid;
 
-//keyboardavoidingwrapper
+//keyboardavoidingwrapper\
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
 import { Octicons, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
@@ -97,7 +97,7 @@ export default function Moredetails({ navigation }) {
     if (/[a-zA-Z]/.test(contact)) {
       Alert.alert(
         "Invalid Contact",
-        "Contact number must not contain letters."
+        "Contact number must not contain letters.",
       );
       return;
     }
@@ -110,7 +110,7 @@ export default function Moredetails({ navigation }) {
     if (/[a-zA-Z]/.test(bankNumber)) {
       Alert.alert(
         "Invalid Bank Number",
-        "Bank number must contain digits only."
+        "Bank number must contain digits only.",
       );
       return;
     }
@@ -118,7 +118,7 @@ export default function Moredetails({ navigation }) {
     if (!category.length || !subcategory.length) {
       Alert.alert(
         "Error",
-        "Please select at least one category and subcategory."
+        "Please select at least one category and subcategory.",
       );
       return;
     }
@@ -183,10 +183,10 @@ export default function Moredetails({ navigation }) {
 
   function deleteEmptyCategory() {
     setCategory((prev) =>
-      prev.length > 1 ? prev.slice(0, prev.length - 1) : prev
+      prev.length > 1 ? prev.slice(0, prev.length - 1) : prev,
     );
     setSubcategory((prev) =>
-      prev.length > 1 ? prev.slice(0, prev.length - 1) : prev
+      prev.length > 1 ? prev.slice(0, prev.length - 1) : prev,
     );
   }
   function updateTitle(index, newTitle, setFieldValue) {
@@ -424,8 +424,8 @@ export default function Moredetails({ navigation }) {
                     cat,
                     index,
                     setFieldValue,
-                    values.subcategory
-                  )
+                    values.subcategory,
+                  ),
                 )}
                 <TouchableOpacity
                   onPress={addEmptyCategory}

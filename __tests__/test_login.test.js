@@ -38,7 +38,7 @@ jest.mock("expo-font", () => ({
   loadAsync: jest.fn().mockResolvedValue(true),
 }));
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 jest.mock("../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
@@ -54,7 +54,7 @@ jest.mock("firebase/auth", () => ({
   signInWithEmailAndPassword: jest.fn(() =>
     Promise.resolve({
       user: { uid: "u1", reload: jest.fn(), emailVerified: true },
-    })
+    }),
   ),
   signInWithCredential: jest.fn(() => Promise.resolve({ user: { uid: "u1" } })),
   GoogleAuthProvider: { credential: jest.fn() },
@@ -64,7 +64,7 @@ jest.mock("firebase/auth", () => ({
 jest.mock("firebase/firestore", () => ({
   doc: jest.fn(),
   getDoc: jest.fn(() =>
-    Promise.resolve({ exists: () => false, data: () => ({}) })
+    Promise.resolve({ exists: () => false, data: () => ({}) }),
   ),
   setDoc: jest.fn(),
 }));
@@ -80,7 +80,7 @@ describe("Login Screen", () => {
     // reset Firestore to “no user”
     const { getDoc } = require("firebase/firestore");
     getDoc.mockImplementation(() =>
-      Promise.resolve({ exists: () => false, data: () => ({}) })
+      Promise.resolve({ exists: () => false, data: () => ({}) }),
     );
 
     // reset auth to default success
@@ -88,13 +88,13 @@ describe("Login Screen", () => {
     signInWithEmailAndPassword.mockImplementation(() =>
       Promise.resolve({
         user: { uid: "u1", reload: jest.fn(), emailVerified: true },
-      })
+      }),
     );
   });
 
   it("renders form fields and buttons", () => {
     const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
+      <Login navigation={navigation} />,
     );
     expect(getByPlaceholderText(/Enter Your Email Here/i)).toBeTruthy();
     expect(getByPlaceholderText(/••••••/)).toBeTruthy();
@@ -109,7 +109,7 @@ describe("Login Screen", () => {
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Error",
-        "Please fill in all fields."
+        "Please fill in all fields.",
       );
     });
   });
@@ -118,15 +118,15 @@ describe("Login Screen", () => {
     // simulate auth wrong-password error
     const { signInWithEmailAndPassword } = require("firebase/auth");
     signInWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({ code: "auth/wrong-password" })
+      Promise.reject({ code: "auth/wrong-password" }),
     );
 
     const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
+      <Login navigation={navigation} />,
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Here/i),
-      "user@example.com"
+      "user@example.com",
     );
     fireEvent.changeText(getByPlaceholderText(/••••••/), "badpass");
     fireEvent.press(getByText("Login"));
@@ -134,7 +134,7 @@ describe("Login Screen", () => {
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Error",
-        "Incorrect email or password"
+        "Incorrect email or password",
       );
     });
   });
@@ -143,15 +143,15 @@ describe("Login Screen", () => {
     // Mock Firestore getDoc to return a user with role "user"
     const { getDoc } = require("firebase/firestore");
     getDoc.mockImplementationOnce(() =>
-      Promise.resolve({ exists: () => true, data: () => ({ role: "user" }) })
+      Promise.resolve({ exists: () => true, data: () => ({ role: "user" }) }),
     );
 
     const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
+      <Login navigation={navigation} />,
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Here/i),
-      "user@example.com"
+      "user@example.com",
     );
     fireEvent.changeText(getByPlaceholderText(/••••••/), "correctpass");
     fireEvent.press(getByText("Login"));
@@ -174,15 +174,15 @@ describe("Login Screen", () => {
           role: "business",
           // omit contact, address, NRIC, etc.
         }),
-      })
+      }),
     );
 
     const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
+      <Login navigation={navigation} />,
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Here/i),
-      "worker@example.com"
+      "worker@example.com",
     );
     fireEvent.changeText(getByPlaceholderText(/••••••/), "workerpass");
     fireEvent.press(getByText("Login"));
@@ -201,15 +201,15 @@ describe("Login Screen", () => {
     signInWithEmailAndPassword.mockImplementationOnce(() =>
       Promise.resolve({
         user: { uid: "u2", reload: jest.fn(), emailVerified: false },
-      })
+      }),
     );
 
     const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
+      <Login navigation={navigation} />,
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Here/i),
-      "unverified@example.com"
+      "unverified@example.com",
     );
     fireEvent.changeText(getByPlaceholderText(/••••••/), "anyPassword");
     fireEvent.press(getByText("Login"));
@@ -217,7 +217,7 @@ describe("Login Screen", () => {
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Email Not Verified",
-        "Please verify your email before logging in."
+        "Please verify your email before logging in.",
       );
     });
   });
@@ -226,15 +226,15 @@ describe("Login Screen", () => {
     // mock signIn to reject with user-not-found
     const { signInWithEmailAndPassword } = require("firebase/auth");
     signInWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({ code: "auth/user-not-found" })
+      Promise.reject({ code: "auth/user-not-found" }),
     );
 
     const { getByPlaceholderText, getByText } = render(
-      <Login navigation={navigation} />
+      <Login navigation={navigation} />,
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Here/i),
-      "missing@example.com"
+      "missing@example.com",
     );
     fireEvent.changeText(getByPlaceholderText(/••••••/), "doesntMatter");
     fireEvent.press(getByText("Login"));

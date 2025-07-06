@@ -24,7 +24,7 @@ jest.mock("../components/style_u_booking.js", () => ({
 }));
 
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 
 jest.mock("../components/KeyboardAvoidingWrapper.js", () => {
@@ -91,7 +91,7 @@ describe("UserBooking Screen", () => {
     handleBookingSubmit({});
     expect(Alert.alert).toHaveBeenCalledWith(
       "Booking Submitted",
-      "Your booking has been successfully submitted!"
+      "Your booking has been successfully submitted!",
     );
   });
 
@@ -136,7 +136,7 @@ describe("UserBooking Screen", () => {
     fireEvent.press(getAllByText("Add Time Slot")[2]);
     expect(Alert.alert).toHaveBeenLastCalledWith(
       "Action Not Allowed",
-      "You can only choose up to 3 time slots."
+      "You can only choose up to 3 time slots.",
     );
 
     // remove one slot → back to 2

@@ -24,7 +24,7 @@ beforeAll(() => {
     if (
       typeof args[0] === "string" &&
       args[0].includes(
-        "An update to Formik inside a test was not wrapped in act"
+        "An update to Formik inside a test was not wrapped in act",
       )
     ) {
       return;
@@ -57,7 +57,7 @@ jest.mock("expo-font", () => ({
   loadAsync: jest.fn().mockResolvedValue(true),
 }));
 jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
+  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
 );
 jest.mock("../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
@@ -70,7 +70,7 @@ jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
 // Auth mocks
 jest.mock("firebase/auth", () => ({
   createUserWithEmailAndPassword: jest.fn(() =>
-    Promise.resolve({ user: { uid: "u1" } })
+    Promise.resolve({ user: { uid: "u1" } }),
   ),
   sendEmailVerification: jest.fn(() => Promise.resolve()),
 }));
@@ -95,14 +95,14 @@ describe("Signup Screen", () => {
       sendEmailVerification,
     } = require("firebase/auth");
     createUserWithEmailAndPassword.mockImplementation(() =>
-      Promise.resolve({ user: { uid: "u1" } })
+      Promise.resolve({ user: { uid: "u1" } }),
     );
     sendEmailVerification.mockImplementation(() => Promise.resolve());
   });
 
   it("renders all fields and buttons", () => {
     const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
-      <Signup navigation={navigation} />
+      <Signup navigation={navigation} />,
     );
 
     expect(getByPlaceholderText(/Enter Your Full Name Here/i)).toBeTruthy();
@@ -130,23 +130,23 @@ describe("Signup Screen", () => {
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Error",
-        "Please fill in all fields."
+        "Please fill in all fields.",
       );
     });
   });
 
   it("alerts when passwords do not match", async () => {
     const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
-      <Signup navigation={navigation} />
+      <Signup navigation={navigation} />,
     );
 
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Full Name Here/i),
-      "Alice"
+      "Alice",
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Address Here/i),
-      "a@b.com"
+      "a@b.com",
     );
     fireEvent.press(getByText("User"));
 
@@ -158,7 +158,7 @@ describe("Signup Screen", () => {
     await waitFor(() => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Error",
-        "Passwords do not match."
+        "Passwords do not match.",
       );
     });
   });
@@ -166,20 +166,20 @@ describe("Signup Screen", () => {
   it("alerts on email-already-in-use error", async () => {
     const { createUserWithEmailAndPassword } = require("firebase/auth");
     createUserWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({ code: "auth/email-already-in-use" })
+      Promise.reject({ code: "auth/email-already-in-use" }),
     );
 
     const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
-      <Signup navigation={navigation} />
+      <Signup navigation={navigation} />,
     );
 
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Full Name Here/i),
-      "Bob"
+      "Bob",
     );
     fireEvent.changeText(
       getByPlaceholderText(/Enter Your Email Address Here/i),
-      "bob@x.com"
+      "bob@x.com",
     );
     fireEvent.press(getByText("User"));
 
@@ -195,7 +195,7 @@ describe("Signup Screen", () => {
 
   it("submits successfully and navigates to Login", async () => {
     const { getByText, getAllByPlaceholderText, getByPlaceholderText } = render(
-      <Signup navigation={navigation} />
+      <Signup navigation={navigation} />,
     );
 
     // fill in name/email/role/password
@@ -216,7 +216,7 @@ describe("Signup Screen", () => {
       expect(Alert.alert).toHaveBeenCalledWith(
         "Please Verify Your Email",
         "A verification email has been sent to you account.",
-        expect.any(Array)
+        expect.any(Array),
       );
     });
   });

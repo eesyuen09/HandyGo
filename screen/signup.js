@@ -14,9 +14,7 @@ import { Formik } from "formik";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Octicons, Ionicons } from "@expo/vector-icons";
 
-
 import { colours, globalStyles } from "../components/style_loginsignup";
-
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
@@ -85,7 +83,7 @@ export default function Signup({ navigation }) {
                 const userCredential = await createUserWithEmailAndPassword(
                   auth,
                   email,
-                  password
+                  password,
                 );
                 const user = userCredential.user;
                 await sendEmailVerification(user);
@@ -102,7 +100,7 @@ export default function Signup({ navigation }) {
                 Alert.alert(
                   "Please Verify Your Email",
                   "A verification email has been sent to you account.",
-                  [{ text: "OK", onPress: () => navigation.navigate("Login") }]
+                  [{ text: "OK", onPress: () => navigation.navigate("Login") }],
                 );
 
                 /*Alert.alert('Success', 'Account created successfully!', [
@@ -117,7 +115,7 @@ export default function Signup({ navigation }) {
                 } else if (error.code === "auth/weak-password") {
                   Alert.alert(
                     "Error",
-                    "Password should be at least 6 characters"
+                    "Password should be at least 6 characters",
                   );
                 } else {
                   Alert.alert("Error", error.message);

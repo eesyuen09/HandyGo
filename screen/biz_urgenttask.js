@@ -20,7 +20,7 @@ import {
 import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
-import { useNavigation , useFocusEffect} from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { auth, getAuth } from "../firebaseConfig";
 import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
@@ -29,9 +29,6 @@ import { services_categories } from "../constants/category_constant";
 //extract data from firebase
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
-
-
-
 
 export default function UrgentTask() {
   const navigation = useNavigation();
@@ -44,94 +41,95 @@ export default function UrgentTask() {
   if (!fontsLoaded) return null;
 
   // add search logic
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredTasks, setFilteredTasks] = useState([]);
   useFocusEffect(
     React.useCallback(() => {
       fetchUrgentTasks();
-    },[])
+    }, []),
   );
 
+  const fetchUrgentTasks = async () => {
+    const user = auth.currentUser;
+    if (!user) return;
 
-    const fetchUrgentTasks = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+    if (!userSnap.exists()) return;
 
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) return;
+    const userData = userSnap.data();
+    const workerCategories = userData.subcategory || [];
 
-      const userData = userSnap.data();
-      const workerCategories = userData.subcategory || [];
+    const q = query(
+      collection(db, "booking"),
+      where("status", "==", "pending"),
+      where("urgency", "==", true),
+    );
+    const querySnapshot = await getDocs(q);
 
-      const q = query(collection(db, "booking"), where("status", "==", "pending"),
-        where('urgency', '==', true));
-      const querySnapshot = await getDocs(q);
+    const formatted = [];
 
-      const formatted = [];
-
-      
-
-      querySnapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (workerCategories.includes(data.type)) {
-          const iconData = getIcon(data.serviceType);
-          formatted.push({
-            id: data.orderID || docSnap.id,
-            category: data.type || "Unknown",
-            time: `${data.availability?.[0]?.date || "N/A"} | ${
-              data.availability?.[0]?.time || "N/A"
-            }`,
-            location: `${data.state || ""}, ${data.postcode || ""}`,
-            price: data.price || "35.99",
-            icon: iconData.name,
-            iconFamily: iconData.family,
-          });
-        }
-      });
-
-      setTasks(formatted);
-      setFilteredTasks(formatted);
-      };
-
-    function handleSearch(text){
-      if(text.trim() === ''){
-        setFilteredTasks(tasks);
-        return;
+    querySnapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (workerCategories.includes(data.type)) {
+        const iconData = getIcon(data.serviceType);
+        formatted.push({
+          id: data.orderID || docSnap.id,
+          category: data.type || "Unknown",
+          time: `${data.availability?.[0]?.date || "N/A"} | ${
+            data.availability?.[0]?.time || "N/A"
+          }`,
+          location: `${data.state || ""}, ${data.postcode || ""}`,
+          price: data.price || "35.99",
+          icon: iconData.name,
+          iconFamily: iconData.family,
+        });
       }
+    });
 
-      const filtered = tasks.filter((item) =>
-      item.category.toLowerCase().includes(text.toLowerCase()) ||
-      item.location.toLowerCase().includes(text.toLowerCase()) ||
-      item.time.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredTasks(filtered);
-    };
+    setTasks(formatted);
+    setFilteredTasks(formatted);
+  };
 
+  function handleSearch(text) {
+    if (text.trim() === "") {
+      setFilteredTasks(tasks);
+      return;
+    }
 
-  
+    const filtered = tasks.filter(
+      (item) =>
+        item.category.toLowerCase().includes(text.toLowerCase()) ||
+        item.location.toLowerCase().includes(text.toLowerCase()) ||
+        item.time.toLowerCase().includes(text.toLowerCase()),
+    );
+    setFilteredTasks(filtered);
+  }
+
   if (!fontsLoaded) return null;
 
   const getIcon = (serviceType) => {
-      switch (serviceType) {
-        case "Cleaning":
-          return { name: "cleaning-services", family: "MaterialIcons" };
-        case "Repair":
-          return { name: "tool", family: "Feather" };
-        case "Maintenance":
-          return { name: "hands-holding", family: "FontAwesome6" };
-        case "Moving":
-          return { name: "truck-moving", family: "FontAwesome5" };
-        case "Outdoor Services":
-          return { name: "tree", family: "FontAwesome5" };
-        default:
-          return { name: "wrench", family: "MaterialCommunityIcons" };
-      }
+    switch (serviceType) {
+      case "Cleaning":
+        return { name: "cleaning-services", family: "MaterialIcons" };
+      case "Repair":
+        return { name: "tool", family: "Feather" };
+      case "Maintenance":
+        return { name: "hands-holding", family: "FontAwesome6" };
+      case "Moving":
+        return { name: "truck-moving", family: "FontAwesome5" };
+      case "Outdoor Services":
+        return { name: "tree", family: "FontAwesome5" };
+      default:
+        return { name: "wrench", family: "MaterialCommunityIcons" };
+    }
   };
   const renderIcon = (iconName, iconFamily, color, size) => {
     switch (iconFamily) {
       case "MaterialCommunityIcons":
-        return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
+        return (
+          <MaterialCommunityIcons name={iconName} size={size} color={color} />
+        );
       case "MaterialIcons":
         return <MaterialIcons name={iconName} size={size} color={color} />;
       case "FontAwesome5":
@@ -146,12 +144,11 @@ export default function UrgentTask() {
         return <Feather name="alert-circle" size={size} color={color} />;
     }
   };
-  
 
   const showTask = ({ item }) => (
     <View style={style.card}>
       <View style={style.taskIconWrap}>
-        {renderIcon(item.icon,item.iconFamily,colours.main_coco,30)}
+        {renderIcon(item.icon, item.iconFamily, colours.main_coco, 30)}
       </View>
 
       <View style={style.taskInfo}>
@@ -180,7 +177,9 @@ export default function UrgentTask() {
         </View>
       </View>
       <TouchableOpacity
-        onPress ={() => navigation.navigate('Order Summary', { orderID: item.id })}
+        onPress={() =>
+          navigation.navigate("Order Summary", { orderID: item.id })
+        }
       >
         <Text style={style.viewText}>View Details</Text>
       </TouchableOpacity>
@@ -211,8 +210,8 @@ export default function UrgentTask() {
             placeholder="Searching for any services?"
             placeholderTextColor={colours.darkest_coco}
             style={style.searchInput}
-            value = { searchQuery }
-            onChangeText = {(text) => {
+            value={searchQuery}
+            onChangeText={(text) => {
               setSearchQuery(text);
               handleSearch(text);
             }}

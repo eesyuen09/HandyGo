@@ -125,10 +125,7 @@ const RootStack = () => {
           component={Biz_scheduledTask}
         />
         <Stack.Screen name="Forgot Password" component={ForgotPassword} />
-        <Stack.Screen
-          name="Order Summary"
-          component={Biz_ordersummary}
-        />
+        <Stack.Screen name="Order Summary" component={Biz_ordersummary} />
       </Stack.Navigator>
     </>
   );
