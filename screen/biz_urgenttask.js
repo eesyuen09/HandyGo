@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import {
   View,
   Text,
@@ -21,14 +21,14 @@ import bg from "../assets/bg_UrgentTask.png";
 import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { auth, getAuth } from "../firebaseConfig";
-import { getDoc, doc, updateDoc } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { services_categories } from "../constants/category_constant";
+import { auth } from "../firebaseConfig";
+import { getDoc, doc } from "firebase/firestore";
+
 
 //extract data from firebase
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../firebaseConfig";
+import FilterScreen from "./biz_servicefilter";
 
 export default function UrgentTask() {
   const navigation = useNavigation();
@@ -216,7 +216,10 @@ export default function UrgentTask() {
               handleSearch(text);
             }}
           />
-          <Feather name="filter" size={20} color={colours.darkest_coco} />
+          <TouchableOpacity
+            onPress={() => navigation.navigate(FilterScreen)}>
+            <Feather name="filter" size={20} color={colours.darkest_coco} />
+          </TouchableOpacity>
         </View>
 
         {/* to be amend!!!!!!!!*/}

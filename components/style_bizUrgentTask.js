@@ -29,8 +29,6 @@ export const style = StyleSheet.create({
   },
 
   header: {
-    //include title, backbutton, icon..
-    // flexDirection: 'row',r
     position: "relative",
     height: 60,
     marginBottom: 20,

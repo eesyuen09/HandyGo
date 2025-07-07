@@ -131,6 +131,7 @@ export default function UserBooking() {
           notif,
           notes,
           status,
+          price,
         } = values;
 
         try {

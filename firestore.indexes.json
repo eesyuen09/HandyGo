@@ -1,0 +1,15 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "booking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "price", "order": "DESCENDING" },
+        { "fieldPath": "location", "order": "ASCENDING" },
+        { "fieldPath": "subcategory", "order": "DESCENDING" },
+        { "fieldPath": "duration", "order": "ASCENDING"},
+        { "fieldPath": "date", "order": "ASCENDING"}
+      ]
+    }
+  ]
+}
