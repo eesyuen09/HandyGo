@@ -13,7 +13,7 @@ export const colours = {
 
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
-  
+
 export const style = StyleSheet.create({
   container: {
     flex: 1,
@@ -40,9 +40,9 @@ export const style = StyleSheet.create({
   },
 
   avatarHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 30,
-    backgroundColor: grey,
+    backgroundColor: 'transparent',
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     paddingVertical: 30,
@@ -53,14 +53,14 @@ export const style = StyleSheet.create({
     height: 100,
     backgroundColor: white,
     borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderColor: darkest_coco,
     borderWidth: 2,
   },
 
   editIcon: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     right: 0,
     backgroundColor: main_coco,
@@ -71,7 +71,7 @@ export const style = StyleSheet.create({
   inputGroup: {
     width: "100%",
     marginBottom: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
   inputLabel: {
@@ -95,6 +95,18 @@ export const style = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
+    dropdownContainer: {
+      borderWidth: 1,
+      width: "100%",
+      borderColor: colours.darkest_coco,
+      backgroundColor: colours.white,
+      borderRadius: 10,
+      fontFamily: "Sora",
+      fontSize: 14,
+      color: colours.darkest_coco,
+      zIndex: 100,
+    },
+  
 
   textInput: {
     flex: 1,
