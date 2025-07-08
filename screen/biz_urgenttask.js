@@ -36,14 +36,40 @@ import { useRoute } from "@react-navigation/native";
 //extract data from firebase
 
 import { db } from "../firebaseConfig";
+import { debounce } from 'lodash';
+
+
 
 
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
+
+  const debouncedFetch = React.useCallback(debounce((params) => {
+    fetchFilteredBookings(params).then(setResults);
+  }, 500), // Wait 500ms between calls
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Object.keys(filter).length) {
+        debouncedFetch({ minDuration, maxDuration });
+      }
+    }, [minDuration, maxDuration])
+  ),
+)
+
+
+useFocusEffect(
+  React.useCallback(() => {
+    if (Object.keys(filter).length) {
+      debouncedFetch({ minDuration, maxDuration });
+    }
+  }, [minDuration, maxDuration])
+);
   //filter
   const route = useRoute();
   const filter = route.params?.filter || {};
+
   const {
     subcategory = [],
     priceRange = [0, Infinity],
@@ -51,7 +77,10 @@ export default function UrgentTask() {
 
   } = filter;
   const [minPrice, maxPrice] = priceRange;
-  const [minDuration, maxDuration] = durationRange;
+  const { minDuration, maxDuration } = React.useMemo(() => ({
+    minDuration: durationRange[0], 
+    maxDuration: durationRange[1]
+  }), [durationRange[0], durationRange[1]]);
 
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
@@ -80,7 +109,7 @@ export default function UrgentTask() {
       } else {
         fetchUrgentTasks().then(setResults);
       }
-    }, [ minPrice, maxPrice, minDuration, maxDuration, subcategory ])  // stringify so React re-runs whenever filters change
+    }, [])  // stringify so React re-runs whenever filters change
   );
 
 
@@ -92,6 +121,8 @@ export default function UrgentTask() {
   }) {
     
     const bookingsRef = collection(db, "booking");
+    console.log(maxDuration);
+    console.log(minDuration);
     const constraint = [
       where("status", "==", "pending"),
       where("urgency", "==", true),
