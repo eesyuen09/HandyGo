@@ -160,53 +160,55 @@ export default function UserActivity({ navigation }) {
         {/* Price */}
         <View style={style.taskMeta}>
           <Text style={style.cardPrice}>${item.price}</Text>
-        </View>
-      </View>
 
-      {/* Status Row */}
-      {!item.isCompleted && (
-        <View style={style.statusRow}>
-          <View
-            style={[
-              style.statusBadge,
-              item.status === "pending"
-                ? style.statusPending
-                : item.status === "confirmed"
-                ? style.statusScheduled
-                : style.statusFailed,
-            ]}
-          >
-            <Text
-              style={[
-                style.statusText,
-                item.status === "pending"
-                  ? style.textPending
-                  : item.status === "confirmed" || item.status === "scheduled"
-                  ? style.textScheduled
-                  : item.status === "cancelled"
-                  ? style.textCancelled
-                  : style.textFailed,
-              ]}
-            >
-              {item.status === "pending"
-                ? "Pending"
-                : item.status === "confirmed" || item.status === "scheduled"
-                ? "Confirmed"
-                : item.status === "cancelled"
-                ? "Cancelled"
-                : "Failed"}
-            </Text>
-          </View>
+          {!item.isCompleted && (
+            <View style={style.statusRow}>
+              <View
+                style={[
+                  style.statusBadge,
+                  item.status === "pending"
+                    ? style.statusPending
+                    : item.status === "confirmed" || item.status === "scheduled"
+                    ? style.statusConfirmed
+                    : item.status === "cancelled"
+                    ? style.statusCancelled
+                    : style.statusFailed,
+                ]}
+              >
+                <Text
+                  style={[
+                    style.statusText,
+                    item.status === "pending"
+                      ? style.textPending
+                      : item.status === "Confirmed" ||
+                        item.status === "scheduled"
+                      ? style.textScheduled
+                      : item.status === "cancelled"
+                      ? style.textCancelled
+                      : style.textFailed,
+                  ]}
+                >
+                  {item.status === "pending"
+                    ? "Pending"
+                    : item.status === "confirmed" || item.status === "scheduled"
+                    ? "Confirmed"
+                    : item.status === "cancelled"
+                    ? "Cancelled"
+                    : "Failed"}
+                </Text>
+              </View>
 
-          {item.status === "failed" && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("UserBooking")}
-            >
-              <Text style={style.viewText}>Retry Booking</Text>
-            </TouchableOpacity>
+              {item.status === "failed" && (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("UserBooking")}
+                >
+                  <Text style={style.viewText}>Retry Booking</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
-      )}
+      </View>
 
       {/* Completed Task Actions */}
       {item.isCompleted && (
@@ -219,7 +221,7 @@ export default function UserActivity({ navigation }) {
               })
             }
           >
-            <Text style={style.actionText}> Review</Text>
+            <Text style={style.actionText}> 👍 Review</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
