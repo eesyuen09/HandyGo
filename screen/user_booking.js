@@ -90,7 +90,7 @@ export default function UserBooking() {
         type: subcategory,
         urgency: false,
         isCompleted: false,
-        duration: 0,
+        duration: null,
         availability: [{ date: "", time: "" }],
         state: "",
         postcode: "",
@@ -192,7 +192,7 @@ export default function UserBooking() {
                 {/* Type */}
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
-                    {icon}
+                    {icon && icon}
                     <Text style={styles.input}>Service Type</Text>
                   </View>
 
@@ -275,7 +275,7 @@ export default function UserBooking() {
                       value={values.duration}
                       items={[...Array(15)].map((_, i) => ({
                         label: `${i + 1} hour${i + 1 > 1 ? "s" : ""}`,
-                        value: `${i + 1}`,
+                        value: i + 1,
                       }))}
                       setOpen={setOpenDuration}
                       setValue={(val) => setFieldValue("duration", val())}
