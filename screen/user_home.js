@@ -177,21 +177,20 @@ export default function UserHome({ navigation }) {
 
   return (
     <SafeAreaView style={styles.frame}>
+      {/* Top Search Bar */}
       <ScrollView
         contentContainerStyle={{ paddingBottom: 100 }}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Top Search Bar */}
-
         <TouchableWithoutFeedback
           onPress={() => searchInputRef.current?.focus()}
         >
-          <View style={styles.container}>
+          <SafeAreaView style={styles.container}>
             <View style={styles.searchBar}>
               <AntDesign
                 name="search1"
                 size={24}
-                // color="white"
+                color="white"
                 style={styles.searchIcon}
               />
               <TextInput
@@ -200,22 +199,20 @@ export default function UserHome({ navigation }) {
                 onChangeText={setSearchQuery}
                 placeholder="Looking for any service?"
                 editable={true}
-                placeholderTextColor={colours.main_coco}
+                placeholderTextColor="white"
                 style={styles.searchInput}
                 returnKeyType="search"
                 onSubmitEditing={handleSearch}
               />
             </View>
-          </View>
+          </SafeAreaView>
         </TouchableWithoutFeedback>
 
         {/* Shortcut Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Shortcut</Text>
-
           <ScrollView
             horizontal
-            nestedScrollEnabled={true}
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.iconRow}
           >

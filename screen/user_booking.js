@@ -90,7 +90,7 @@ export default function UserBooking() {
         type: subcategory,
         urgency: false,
         isCompleted: false,
-        duration: "",
+        duration: 0,
         availability: [{ date: "", time: "" }],
         state: "",
         postcode: "",
@@ -104,7 +104,7 @@ export default function UserBooking() {
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
         urgency: Yup.string().required("Urgency is required"),
-        duration: Yup.string().required("duration is required"),
+        duration: Yup.number().required("duration is required"),
         availability: Yup.array().of(
           Yup.object().shape({
             date: Yup.string().required("Date is required"),
@@ -115,7 +115,7 @@ export default function UserBooking() {
           .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
           .required("State is required"),
         postcode: Yup.string()
-          .matches(/^[0-9]+$/, "Postcode can only contain numbers")
+          .matches(/^\d{6}$/, "Postcode must be 6 digits")
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
       })}
@@ -141,6 +141,7 @@ export default function UserBooking() {
             ...values,
             createdAt: new Date(),
             userId: auth.currentUser.uid,
+            price: 30, //assume its a fixed price for now for worker's analysis
           });
 
           await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
@@ -280,7 +281,7 @@ export default function UserBooking() {
                       setValue={(val) => setFieldValue("duration", val())}
                       setItems={() => {}}
                       placeholder="Select Duration"
-                      ontainerStyle={{ zIndex: 800 }}
+                      containerStyle={{ zIndex: 800 }}
                       zIndex={800}
                       listMode="SCROLLVIEW"
                     />

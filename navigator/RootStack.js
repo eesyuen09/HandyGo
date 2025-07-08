@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, ActivityIndicator } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Platform,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "../firebaseConfig";
-import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   FontAwesome5,
@@ -18,7 +21,7 @@ import {
 } from "@expo/vector-icons";
 
 import { colours } from "../components/style_loginsignup";
-
+import { useNavigation } from "@react-navigation/native";
 const Stack = createNativeStackNavigator();
 
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
@@ -40,7 +43,6 @@ import ForgotPassword from "../screen/forgotpassword";
 import Biz_ordersummary from "../screen/biz_ordersummary";
 import UserTabs from "./userTabs";
 import WorkerTabs from "./workerTabs";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -87,16 +89,44 @@ const RootStack = () => {
           name="UserBooking"
           component={UserBooking}
           options={{
-            headerTitle: "Booking",
-            headerTransparent: false,
-            headerStyle: {
-              backgroundColor: "white",
-            },
-            headerTintColor: main_coco,
-            headerTitleStyle: {
-              fontFamily: "Sora",
-              fontSize: 18,
-              color: darkest_coco,
+            header: () => {
+              const navigation = useNavigation();
+              return (
+                <SafeAreaView
+                  style={{
+                    backgroundColor: "white",
+                    paddingTop:
+                      Platform.OS === "android" ? StatusBar.currentHeight : 0,
+                  }}
+                >
+                  <View
+                    style={{
+                      height: 60,
+                      paddingHorizontal: 16,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      borderBottomWidth: 1,
+                      borderBottomColor: "#eee",
+                    }}
+                  >
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                      <Ionicons name="arrow-back" size={24} color="#704F38" />
+                    </TouchableOpacity>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: "Sora",
+                        color: "#704F38",
+                      }}
+                    >
+                      Booking
+                    </Text>
+                    <View style={{ width: 24 }} />{" "}
+                    {/* Spacer to balance layout */}
+                  </View>
+                </SafeAreaView>
+              );
             },
           }}
         />
@@ -125,10 +155,7 @@ const RootStack = () => {
           component={Biz_scheduledTask}
         />
         <Stack.Screen name="Forgot Password" component={ForgotPassword} />
-        <Stack.Screen
-          name="Order Summary"
-          component={Biz_ordersummary}
-        />
+        <Stack.Screen name="Order Summary" component={Biz_ordersummary} />
       </Stack.Navigator>
     </>
   );

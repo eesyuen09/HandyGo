@@ -128,7 +128,7 @@ export const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "flex-start",
     backgroundColor: colours.white,
-    borderColor: colours._coco,
+    borderColor: colours.darkest_coco,
     borderWidth: 0.5,
     padding: 12,
     borderRadius: 10,

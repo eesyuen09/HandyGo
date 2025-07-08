@@ -134,10 +134,10 @@ export default function Login({ navigation }) {
                     ) {
                       navigation.navigate("Add Details");
                     } else {
-                      navigation.replace("WorkerTabs");
+                      navigation.navigate("WorkerTabs");
                     }
                   } else if (userData.role == "user") {
-                    navigation.replace("UserTabs");
+                    navigation.navigate("UserTabs");
                   } else {
                     Alert.alert("Error", "No role assigned");
                   }

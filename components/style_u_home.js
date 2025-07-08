@@ -7,7 +7,7 @@ export const colours = {
   light_coco: "#CB9D83",
   main_coco: "#A76545",
   beige: "#F9F2ED",
-  grey: "E3E3E3",
+  grey: "#E3E3E3",
   white: "#FFFFFF",
   yellow_brown: "#DDA853",
   black: "#000000",
@@ -40,15 +40,16 @@ export const styles = StyleSheet.create({
 
   //container for search bar
   container: {
-    // backgroundColor: beige,
-    // flexDirection: "column",
-
-    // paddingTop: Platform.OS === "android" ? 16 : Constants.statusBarHeight + 8,
+    backgroundColor: main_coco,
+    flexDirection: "column",
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    // paddingTop: Platform.OS === "android" ? 5 : Constants.statusBarHeight + 8,
     // height: Constants.statusBarHeight + 75,
     // minHeight: 100,
-    paddingVertical: 10,
-    // paddingHorizontal: 20,
-    // marginHorizontal: 0,
+    // paddingHorizontal: 0,
+    // paddingBottom: 10,
+    marginHorizontal: 0,
   },
 
   searchBar: {
@@ -57,11 +58,10 @@ export const styles = StyleSheet.create({
     // backgroundColor: light_coco,
     borderRadius: 30,
     paddingHorizontal: 26,
-    borderColor: main_coco,
+    borderColor: white,
     borderWidth: 1,
     // paddingVertical: 8,
     marginHorizontal: 25,
-    marginVertical: 0,
     // marginBottom: 8,
     // height: 45,
   },
@@ -69,13 +69,13 @@ export const styles = StyleSheet.create({
   searchIcon: {
     width: 24,
     height: 24,
-    color: main_coco,
+    color: white,
   },
 
   searchInput: {
     marginLeft: 10,
     fontFamily: "Sora",
-    color: main_coco,
+    color: white,
     // lineHeight: 25,
     fontSize: 15,
     flex: 1,
