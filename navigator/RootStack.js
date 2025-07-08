@@ -43,6 +43,7 @@ import ForgotPassword from "../screen/forgotpassword";
 import Biz_ordersummary from "../screen/biz_ordersummary";
 import UserTabs from "./userTabs";
 import WorkerTabs from "./workerTabs";
+import UserRating from "../screen/user_rating";
 
 const stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -147,6 +148,7 @@ const RootStack = () => {
             },
           }}
         />
+        <Stack.Screen name="UserRating" component={UserRating} />
         <Stack.Screen name="Business Home Page" component={Biz_homepage} />
         <Stack.Screen name="Add Details" component={Biz_adddetails} />
         <Stack.Screen name="Business Urgent Task" component={Biz_urgentTask} />

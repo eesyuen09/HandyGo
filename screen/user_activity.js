@@ -110,6 +110,8 @@ export default function UserActivity({ navigation }) {
           iconFamily: getIcon(data.serviceType).family,
           isCompleted: data.isCompleted || false,
           status: data.status || "pending",
+          workerId: data.workerId,
+          userId: data.userId,
         };
 
         if (task.isCompleted) {
@@ -122,7 +124,7 @@ export default function UserActivity({ navigation }) {
 
       setCompletedTasks(completedTasks);
       setIncompleteTasks(incompletedTasks);
-      console.log("completedtask", completedTasks);
+      // console.log("completedtask", completedTasks);
     } catch (err) {
       console.error("Failed to fetch Firestore data:", err.message);
       Alert.alert("Error", "Failed to load your bookings.");
@@ -210,15 +212,18 @@ export default function UserActivity({ navigation }) {
       {item.isCompleted && (
         <View style={style.buttonRow}>
           <TouchableOpacity
-            onPress={() => Alert.alert("Review Task", "Please leave a review")}
+            onPress={() =>
+              navigation.navigate("UserRating", {
+                orderId: item.id,
+                workerId: item.workerId,
+              })
+            }
           >
-            <Text style={style.actionText}>👍 Review</Text>
+            <Text style={style.actionText}> Review</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() =>
-              navigation.navigate("UserBooking", { prefillData: item })
-            }
+            onPress={() => Alert.alert("Rebook", "Rebook the service?")}
           >
             <Text style={style.actionText}>🔁 Rebook</Text>
           </TouchableOpacity>

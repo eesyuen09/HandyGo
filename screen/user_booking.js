@@ -23,7 +23,7 @@ import {
   Feather,
   FontAwesome6,
 } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
 import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";
@@ -73,6 +73,7 @@ export default function UserBooking() {
   const [showDatePicker, setShowDatePicker] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const auth = getAuth(app);
+  const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -150,6 +151,7 @@ export default function UserBooking() {
             "Your booking has been successfully submitted!"
           );
           resetForm();
+          navigation.goBack();
         } catch (error) {
           console.error("Error submitting booking:", error);
           Alert.alert("Error", "Booking submission failed. Please try again.");
