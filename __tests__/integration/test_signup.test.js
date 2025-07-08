@@ -15,7 +15,7 @@ jest.mock("@react-native-community/datetimepicker", () => {
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import Signup from "../screen/signup.js";
+import Signup from "../../screen/signup.js";
 
 // Silence Formik act warnings
 const originalError = console.error;
@@ -59,13 +59,13 @@ jest.mock("expo-font", () => ({
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
-jest.mock("../components/KeyboardAvoidingWrapper", () => {
+jest.mock("../../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
   return ({ children }) => React.createElement(">{children}", {}, children);
 });
 
 // firebaseConfig stub
-jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
+jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
 
 // Auth mocks
 jest.mock("firebase/auth", () => ({

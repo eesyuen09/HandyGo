@@ -14,9 +14,7 @@ import { Formik } from "formik";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Octicons, Ionicons } from "@expo/vector-icons";
 
-
 import { colours, globalStyles } from "../components/style_loginsignup";
-
 
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
@@ -26,6 +24,29 @@ import {
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
+
+///sign up with email and password
+export function signupWithEmail(email, password) {
+  return createUserWithEmailAndPassword(auth, email, password);
+}
+
+// send email verification
+export function sendVerificationEmail(user) {
+  return sendEmailVerification(user);
+}
+
+// create firestore user document
+export function createSignupUserDoc({ uid, fullName, email, dob, role }) {
+  const ref = doc(db, "users", uid);
+  return setDoc(ref, {
+    uid,
+    fullName,
+    email,
+    dob,
+    role,
+    createdAt: new Date().toISOString(),
+  });
+}
 
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);

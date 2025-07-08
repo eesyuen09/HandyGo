@@ -7,7 +7,7 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import Login from "../screen/login.js";
+import Login from "../../screen/login.js";
 
 // Polyfill missing globals
 global.clearImmediate = global.clearImmediate || ((id) => clearTimeout(id));
@@ -40,13 +40,13 @@ jest.mock("expo-font", () => ({
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
-jest.mock("../components/KeyboardAvoidingWrapper", () => {
+jest.mock("../../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
   return ({ children }) => React.createElement(">{children}", {}, children);
 });
 
 // 3) Mock firebaseConfig
-jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
+jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
 
 // 4) Mock Firebase Auth
 const authMock = require("firebase/auth");

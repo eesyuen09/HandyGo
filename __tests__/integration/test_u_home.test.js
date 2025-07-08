@@ -37,7 +37,7 @@ jest.mock("expo-font", () => ({
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
-jest.mock("../components/KeyboardAvoidingWrapper", () => {
+jest.mock("../../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
   const { View } = require("react-native");
   return ({ children }) => React.createElement(View, null, children);
@@ -76,12 +76,12 @@ const SERVICES = [
     price: 120,
   },
 ];
-jest.mock("../constants/category_constant", () => ({
+jest.mock("../../constants/category_constant", () => ({
   services_categories: SERVICES,
 }));
 
 // 2) Stub firebase so imports don't break:
-jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
+jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
 jest.mock("firebase/auth", () => ({
   /* unused here */
 }));
@@ -91,7 +91,7 @@ jest.mock("firebase/firestore", () => ({
 
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import UserHome from "../screen/user_home";
+import UserHome from "../../screen/user_home";
 
 describe("UserHome Screen", () => {
   let mockNavigate;
