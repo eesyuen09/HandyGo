@@ -15,7 +15,6 @@ export const colours = {
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
 
-
 // Global Styles
 export const style = StyleSheet.create({
   background: {
@@ -53,7 +52,6 @@ export const style = StyleSheet.create({
     marginVertical: 20,
     marginBottom: 40,
   },
-  
 
   buttonText: {
     color: white,

@@ -4,12 +4,37 @@
       "collectionGroup": "booking",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "price", "order": "DESCENDING" },
-        { "fieldPath": "location", "order": "ASCENDING" },
-        { "fieldPath": "subcategory", "order": "DESCENDING" },
-        { "fieldPath": "duration", "order": "ASCENDING"},
-        { "fieldPath": "date", "order": "ASCENDING"}
+        { "fieldPath": "type", "order": "DESCENDING" },
+        { "fieldPath": "duration", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING"},
+        {"fieldPath": "urgency", "order":"ASCENDING"}
       ]
-    }
+    },
+    {
+      "collectionGroup": "booking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "duration", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "urgency", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "booking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "urgency", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "booking",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "duration", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "urgency", "order": "ASCENDING" }
+      ]
+    },
   ]
 }

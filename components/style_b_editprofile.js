@@ -42,7 +42,7 @@ export const style = StyleSheet.create({
   avatarHeader: {
     alignItems: "center",
     marginBottom: 30,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderBottomLeftRadius: 30,
     borderBottomRightRadius: 30,
     paddingVertical: 30,
@@ -95,18 +95,17 @@ export const style = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 16,
   },
-    dropdownContainer: {
-      borderWidth: 1,
-      width: "100%",
-      borderColor: colours.darkest_coco,
-      backgroundColor: colours.white,
-      borderRadius: 10,
-      fontFamily: "Sora",
-      fontSize: 14,
-      color: colours.darkest_coco,
-      zIndex: 100,
-    },
-  
+  dropdownContainer: {
+    borderWidth: 1,
+    width: "100%",
+    borderColor: colours.darkest_coco,
+    backgroundColor: colours.white,
+    borderRadius: 10,
+    fontFamily: "Sora",
+    fontSize: 14,
+    color: colours.darkest_coco,
+    zIndex: 100,
+  },
 
   textInput: {
     flex: 1,

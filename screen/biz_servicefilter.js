@@ -19,13 +19,13 @@ import { max } from "moment";
 
 
 export default function FilterScreen({navigation}){
-    const [minPrice, setMinPrice] = useState(10);
-    const [maxPrice, setMaxPrice] = useState(100);
-    const [minDuration, setMinDuration] = useState(null);
-    const [maxDuration, setMaxDuration] = useState(null);
+    const [minPrice, setMinPrice] = useState(0);
+    const [maxPrice, setMaxPrice] = useState(0);
+    const [minDuration, setMinDuration] = useState(0);
+    const [maxDuration, setMaxDuration] = useState(0);
     const [subcategory, setSubcategory] = useState([]);
     const [selectedSubcategory, setSelectedSubcategory] = useState([]);
-    const [orderByDate, setOrderByDate] = useState(false);
+    // const [orderByDate, setOrderByDate] = useState(false);
     const [fontsLoaded] = useFonts({
         Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
         Inter: require("../assets/fonts/Inter-regular.ttf"),
@@ -77,15 +77,30 @@ export default function FilterScreen({navigation}){
         );
 
       const applyFilters = () => {
-            const filters = {
-            subcategory: selectedSubcategory,             
-            priceRange: [minPrice, maxPrice],              
-            durationRange: [minDuration, maxDuration],      
-            orderByDate,                                   
-            };
+            const filter = {}
+            if (selectedSubcategory.length > 0) {
+                filter.subcategory = selectedSubcategory;
+            }
 
-            navigation.navigate("Business Urgent Task", { filters });
-        };
+            if (minPrice != 0 || maxPrice != 0) {
+                filter.priceRange = [minPrice, maxPrice];
+            }
+
+            if (minDuration != 0 || maxDuration != 0) {
+                filter.durationRange = [minDuration, maxDuration];
+            }
+
+            // if (orderByDate) {
+            //     filter.orderByDate = orderByDate;
+            // }
+
+            navigation.navigate("Business Urgent Task", { filter });
+            console.log(filter);
+            };
+            
+
+        
+    
 
     
 
@@ -178,7 +193,7 @@ export default function FilterScreen({navigation}){
             </View>
 
     
-            <TouchableOpacity
+            {/* <TouchableOpacity
             onPress={() => setOrderByDate(!orderByDate)}
             style={style.checkboxItem}
         >
@@ -188,7 +203,7 @@ export default function FilterScreen({navigation}){
             color="#704F38"
             />
             <Text style={style.checkboxLabel}>Order By Date</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
                 {/*Apply filter */}
             <TouchableOpacity

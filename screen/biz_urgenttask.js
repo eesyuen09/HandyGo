@@ -1,4 +1,4 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -22,17 +22,37 @@ import { style, colours } from "../components/style_bizUrgentTask";
 import { useFonts } from "expo-font";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { auth } from "../firebaseConfig";
-import { getDoc, doc } from "firebase/firestore";
-
+import {
+  getDoc,
+  doc,
+  collection,
+  getDocs,
+  query,
+  where,
+  orderBy,
+} from "firebase/firestore";
+import { useRoute } from "@react-navigation/native";
 
 //extract data from firebase
-import { collection, getDocs, query, where } from "firebase/firestore";
+
 import { db } from "../firebaseConfig";
-import FilterScreen from "./biz_servicefilter";
+
 
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
+  //filter
+  const route = useRoute();
+  const filter = route.params?.filter || {};
+  const {
+    subcategory = [],
+    priceRange = [0, Infinity],
+    durationRange = [0, Infinity],
+
+  } = filter;
+  const [minPrice, maxPrice] = priceRange;
+  const [minDuration, maxDuration] = durationRange;
+
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
     Inter: require("../assets/fonts/Inter-regular.ttf"),
@@ -43,11 +63,87 @@ export default function UrgentTask() {
   // add search logic
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredTasks, setFilteredTasks] = useState([]);
+  const setResults = results => {
+    setTasks(results);
+    setFilteredTasks(results);
+  };
   useFocusEffect(
     React.useCallback(() => {
-      fetchUrgentTasks();
-    }, []),
+    if (Object.keys(filter).length) {
+      // use the local min/max vars, not the raw priceRange array
+      fetchFilteredBookings({
+        minPrice,   maxPrice,
+        subcategory,
+        minDuration, maxDuration,
+
+      }).then(setResults);
+      } else {
+        fetchUrgentTasks().then(setResults);
+      }
+    }, [ minPrice, maxPrice, minDuration, maxDuration, subcategory ])  // stringify so React re-runs whenever filters change
   );
+
+
+  async function fetchFilteredBookings({
+    minPrice, maxPrice,
+    subcategory, 
+    minDuration, maxDuration,
+
+  }) {
+    
+    const bookingsRef = collection(db, "booking");
+    const constraint = [
+      where("status", "==", "pending"),
+      where("urgency", "==", true),
+  
+  ];
+      if (subcategory.length > 0) {
+          constraint.push(where("type", "in", subcategory));
+        }
+
+
+      // PRICE filter & sort (index: price DESC)
+      // if (minPrice > 0) constraint.push(where("price", ">=", minPrice))
+      // if (isFinite(maxPrice)) constraint.push(where("price", "<=", maxPrice))
+
+
+      // LOCATION filter & sort (index: location ASC)
+      // where("location", "==", location),
+      // orderBy("location", "asc"),
+
+      // SUBCATEGORY filter & sort (index: subcategory DESC)
+if (minDuration > 0) constraint.push(where("duration", ">=", minDuration))
+  if (isFinite(maxDuration)) constraint.push(where("duration", "<=", maxDuration))
+
+
+    const q = query(
+      bookingsRef,
+      ...constraint
+    );
+
+    // 3) Execute and return results
+    try{
+    const snapshot = await getDocs(q);
+    const formatted = snapshot.docs.map(docSnap => {
+      const data = docSnap.data();
+      const iconData = getIcon(data.serviceType);
+      return {
+        id: data.orderID || docSnap.id,
+        category: data.type || "Unknown",
+        time: `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
+        location: `${data.state || ""}, ${data.postcode || ""}`,
+        price: data.price || '35.99',
+        icon: iconData.name,
+        iconFamily: iconData.family,
+      };
+    });
+    return formatted;
+  }catch (error) {
+      console.error("Error fetching tasks:", error);
+      Alert.alert("Error", "Failed to load tasks");
+      return [];
+  }
+}
 
   const fetchUrgentTasks = async () => {
     const user = auth.currentUser;
@@ -55,7 +151,7 @@ export default function UrgentTask() {
 
     const userRef = doc(db, "users", user.uid);
     const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) return;
+    if (!userSnap.exists()) return [];
 
     const userData = userSnap.data();
     const workerCategories = userData.subcategory || [];
@@ -86,9 +182,7 @@ export default function UrgentTask() {
         });
       }
     });
-
-    setTasks(formatted);
-    setFilteredTasks(formatted);
+    return formatted;
   };
 
   function handleSearch(text) {
@@ -106,7 +200,6 @@ export default function UrgentTask() {
     setFilteredTasks(filtered);
   }
 
-  if (!fontsLoaded) return null;
 
   const getIcon = (serviceType) => {
     switch (serviceType) {
@@ -216,8 +309,7 @@ export default function UrgentTask() {
               handleSearch(text);
             }}
           />
-          <TouchableOpacity
-            onPress={() => navigation.navigate(FilterScreen)}>
+          <TouchableOpacity onPress={() => navigation.navigate("FilterScreen")}>
             <Feather name="filter" size={20} color={colours.darkest_coco} />
           </TouchableOpacity>
         </View>

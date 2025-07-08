@@ -121,8 +121,11 @@ const RootStack = () => {
         <Stack.Screen name="Business Home Page" component={Biz_homepage} />
         <Stack.Screen name="Add Details" component={Biz_adddetails} />
         <Stack.Screen name="Business Urgent Task" component={Biz_urgentTask} />
-        <Stack.Screen name="Business Scheduled Task" component={Biz_scheduledTask}/>
-        <Stack.Screen name = "FilterScreen" component={FilterScreen}/>
+        <Stack.Screen
+          name="Business Scheduled Task"
+          component={Biz_scheduledTask}
+        />
+        <Stack.Screen name="FilterScreen" component={FilterScreen} />
         <Stack.Screen name="Forgot Password" component={ForgotPassword} />
         <Stack.Screen name="Order Summary" component={Biz_ordersummary} />
       </Stack.Navigator>
