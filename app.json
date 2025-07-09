@@ -30,10 +30,7 @@
     "web": {
       "favicon": "./assets/handygo-logo.png"
     },
-    "plugins": [
-      "expo-web-browser",
-      "expo-font"
-    ],
+    "plugins": ["expo-web-browser", "expo-font"],
     "extra": {
       "eas": {
         "projectId": "9ea46c82-7e55-4bed-a197-d422c4f36f6b"
