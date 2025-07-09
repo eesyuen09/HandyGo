@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "158473300904",
+    "project_id": "handygo-123",
+    "storage_bucket": "handygo-123.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:158473300904:android:bc5bfdcee6173d6b9a0b9d",
+        "android_client_info": {
+          "package_name": "com.eesyuen.HandyGo"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "158473300904-4qg6m53aic6gtp2ttjlcg19b0rihshhi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDWYCPaCD6lebnL6e1AWbKvvO7yt8wNMro"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "158473300904-4qg6m53aic6gtp2ttjlcg19b0rihshhi.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "158473300904-ham58hc6burjv712vjpiup7hs052jde2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.eesyuen.HandyGo"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
