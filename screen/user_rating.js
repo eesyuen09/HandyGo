@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, getDoc, addDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { styles } from "../components/style_u_rating";
 
@@ -21,7 +21,7 @@ export default function UserRating() {
 
   const route = useRoute();
   const navigation = useNavigation();
-  const { orderId, workerId } = route.params || {};
+  const { orderId, workerId, userId } = route.params || {};
 
   const handleRatingSubmit = async () => {
     if (rating === 0) {
@@ -33,39 +33,46 @@ export default function UserRating() {
 
     try {
       //Update booking document
+      console.log({ orderId, workerId, userId, rating, review });
       const bookingRef = doc(db, "booking", orderId);
       await updateDoc(bookingRef, {
         rating,
         review,
       });
 
-      // Update worker’s review array and average rating
+      // Update worker’s review collection and average rating
       const workerRef = doc(db, "users", workerId);
       const workerSnap = await getDoc(workerRef);
-      const workerData = workerSnap.exists() ? workerSnap.data() : {};
-      const prevReviews = workerData.reviews || [];
+      if (!workerSnap.exists()) {
+        console.error("Worker document not found:", workerId);
+        Alert.alert("Error", "Worker data not found.");
+        return;
+      }
+      const workerData = workerSnap.data();
       const newReview = {
         orderId,
+        userId,
         rating,
         review,
         timestamp: new Date(),
       };
+
+      const reviewsRef = collection(db, "users", workerId, "reviews");
+      await addDoc(reviewsRef, newReview);
 
       const updatedTotal = (workerData.totalRating || 0) + rating;
       const updatedCount = (workerData.ratingCount || 0) + 1;
       const updatedAverage = updatedTotal / updatedCount;
 
       await updateDoc(workerRef, {
-        reviews: arrayUnion(newReview),
         averageRating: updatedAverage,
-        totalRating: updatedTotal,
         ratingCount: updatedCount,
       });
 
       Alert.alert("Success", "Your rating has been submitted.");
       navigation.goBack();
     } catch (err) {
-      console.log(orderId, workerId);
+      console.log(orderId, workerId, userId);
       console.error("Failed to submit rating:", err);
       Alert.alert("Error", "Failed to submit your rating. Please try again.");
     } finally {

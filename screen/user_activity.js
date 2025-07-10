@@ -111,7 +111,7 @@ export default function UserActivity({ navigation }) {
           isCompleted: data.isCompleted || false,
           status: data.status || "pending",
           workerId: data.workerId,
-          userId: data.userId,
+          userId: data.userId || "unknown",
         };
 
         if (task.isCompleted) {
@@ -218,6 +218,7 @@ export default function UserActivity({ navigation }) {
               navigation.navigate("UserRating", {
                 orderId: item.id,
                 workerId: item.workerId,
+                userId: item.userId,
               })
             }
           >
