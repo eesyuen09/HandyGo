@@ -84,6 +84,12 @@ export default function FinanceScreen(){
 
             <View style = {style.line}/>
 
+            {/* ratings and review */}
+            <Text style = {style.subtitle}>Ratings and Reviews</Text>
+            <Text style = {style.subtitle}>Current Ratings: {rating}</Text>
+            
+
+
             {/* Top Earning */}
             <View style={style.earningHeader}>
                 <Text style={style.subtitle}>Top Earning</Text>
@@ -93,6 +99,13 @@ export default function FinanceScreen(){
             {topEarnings.map((item) => (
                 <EarningCard key={item.id} {...item} />
                 ))}
+
+            <View style = {style.line}/>
+
+            
+
+
+
             </ScrollView>
         </View>
     )

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Dimensions } from 'react-native';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import * as d3Shape from 'd3-shape';
+import { useFonts } from 'expo-font';
 
 const { width } = Dimensions.get('window');
 const size = width -150;
@@ -15,6 +16,10 @@ const pieData = [
 ];
 
 export default function PieChart() {
+  const [fontsLoaded] = useFonts({
+      Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
+      Inter: require("../assets/fonts/Inter-regular.ttf"),
+    });
   const pieGen = d3Shape.pie().value(d => d.value);
   const arcGen = d3Shape.arc().outerRadius(radius).innerRadius(0);
 
@@ -51,6 +56,7 @@ export default function PieChart() {
                 fontSize="12"
                 fontWeight="bold"
                 textAnchor="middle"
+                fontFamily='Inter'
               >
                 {`${pieData[i].label}:${pieData[i].value}`}
               </SvgText>
