@@ -275,7 +275,7 @@ export default function UserBooking() {
                       style={styles.dropdownContainer}
                       open={openDuration}
                       value={values.duration}
-                      items={[...Array(15)].map((_, i) => ({
+                      items={[...Array(7)].map((_, i) => ({
                         label: `${i + 1} hour${i + 1 > 1 ? "s" : ""}`,
                         value: i + 1,
                       }))}
