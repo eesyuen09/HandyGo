@@ -366,6 +366,10 @@ export default function EditProfile({ navigation }) {
         <TouchableOpacity style={style.button} onPress={handleSave}>
           <Text style={style.buttonText}>Save Changes</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity style = {style.button} onPress={() => navigation.navigate('Login')}>
+          <Text style = {style.buttonText}>Sign Out</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
