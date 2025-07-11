@@ -118,6 +118,7 @@ export default function UserHome({ navigation }) {
       subcategory: serviceData.subcategories[0],
       description: serviceData.description,
       price: serviceData.price,
+      questions: serviceData.questions,
       // bannerImage: serviceData.bannerImage,
       // icon: serviceData.icon,
     });
@@ -139,6 +140,7 @@ export default function UserHome({ navigation }) {
       subcategory: subcategory,
       description: serviceData.description,
       price: serviceData.price,
+      questions: serviceData.questions,
       // bannerImage: serviceData.bannerImage,
       // icon: serviceData.icon,
     });

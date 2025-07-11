@@ -52,10 +52,34 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
+function bucketItemCount(count) {
+  if (count <= 1) {
+    return 1;
+  }
+  if (count <= 3) {
+    return 2;
+  } else {
+    return 3;
+  }
+}
+
+function bucketAreaSize(m2) {
+  if (m2 <= 20) return 1;
+  if (m2 <= 50) return 2;
+  return 3;
+}
+
 export { calculateEndTime, handleBookingSubmit };
+
 export default function UserBooking() {
   const route = useRoute();
-  const { serviceType, subcategory, description, price } = route.params || {};
+  const {
+    serviceType,
+    subcategory,
+    description,
+    price,
+    questions = [],
+  } = route.params || {};
   const icon = services_categories.find(
     (category) => category.title === serviceType
   )?.icon;
@@ -65,6 +89,19 @@ export default function UserBooking() {
   const subcategories = services_categories.find(
     (category) => category.title === serviceType
   )?.subcategories;
+  const dynamicInitial = {
+    ...questions.reduce((acc, q) => {
+      acc[q.key] = 0;
+      console.log("Dynamic Initial Value for", q.key, ":", acc[q.key]);
+      return acc;
+    }, {}),
+  };
+  const [openStates, setOpenStates] = useState(
+    Object.keys(dynamicInitial).reduce((acc, key) => {
+      acc[key] = false;
+      return acc;
+    }, {})
+  );
   const [openUrgency, setOpenUrgency] = useState(false);
   const [openType, setOpenType] = useState(false);
   const [openDuration, setOpenDuration] = useState(false);
@@ -74,6 +111,12 @@ export default function UserBooking() {
   const [currentUser, setCurrentUser] = useState(null);
   const auth = getAuth(app);
   const navigation = useNavigation();
+  const dynamicSchema = questions.reduce((schema, q) => {
+    schema[q.key] = Yup.number()
+      .min(1, `${q.prompt} is required`)
+      .required(`${q.prompt} is required`);
+    return schema;
+  }, {});
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -101,6 +144,7 @@ export default function UserBooking() {
         notif: false,
         notes: "",
         status: "pending",
+        ...dynamicInitial,
       }}
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
@@ -119,6 +163,7 @@ export default function UserBooking() {
           .matches(/^\d{6}$/, "Postcode must be 6 digits")
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
+        ...dynamicSchema,
       })}
       onSubmit={async (values, { resetForm }) => {
         const {
@@ -138,10 +183,36 @@ export default function UserBooking() {
         } = values;
 
         try {
+          // create an array for scores
+          const scores = [];
+
+          // collect scores from dropdowns
+          questions.forEach((q) => {
+            if (
+              ["severity", "access", "sizeTier", "floors", "distance"].includes(
+                q.key
+              )
+            ) {
+              scores.push(values[q.key]);
+            }
+          });
+
+          if (values.itemCount != null) {
+            scores.push(bucketItemCount(values.itemCount));
+          }
+          if (values.areaSize != null) {
+            scores.push(bucketAreaSize(values.areaSize));
+          }
+
+          const avgSeverity = scores.length
+            ? scores.reduce((sum, s) => sum + s, 0) / scores.length
+            : 0;
+
           const bookingRef = await addDoc(collection(db, "booking"), {
             ...values,
             createdAt: new Date(),
             userId: auth.currentUser.uid,
+            severity: avgSeverity,
             price: 30, //assume its a fixed price for now for worker's analysis
           });
 
@@ -258,6 +329,44 @@ export default function UserBooking() {
                 {touched.urgency && errors.urgency && (
                   <Text style={styles.error}>{errors.urgency}</Text>
                 )}
+              </View>
+
+              {/* Severity */}
+              <View style={styles.section}>
+                <View style={styles.inputRow}>
+                  <View style={styles.header}>
+                    <FontAwesome name="tasks" size={18} color="#704F38" />
+                    <Text style={styles.input}>Severity</Text>
+                  </View>
+
+                  {/* One box per question */}
+                  {questions.map((q, i) => (
+                    <View
+                      key={q.key}
+                      style={[styles.inputRow, { zIndex: 600 - i }]}
+                    >
+                      <Text style={styles.input}>{q.prompt}</Text>
+                      <DropDownPicker
+                        open={openStates[q.key]}
+                        value={values[q.key]}
+                        items={q.options.map((opt, idx) => ({
+                          label: opt.label,
+                          value: opt.value,
+                        }))}
+                        setOpen={(v) =>
+                          setOpenStates((s) => ({ ...s, [q.key]: v }))
+                        }
+                        setValue={(cb) => setFieldValue(q.key, cb())}
+                        containerStyle={{ zIndex: 600 - i }}
+                        placeholder={`Select ${q.prompt.toLowerCase()}`}
+                        listMode="SCROLLVIEW"
+                      />
+                      {touched[q.key] && errors[q.key] && (
+                        <Text style={styles.error}>{errors[q.key]}</Text>
+                      )}
+                    </View>
+                  ))}
+                </View>
               </View>
 
               {/* Time */}

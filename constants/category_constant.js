@@ -39,6 +39,38 @@ export const services_categories = [
       />
     ),
     bannerImage: require("../assets/images/cleaning_banner.png"),
+    questions: [
+      {
+        key: "homeSize",
+        prompt: "Home size / number of rooms",
+        type: "select",
+        options: [
+          { label: "Studio / 1-room", value: 1 },
+          { label: "2-3 rooms", value: 2 },
+          { label: "4+ rooms", value: 3 },
+        ],
+      },
+      {
+        key: "petHair",
+        prompt: "Pet hair cleanup needed?",
+        type: "select",
+        options: [
+          { label: "No", value: 1 },
+          { label: "Light", value: 2 },
+          { label: "Heavy", value: 3 },
+        ],
+      },
+      {
+        key: "access",
+        prompt: "Stairs / elevator access",
+        type: "select",
+        options: [
+          { label: "Ground floor", value: 1 },
+          { label: "Elevator accessible", value: 2 },
+          { label: "Stairs only", value: 3 },
+        ],
+      },
+    ],
   },
 
   {
@@ -63,9 +95,12 @@ export const services_categories = [
         prompt: "How severe is the issue?",
         type: "select",
         options: [
-          "Minor (small leak, tiny crack)",
-          "Moderate (dripping)",
-          "Major (burst pipe, no power, completely broken lock)",
+          { label: "Minor (small leak, tiny crack)", value: 1 },
+          { label: "Moderate (dripping)", value: 2 },
+          {
+            label: "Major (burst pipe, no power, completely broken lock)",
+            value: 3,
+          },
         ],
       },
       {
@@ -73,9 +108,9 @@ export const services_categories = [
         prompt: "Is access straightforward?",
         type: "select",
         options: [
-          "Easy (ground)",
-          "Moderate (lift accessible)",
-          "Difficult (upstairs, no elevator)",
+          { label: "Easy (ground)", value: 1 },
+          { label: "Moderate (lift accessible)", value: 2 },
+          { label: "Difficult (upstairs, no elevator)", value: 3 },
         ],
       },
     ],
@@ -121,9 +156,12 @@ export const services_categories = [
         prompt: "Task complexity",
         type: "select",
         options: [
-          "Basic - straightforward install or check",
-          "Intermediate - some prep or precision work",
-          "Advanced - needs special tools or partial demolition",
+          { label: "Basic - straightforward install or check", value: 1 },
+          { label: "Intermediate - some prep or precision work", value: 2 },
+          {
+            label: "Advanced - needs special tools or partial demolition",
+            value: 3,
+          },
         ],
       },
     ],
@@ -152,22 +190,30 @@ export const services_categories = [
         prompt: "Home size or load tier",
         type: "select",
         options: [
-          "Studio / 1-2 items",
-          "1-2 BR (5-10 items)",
-          "3+ BR (10+ items)",
+          { label: "Studio / 1-2 items", value: "1" },
+          { label: "1-2 BR (5-10 items)", value: "2" },
+          { label: "3+ BR (10+ items)", value: "3" },
         ],
       },
       {
         key: "floors",
         prompt: "Stairs / elevator access",
         type: "select",
-        options: ["Ground floor only", "Elevator accessible", "No elevator"],
+        options: [
+          { label: "Ground floor only", value: 1 },
+          { label: "Elevator accessible", value: 2 },
+          { label: "No elevator", value: 3 },
+        ],
       },
       {
         key: "distance",
         prompt: "Carry distance",
         type: "select",
-        options: ["< 20 m", "20-50 m", "> 50 m"],
+        options: [
+          { label: "< 20 m", value: 1 },
+          { label: "20-50 m", value: 2 },
+          { label: "> 50 m", value: 3 },
+        ],
       },
     ],
   },
