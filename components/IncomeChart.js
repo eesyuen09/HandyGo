@@ -3,11 +3,12 @@ import { View, Dimensions, TouchableWithoutFeedback} from 'react-native';
 import Svg, { Line, Circle, Path, Text as SvgText, TSpan, G } from 'react-native-svg';
 import * as shape from 'd3-shape';
 import * as scale from 'd3-scale';
+import { useFonts } from 'expo-font';
 
 
 const screenWidth = Dimensions.get('window').width;
-const MARGIN = { top: 40, right: 20, bottom: 30, left: 40 };
-const chartWidth = (screenWidth - MARGIN.left - MARGIN.right)*0.8;
+const MARGIN = { top: 20, right: 20, bottom: 30, left: 45 };
+const chartWidth = screenWidth * 0.75 - MARGIN.left - MARGIN.right;
 const chartHeight = 200;
 
 export const colours = {
@@ -22,14 +23,22 @@ export const colours = {
 
 const { main_coco } = colours;
 
-const data = [400, 600, 1230, 900, 700, 800];
-const labels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+const fullData = [400, 600, 1230, 900, 700, 800, 1000, 2300, 1400, 1900, 2400, 1700];
+const fullLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-const maxY = Math.max(...data);
+const maxY = Math.max(...fullData);
 const minY = 0;
 
-export default function IncomeChart() {
+export default function IncomeChart({ startMonth = 0, endMonth = 6}) {
 const [selectedDot, setSelectedDot] = useState(null);
+const data = fullData.slice(startMonth, endMonth);
+const labels = fullLabels.slice(startMonth, endMonth);
+      const [fontsLoaded] = useFonts({
+        Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
+        Inter: require("../assets/fonts/Inter-regular.ttf"),
+      });
+    
+      if (!fontsLoaded) return null;
 
   const xScale = scale.scalePoint()
     .domain(labels)
@@ -50,6 +59,8 @@ const [selectedDot, setSelectedDot] = useState(null);
     .x(d => d.x)
     .y(d => d.y)
     .curve(shape.curveCatmullRom.alpha(0.5))(points);
+  
+  const yTicks = Array.from({ length: 5 }, (_, i) => Math.round((maxY / 4) * i));
 
   return (
     <View style={{ paddingHorizontal: 20 }}>
@@ -59,7 +70,7 @@ const [selectedDot, setSelectedDot] = useState(null);
           <Line x1={0} y1={0} x2={0} y2={chartHeight} stroke={main_coco} strokeWidth="2" />
 
           {/* Y Labels */}
-          {[0, 400, 800, 1200].map(value => (
+          {yTicks.map(value => (
         <SvgText
   key={value}
   x={-10}
@@ -68,7 +79,7 @@ const [selectedDot, setSelectedDot] = useState(null);
   fill={main_coco}
   textAnchor="end"
   alignmentBaseline="middle"
-  fontFamily='Inter'
+  fontFamily='Sora'
 >
   {value}
 </SvgText>
@@ -86,7 +97,7 @@ const [selectedDot, setSelectedDot] = useState(null);
               fontSize="13"
               fill={main_coco}
               textAnchor="middle"
-              fontFamily='Inter'
+              fontFamily='Sora'
             >
               {label}
             </SvgText>

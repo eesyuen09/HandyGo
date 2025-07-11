@@ -90,6 +90,7 @@ export const style = StyleSheet.create({
     fontSize: 20, 
     fontWeight: 'bold',
     color: darkest_coco,
+    fontFamily: 'Sora'
   },
     line: {
     height: 1,
@@ -97,6 +98,12 @@ export const style = StyleSheet.create({
     backgroundColor: darkest_coco,
     marginVertical: 10,
   },
+  aiText:{
+    fontSize: 14,
+    color: darkest_coco,
+    lineHeight: 18,
+    marginTop: 6,
+  }
 //   seeAll: {
 //     color: colours.primary,
 //   },

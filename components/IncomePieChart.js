@@ -56,7 +56,7 @@ export default function PieChart() {
                 fontSize="12"
                 fontWeight="bold"
                 textAnchor="middle"
-                fontFamily='Inter'
+                fontFamily='Sora'
               >
                 {`${pieData[i].label}:${pieData[i].value}`}
               </SvgText>
