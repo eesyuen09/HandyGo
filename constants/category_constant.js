@@ -57,6 +57,28 @@ export const services_categories = [
     price: 20,
     bannerImage: require("../assets/images/repair_banner.png"),
     icon: <Feather name="tool" size={18} color={colours.darkest_coco} />,
+    questions: [
+      {
+        key: "severity",
+        prompt: "How severe is the issue?",
+        type: "select",
+        options: [
+          "Minor (small leak, tiny crack)",
+          "Moderate (dripping)",
+          "Major (burst pipe, no power, completely broken lock)",
+        ],
+      },
+      {
+        key: "access",
+        prompt: "Is access straightforward?",
+        type: "select",
+        options: [
+          "Easy (ground)",
+          "Moderate (lift accessible)",
+          "Difficult (upstairs, no elevator)",
+        ],
+      },
+    ],
   },
   {
     title: "Maintenance",
@@ -83,6 +105,28 @@ export const services_categories = [
         color={colours.darkest_coco}
       />
     ),
+    questions: [
+      {
+        key: "itemCount",
+        prompt: "Number of items (e.g. furniture, fixtures)",
+        type: "number",
+      },
+      {
+        key: "areaSize",
+        prompt: "Area size in m² (e.g. painting, tiling)",
+        type: "number",
+      },
+      {
+        key: "complexity",
+        prompt: "Task complexity",
+        type: "select",
+        options: [
+          "Basic - straightforward install or check",
+          "Intermediate - some prep or precision work",
+          "Advanced - needs special tools or partial demolition",
+        ],
+      },
+    ],
   },
   {
     title: "Moving",
@@ -102,6 +146,30 @@ export const services_categories = [
         color={colours.darkest_coco}
       />
     ),
+    questions: [
+      {
+        key: "sizeTier",
+        prompt: "Home size or load tier",
+        type: "select",
+        options: [
+          "Studio / 1-2 items",
+          "1-2 BR (5-10 items)",
+          "3+ BR (10+ items)",
+        ],
+      },
+      {
+        key: "floors",
+        prompt: "Stairs / elevator access",
+        type: "select",
+        options: ["Ground floor only", "Elevator accessible", "No elevator"],
+      },
+      {
+        key: "distance",
+        prompt: "Carry distance",
+        type: "select",
+        options: ["< 20 m", "20-50 m", "> 50 m"],
+      },
+    ],
   },
   {
     title: "Outdoor Services",
@@ -116,5 +184,13 @@ export const services_categories = [
     price: 50,
     bannerImage: require("../assets/images/outdoor_banner.png"),
     icon: <FontAwesome5 name="tree" size={18} color={colours.darkest_coco} />,
+    questions: [
+      {
+        key: "areaSize",
+        prompt: "Area size in m²",
+        type: "number",
+        helperText: "Enter area, e.g. 100",
+      },
+    ],
   },
 ];
