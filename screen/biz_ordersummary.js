@@ -168,8 +168,8 @@ const handleCompleteTask = async () => {
     const data = snap.data();
 
     // Write the earning
-    const earningsRef = collection(db, "users", workerId, "earnings");
-    await addDoc(earningsRef, {
+    const earningsRef = doc(db, "users", workerId, "earnings", bookingRef.id);
+    await setDoc(earningsRef, {
       date: data.availability?.[0]?.date || data.createdAt?.toDate()?.toISOString().slice(0,10),
       // price: data.price,
       serviceType: data.type,
