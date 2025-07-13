@@ -46,14 +46,13 @@ service cloud.firestore {
       //Unified read rule for both user and worker
      
       allow read: if request.auth != null &&
-  (resource.data.userId == request.auth.uid || resource.data.workerId == request.auth.uid);
- // Allow users to set orderID on newly created docs
-allow update: if request.auth != null && (
-     // once a worker accepts, only they can update
-     (resource.data.workerId == request.auth.uid) ||
-     // before that, let the client merge in orderID
-     (resource.data.workerId == null && request.auth.uid == resource.data.userId)
-   );
+      (resource.data.userId == request.auth.uid || resource.data.workerId == request.auth.uid);
+      // Allow users to set orderID on newly created docs
+      allow update: if request.auth != null &&
+          (
+            resource.data.userId == request.auth.uid ||   // let the creator finish the merge
+            resource.data.workerId == request.auth.uid     // or the assigned worker later
+          );
         }
 
     // 7. Fallback
