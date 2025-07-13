@@ -48,14 +48,14 @@ export async function getSummaryForUser(userId){
     //if the model decided to invoke your helper function instead of just answering directly.
     if(message.function_call){
         //destruct object, pull out two properties from reply.function_call
-        const{ name, arguments: rawArgs } = reply.function_call;
+        const{ name, arguments: rawArgs } = message.function_call;
         //because rawArgs is JSON-encoded string, need to turn into normal object using "JSON.parse"
         const { userId: uid, maxItems = 5} = JSON.parse(rawArgs);
 
         //2. real firestore lookup
         //query returns reference only
         const q = query(
-            collection(db, 'user', uid, 'schedules'),
+            collection(db, 'users', uid, 'schedules'),
             orderBy('date', 'desc'),
             limit(maxItems)
         );
@@ -80,10 +80,10 @@ export async function getSummaryForUser(userId){
         });
 
         //4. return summary
-        return second.output.choices?.[0]?.messages?.content
+        return second.choices[0].messages?.content
             ??'Sorry, I wasn;t able to summarize'
     }
     //if no function was called, just return the model's direct reply:
-    return reply.choices?.[0]?.message?.content
+    return first.choices?.[0]?.message?.content
         ??"Sorry, I didn't get that.";
 }

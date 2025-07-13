@@ -48,7 +48,7 @@ export default function FinanceScreen() {
       try {
         // 1) Query Firestore for latest schedules
         const q = query(
-          collection(db, 'user', userId, 'schedules'),
+          collection(db, 'users', userId, 'schedules'),
           orderBy('date', 'desc'),
           limit(5)
         );

@@ -17,8 +17,10 @@ import {
   updateDoc,
   onSnapshot,
   collection,
+  addDoc,
   setDoc,
   deleteField,
+  Timestamp
 } from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
@@ -43,6 +45,7 @@ export default function OrderSummary({ navigation }) {
 
   const categoryItem = booking.find((item) => item.type === "category");
   const bookingDetails = booking.filter((item) => item.type !== "category");
+
 
   //add schedule as subcollection in workers' firestore
   const addScheduleForWorker = async (workerID, orderID) => {
@@ -103,30 +106,7 @@ export default function OrderSummary({ navigation }) {
         </View>
         <View style={style.taskInfo}>
           <Text style={style.cardTitle}>{item.title}</Text>
-          {/* {isAvailabilityCard && Array.isArray(item.content) && bookingData?.status !== 'accepted' ? (
-                <DropDownPicker
-                    open={openDate}
-                    value={selectedTime}
-                    items={availabilityOptions}
-                    setOpen={setOpenDate}
-                    setValue={setSelectedTime}
-                    setItems={() => {}}
-                    placeholder="Select a time slot"
-                    zIndex={1000}
-                    style={style.dropdownContainer}
-                    textStyle={style.cardContent}
-                />
-                ) : isAvailabilityCard ? (
-                // Show selected time string when accepted
-                <Text style={style.cardContent}>
-                {typeof bookingData?.availability === 'object'
-                    ? `${bookingData.availability.date} | ${bookingData.availability.time}`
-                    : bookingData?.availability || "No time selected"}
-                </Text>
-                ) : (
-                // For non-availability items
-                <Text style={style.cardContent}>{item.content}</Text>
-                )} */}
+  
           {isAvailabilityCard && Array.isArray(item.content) ? (
             role === "user" && bookingData?.status !== "accepted" ? (
               // Show all available slots as plain text for users
@@ -167,7 +147,7 @@ export default function OrderSummary({ navigation }) {
       </View>
     );
   };
-  const changeIsComplete = async (bookingId, workerID) => {
+  const handleCompleteTask = async (bookingId, workerID) => {
     if (!bookingData) {
       Alert.alert("Data not ready yet.");
       return;
@@ -177,9 +157,28 @@ export default function OrderSummary({ navigation }) {
       Alert.alert("Error! This booking has already been completed.");
       return;
     }
+    //add earning
+    const bookingRef = doc(db, "booking", bookingId);
+    const bookingSnap = await getDoc(bookingRef);
+
+    if (!bookingSnap.exists()) {
+      console.log("No booking found for earnings.");
+      return;
+    }
+
+    const data = bookingSnap.data();
+    const workerId = auth.currentUser.uid;
+
+    const earningRef = collection(db, "users", workerId, "earning");
+    await addDoc(earningRef, {
+      date: data.date,
+      price: data.price,
+      type: data.type,
+      orderID: data.orderID,
+      timestamp: Timestamp.now(),
+    });
 
     try {
-      const bookingRef = doc(db, "booking", bookingId);
       const scheduledDocRef = doc(
         db,
         "users",
@@ -391,9 +390,11 @@ export default function OrderSummary({ navigation }) {
           {userID && !isCompleted && role === "business" && (
             <TouchableOpacity
               style={style.button}
-              onPress={() => changeIsComplete(orderID, userID)}
+              onPress={() => {
+                handleCompleteTask(orderID, userID)
+              }}
             >
-              <Text style={style.buttonText}>Completed Task</Text>
+              <Text style={style.buttonText}>Complete Task</Text>
             </TouchableOpacity>
           )}
 
