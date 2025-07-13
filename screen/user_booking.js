@@ -92,7 +92,6 @@ export default function UserBooking() {
   const dynamicInitial = {
     ...questions.reduce((acc, q) => {
       acc[q.key] = 0;
-      console.log("Dynamic Initial Value for", q.key, ":", acc[q.key]);
       return acc;
     }, {}),
   };
