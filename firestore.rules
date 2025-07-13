@@ -37,23 +37,27 @@ service cloud.firestore {
     }
 
     // 6. Bookings
-    match /booking/{bookingId} {
-      allow create: if request.auth != null
-        && get(
-          /databases/$(database)/documents/users/$(request.auth.uid)
-        ).data.role == 'user';
+      match /booking/{bookingId} {
+  allow create: if request.auth != null
+    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'user';
 
-      //Unified read rule for both user and worker
-     
-      allow read: if request.auth != null &&
-      (resource.data.userId == request.auth.uid || resource.data.workerId == request.auth.uid);
-      // Allow users to set orderID on newly created docs
-      allow update: if request.auth != null &&
-          (
-            resource.data.userId == request.auth.uid ||   // let the creator finish the merge
-            resource.data.workerId == request.auth.uid     // or the assigned worker later
-          );
-        }
+  allow read: if request.auth != null
+    && (
+      resource.data.userId == request.auth.uid
+      || resource.data.workerId == request.auth.uid
+      || (
+        // business users can see unassigned bookings
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
+        && resource.data.workerId == null
+      )
+    );
+
+  allow update: if request.auth != null
+    && (
+      resource.data.userId == request.auth.uid
+      || resource.data.workerId == request.auth.uid
+    );
+}
 
     // 7. Fallback
     match /{document=**} {
