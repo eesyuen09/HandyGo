@@ -60,6 +60,12 @@ service cloud.firestore {
     );
 }
 
+      //8. Earning
+      match /users/{workerId}/earnings/{earningId} {
+  allow read, write: if request.auth != null
+    && request.auth.uid == workerId;
+}
+
     // 7. Fallback
     match /{document=**} {
       allow read, write: if false;
