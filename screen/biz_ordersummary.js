@@ -147,65 +147,56 @@ export default function OrderSummary({ navigation }) {
       </View>
     );
   };
-  const handleCompleteTask = async (bookingId, workerID) => {
-    if (!bookingData) {
-      Alert.alert("Data not ready yet.");
-      return;
-    }
 
-    if (bookingData.isCompleted) {
-      Alert.alert("Error! This booking has already been completed.");
-      return;
-    }
-    //add earning
-    const bookingRef = doc(db, "booking", bookingId);
-    const bookingSnap = await getDoc(bookingRef);
 
-    if (!bookingSnap.exists()) {
-      console.log("No booking found for earnings.");
-      return;
-    }
+const handleCompleteTask = async () => {
+  if (!bookingData) {
+    return Alert.alert("Data not ready yet.");
+  }
+  if (bookingData.isCompleted) {
+    return Alert.alert("Error! Already completed.");
+  }
 
-    const data = bookingSnap.data();
-    const workerId = auth.currentUser.uid;
+  const bookingRef = doc(db, "booking", orderID);
+  const workerId   = auth.currentUser.uid;
 
-    const earningRef = collection(db, "users", workerId, "earning");
-    await addDoc(earningRef, {
-      date: data.date,
-      price: data.price,
-      type: data.type,
-      orderID: data.orderID,
+  try {
+    //  Read the latest booking
+    const snap = await getDoc(bookingRef);
+    if (!snap.exists()) throw new Error("Booking not found");
+
+    const data = snap.data();
+
+    // Write the earning
+    const earningsRef = collection(db, "users", workerId, "earnings");
+    await addDoc(earningsRef, {
+      date: data.availability?.[0]?.date || data.createdAt?.toDate()?.toISOString().slice(0,10),
+      // price: data.price,
+      serviceType: data.type,
+      bookingId: bookingRef.id,
       timestamp: Timestamp.now(),
     });
 
-    try {
-      const scheduledDocRef = doc(
-        db,
-        "users",
-        workerID,
-        "schedules",
-        bookingId
-      ); // use bookingId
+    // Mark booking completed
+    await updateDoc(bookingRef, {
+      isCompleted: true,
+      completedAt: new Date(),
+      status: "completed",
+    });
 
-      // Update booking document
-      await updateDoc(bookingRef, {
-        isCompleted: true,
-        completedAt: new Date(),
-        status: "completed",
-      });
+    // Update the schedule sub-doc
+    const scheduleRef = doc(db, "users", workerId, "schedules", bookingRef.id);
+    await updateDoc(scheduleRef, { status: "completed" });
 
-      // Update worker's schedule document
-      await updateDoc(scheduledDocRef, {
-        status: "completed",
-      });
+    // Finally, go back
+    Alert.alert("Success", "Booking completed and earnings recorded!");
+    navigation.goBack();
 
-      Alert.alert("Booking Completed!");
-      navigation.goBack();
-    } catch (err) {
-      console.error("Failed to complete booking:", err);
-      Alert.alert("Error", "Failed to complete booking.");
-    }
-  };
+  } catch (err) {
+    console.error("Complete task failed:", err);
+    Alert.alert("Error", err.message || "Something went wrong");
+  }
+};
 
   const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
