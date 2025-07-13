@@ -47,8 +47,13 @@ service cloud.firestore {
      
       allow read: if request.auth != null &&
   (resource.data.userId == request.auth.uid || resource.data.workerId == request.auth.uid);
-          allow update: if request.auth != null
-            && resource.data.workerId == request.auth.uid;
+ // Allow users to set orderID on newly created docs
+allow update: if request.auth != null && (
+     // once a worker accepts, only they can update
+     (resource.data.workerId == request.auth.uid) ||
+     // before that, let the client merge in orderID
+     (resource.data.workerId == null && request.auth.uid == resource.data.userId)
+   );
         }
 
     // 7. Fallback
