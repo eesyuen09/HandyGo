@@ -137,6 +137,9 @@ export default function Moredetails({ navigation }) {
         category: values.category,
         subcategory: values.subcategory,
         introduction: values.introduction,
+        totalEarnings: 0,
+        monthlyEarnings: {},
+        pieSummary: {},
       });
 
       alert("Data saved successfully!");

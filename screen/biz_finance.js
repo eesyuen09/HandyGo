@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-import { getDocs, collection, query, orderBy, limit } from 'firebase/firestore';
+import { getDocs, collection, query, orderBy, limit, doc, updateDoc, Timestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -20,6 +20,7 @@ import { db } from '../firebaseConfig';
 import { getSummaryForUser } from './openaiService';
 import { style } from '../components/style_bizfinance';
 import { colours } from '../components/IncomeChart';
+import { increment } from "firebase/firestore";
 
 export default function FinanceScreen() {
   const auth = getAuth();
@@ -40,6 +41,17 @@ export default function FinanceScreen() {
   // AI summary state
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
+
+  //record earnings
+  async function recordEarning(workerId, amount, dateString) {
+    const monthKey = dateString.slice(0, 7);     // e.g. "2025-07"
+    const workerRef = doc(db, "workers", workerId);
+
+    await updateDoc(workerRef, {
+      totalEarnings:       increment(amount),
+      [`monthlyEarnings.${monthKey}`]: increment(amount)
+    });
+  }
 
   // Fetch & summarize on mount
   useEffect(() => {
