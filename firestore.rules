@@ -40,17 +40,18 @@ service cloud.firestore {
       match /booking/{bookingId} {
   allow create: if request.auth != null
     && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'user';
+    
+    allow read: if request.auth != null && (
+    resource.data.userId == request.auth.uid
+    || resource.data.workerId == request.auth.uid
+    // any business user can see unassigned bookings
+    || (
+      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
+      && !resource.data.keys().has('workerId')    // ← field is missing
+    )
+  );
 
-  allow read: if request.auth != null
-    && (
-      resource.data.userId == request.auth.uid
-      || resource.data.workerId == request.auth.uid
-      || (
-        // business users can see unassigned bookings
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
-        && resource.data.workerId == null
-      )
-    );
+  
 
   allow update: if request.auth != null
     && (
