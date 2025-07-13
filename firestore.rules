@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Users collection
+    match /users/{userId} {
+      allow read, update, delete: if
+        request.auth != null
+        && request.auth.uid == userId;
+      allow create: if
+        request.auth != null;
+    }
+
+    // 2. CategoryToWorker
+    match /CategoryToWorker/{categoryId} {
+      allow read, write: if false;
+    }
+
+    // 3. SubcategoryToWorker
+    match /SubcategoryToWorker/{subcategoryId} {
+      allow read, write: if false;
+    }
+
+    // 4. InitialisationStatus
+    match /InitialisationStatus/{docId} {
+      allow read: if false;
+      allow create: if
+        !exists(/databases/$(database)/documents/InitialisationStatus/$(docId));
+      allow update, delete: if false;
+    }
+
+    // 5. Worker Schedules
+    match /users/{workerId}/schedules/{scheduleId} {
+      allow read, write: if
+        request.auth != null
+        && request.auth.uid == workerId;
+    }
+
+    // 6. Bookings
+    match /booking/{bookingId} {
+      allow create: if request.auth != null
+        && get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == 'user';
+
+      //Unified read rule for both user and worker
+     
+      allow read: if request.auth != null &&
+      (resource.data.userId == request.auth.uid 
+      || resource.data.workerId == request.auth.uid
+      ||(get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
++         && resource.data.workerId == null) );
+      // Allow users to set orderID on newly created docs
+      allow update: if request.auth != null &&
+          (
+            resource.data.userId == request.auth.uid ||   // let the creator finish the merge
+            resource.data.workerId == request.auth.uid     // or the assigned worker later
+          );
+        }
+
+    // 7. Fallback
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
