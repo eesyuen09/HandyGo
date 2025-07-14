@@ -103,6 +103,9 @@ export const style = StyleSheet.create({
     color: darkest_coco,
     lineHeight: 18,
     marginTop: 6,
+    fontFamily: 'Sora',
+    textAlign: 'justify'
+
   }
 //   seeAll: {
 //     color: colours.primary,
