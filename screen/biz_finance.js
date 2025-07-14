@@ -61,16 +61,22 @@ export default function FinanceScreen() {
         // 1) Query Firestore for latest schedules
         const q = query(
           collection(db, 'users', userId, 'schedules'),
-          orderBy('date', 'desc'),
+          orderBy('availability', 'desc'),
           limit(5)
         );
         const snap = await getDocs(q);
         const bookings = snap.docs.map(d => d.data());
 
+              if (bookings.length === 0) {
+        setSummary("No recent bookings to summarize.");
+        setLoading(false);
+        return;
+      }
+
         // 2) Summarize via ChatGPT
         const rawData = JSON.stringify(bookings);
         const prompt = `Please summarize the following booking data and provide insights: ${rawData}`;
-        const aiSummary = await getSummaryForUser(prompt);
+        const aiSummary = await getSummaryForUser(userId);
         setSummary(aiSummary);
       } catch (error) {
         console.error('Error during summarization:', error);
