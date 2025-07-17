@@ -190,9 +190,9 @@ export const services_categories = [
         prompt: "Home size or load tier",
         type: "select",
         options: [
-          { label: "Studio / 1-2 items", value: "1" },
-          { label: "1-2 BR (5-10 items)", value: "2" },
-          { label: "3+ BR (10+ items)", value: "3" },
+          { label: "Studio / 1-2 items", value: 1 },
+          { label: "1-2 BR (5-10 items)", value: 2 },
+          { label: "3+ BR (10+ items)", value: 3 },
         ],
       },
       {
