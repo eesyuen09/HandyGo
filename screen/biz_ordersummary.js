@@ -19,8 +19,8 @@ import {
   collection,
   addDoc,
   setDoc,
-  deleteField,
-  Timestamp
+  Timestamp, 
+  increment
 } from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
@@ -187,6 +187,17 @@ const handleCompleteTask = async () => {
     // Update the schedule sub-doc
     const scheduleRef = doc(db, "users", workerId, "schedules", bookingRef.id);
     await updateDoc(scheduleRef, { status: "completed" });
+
+    //update parent user document, increment total earnings, increment this month bucket
+    userRef = doc(db, "users", workerId);
+    const completedAt = new Date();  
+    const monthKey = completedAt.toISOString().slice(0,7); // "YYYY-MM"
+
+    await updateDoc(userRef, {
+      totalEarnings: increment(data.price || 0),
+      [`monthlyEarnings.${monthKey}`]: increment(data.price || 0)
+    });
+
 
     // Finally, go back
     Alert.alert("Success", "Booking completed and earnings recorded!");
