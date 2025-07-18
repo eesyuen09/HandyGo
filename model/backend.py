@@ -3,9 +3,21 @@ from flask import Flask, request, jsonify
 import joblib
 import numpy as np
 import pandas as pd
+import os
+from geopy.distance import distance
+
 
 app = Flask(__name__)
-model = joblib.load('xgboost_model.pkl')
+BASE_DIR = os.path.dirname(__file__)
+model = joblib.load(os.path.join(BASE_DIR, 'xgboost_model.pkl'))
+
+postcode_df = pd.read_csv(os.path.join(BASE_DIR, "sg_postcodes.csv"), dtype={"postal_code": str})
+postcode_to_latlng = {
+    row.postal_code: (row.lat, row.lon)
+    for row in postcode_df.itertuples()
+}
+
+CITY_CENTER = (1.3521, 103.8198)
 
 services = ["General House Cleaning",
       "Home Organizing",
@@ -76,16 +88,21 @@ base_rates = {
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    data = request.json  # expects {"features": [...]}
+    data = request.json  
+
+    pc = data['postcode']
+    # compute zone_center
+    dist_km = distance(CITY_CENTER, latlng).km
+    zone = 1 if dist_km <= 10 else 0
     
     df = pd.DataFrame([{
       'duration_hours': data['duration_hours'],
       'lead_time_hours': data['lead_time_hours'],
-      'zone_center': data['zone_center'],
+      'zone_center': zone,
       'severity_score': data['severity_score'],
       'gender_pref': int(data['gender_pref']),
       'min_rating_required': data['min_rating_required'],
-      'demand_supply_ratio': data['demand_supply_ratio'],
+      'demand_supply_ratio': 1,
       # one-hot for service type
       **{ f'service_{s}': int(data['service_type']==s) for s in services },
       'base_rate': base_rates[data['service_type']]

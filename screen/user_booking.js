@@ -32,6 +32,8 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { addDoc, collection, setDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db, app } from "../firebaseConfig";
+import { getPriceEstimate } from "../src/api/pricing.js";
+import { postcodes } from "../constants/postcodes.js";
 
 const handleBookingSubmit = (values) => {
   console.log("Booking submitted:", values);
@@ -135,7 +137,7 @@ export default function UserBooking() {
         isCompleted: false,
         duration: null,
         availability: [{ date: "", time: "" }],
-        state: "",
+        // state: "",
         postcode: "",
         address: "",
         gender: "",
@@ -155,16 +157,20 @@ export default function UserBooking() {
             time: Yup.string().required("Time is required"),
           })
         ),
-        state: Yup.string()
-          .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
-          .required("State is required"),
+        // state: Yup.string()
+        //   .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
+        //   .required("State is required"),
         postcode: Yup.string()
-          .matches(/^\d{6}$/, "Postcode must be 6 digits")
+          .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
+          .test("valid-postcode", "Invalid Singapore postcode", (value) =>
+            postcodes.some((p) => p.postal_code.toString() === value.trim())
+          )
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
         ...dynamicSchema,
       })}
       onSubmit={async (values, { resetForm }) => {
+        console.log("Submitting booking with values:", values);
         const {
           type,
           urgency,
@@ -207,12 +213,39 @@ export default function UserBooking() {
             ? scores.reduce((sum, s) => sum + s, 0) / scores.length
             : 0;
 
+          const { date, time } = values.availability[0];
+
+          const now = new Date();
+          const [h, m] = time.split(":").map(Number);
+          const target = new Date(`${date}T${time}:00`);
+          let lead_time_hours = (target - now) / (1000 * 60 * 60);
+          if (lead_time_hours < 0) lead_time_hours = 0;
+
+          // Build the payload for the pricing API
+          const payload = {
+            service_type: values.serviceType,
+            duration_hours: values.duration,
+            lead_time_hours,
+            postcode: values.postcode,
+            severity_score: avgSeverity,
+            gender_pref: values.gender != "" ? 1 : 0,
+            min_rating_required: isNaN(parseFloat(values.rating))
+              ? 0
+              : parseFloat(values.rating),
+          };
+
+          console.log("Payload for pricing API:", payload);
+
+          const predicted_price = await getPriceEstimate(payload);
+
+          console.log("Predicted price from API:", predicted_price);
+
           const bookingRef = await addDoc(collection(db, "booking"), {
             ...values,
             createdAt: new Date(),
             userId: auth.currentUser.uid,
             severity: avgSeverity,
-            price: 30, //assume its a fixed price for now for worker's analysis
+            price: predicted_price, //assume its a fixed price for now for worker's analysis
           });
 
           await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
@@ -220,6 +253,7 @@ export default function UserBooking() {
             "Success",
             "Your booking has been successfully submitted!"
           );
+          console.log(bookingRef);
           resetForm();
           navigation.goBack();
         } catch (error) {
@@ -238,6 +272,9 @@ export default function UserBooking() {
         setFieldValue,
       }) => (
         <View style={{ flex: 1, zIndex: 0, backgroundColor: "#F9F2ED" }}>
+          {/* <Text style={{ color: "red", padding: 10, fontSize: 12 }}>
+            {JSON.stringify({ errors, touched }, null, 2)}
+          </Text> */}
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
@@ -611,7 +648,7 @@ export default function UserBooking() {
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Location</Text>
 
-                {/* State */}
+                {/* State
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
                     <Entypo name="location-pin" size={20} color="#704F38" />
@@ -635,7 +672,7 @@ export default function UserBooking() {
                   {touched.state && errors.state && (
                     <Text style={styles.error}>{errors.state}</Text>
                   )}
-                </View>
+                </View> */}
 
                 {/* Postcode*/}
                 <View style={styles.inputRow}>
