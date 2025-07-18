@@ -99,6 +99,15 @@ def predict():
     print(f"Distance: {dist_km} km")
     zone = 1 if dist_km <= 10 else 0
 
+    service_key = (
+        data["service_type"]
+        .lower()
+        .replace(" & ", "_")
+        .replace(" ", "_")
+        .replace("-", "_")
+    )
+    base_rate_val = base_rates.get(service_key, 0)
+
     df = pd.DataFrame(
         [
             {
@@ -111,7 +120,7 @@ def predict():
                 "demand_supply_ratio": 1,
                 # one-hot for service type
                 **{f"service_{s}": int(data["service_type"] == s) for s in services},
-                "base_rate": base_rates[data["service_type"]],
+                "base_rate": base_rate_val,
             }
         ]
     )
