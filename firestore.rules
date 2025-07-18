@@ -57,6 +57,7 @@ service cloud.firestore {
     && (
       resource.data.userId == request.auth.uid
       || resource.data.workerId == request.auth.uid
+      || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
     );
 }
 
