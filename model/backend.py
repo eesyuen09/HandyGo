@@ -11,7 +11,7 @@ app = Flask(__name__)
 BASE_DIR = os.path.dirname(__file__)
 model = joblib.load(os.path.join(BASE_DIR, 'xgboost_model.pkl'))
 
-postcode_df = pd.read_csv(os.path.join(BASE_DIR, "sg_postcodes.csv"), dtype={"postal_code": str})
+postcode_df = pd.read_csv(os.path.join(BASE_DIR, "SG_postal.csv"), dtype={"postal_code": str})
 postcode_to_latlng = {
     row.postal_code: (row.lat, row.lon)
     for row in postcode_df.itertuples()
