@@ -1,6 +1,11 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Ionicons, Feather, MaterialCommunityIcons, FontAwesome5 } from "@expo/vector-icons";
+import {
+  Ionicons,
+  Feather,
+  MaterialCommunityIcons,
+  FontAwesome5,
+} from "@expo/vector-icons";
 import { colours } from "../components/style_loginsignup";
 
 import Biz_homepage from "../screen/biz_homepage";
@@ -14,7 +19,7 @@ const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
 
 const Tab = createBottomTabNavigator();
 
-export default function workerTabs() {
+export default function WorkerTabs() {
   return (
     <Tab.Navigator
       initialRouteName="Biz_homepage"

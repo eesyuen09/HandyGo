@@ -63,7 +63,7 @@ export default function ForgotPassword({navigation}){
                 <View style = {globalStyles.inner}>
                     <Text style = {globalStyles.title}>Reset Your Password</Text>
                     <Text style = {globalStyles.subtitle}>
-                        Enter you email to receive a password reset link.
+                        Enter your email to receive a password reset link.
                     </Text>
 
                 <View style = {globalStyles.inputWrapper}>

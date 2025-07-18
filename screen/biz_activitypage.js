@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { use, useCallback, useState} from "react";
 import {
   View,
   Text,
@@ -6,15 +6,16 @@ import {
   FlatList,
   ImageBackground,
 } from "react-native";
-// import CalendarPicker from 'react-native-calendar-picker';
+import {Calendar} from 'react-native-calendars';
+import moment from 'moment';
 import { Ionicons } from "@expo/vector-icons";
 import { colours, style } from "../components/style_bizactivitypage";
 import BgImage from "../assets/images/biz_activitypageBG.png";
-import { getDoc, doc, onSnapshot } from "firebase/firestore";
 import { db, auth } from "../firebaseConfig";
-import { getDocs, collection } from "firebase/firestore";
-import { useEffect } from "react";
+import { getDocs, collection,query, where } from "firebase/firestore";
 import { useFonts } from "expo-font";
+import { ScrollView } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 const {
   darkest_coco,
@@ -28,9 +29,11 @@ const {
 } = colours;
 
 export default function Biz_activitypage({ navigation }) {
+  const today = moment().format('YYYY-MM-DD');
   const [selectedDate, setSelectedDate] = useState(null);
 
-  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [recentTasks, setRecentTasks] = useState([]);
+  const [upcomingTasks, setUpcomingTasks] = useState([]);
 
   const [markedDates, setMarkedDates] = useState([]);
 
@@ -41,15 +44,67 @@ export default function Biz_activitypage({ navigation }) {
 
   if (!fontsLoaded) return null;
 
-  const typeColorMap = {
-    Cleaning: "#fcd6c5",
-    "Home Organising": "#d1a03f",
-    "Air Conditioner Repair": "#a6d1e6",
-    "Plumbing Services": "#b0e0a8",
-    "Moving Services": "#f5c16c",
+  const serviceGroups = {
+    Cleaning: [
+      'General House Cleaning',
+      'Home Organizing',
+      'Deep Cleaning',
+      'Aircond Cleaning',
+      'Carpet Cleaning',
+      'Sofa or Mattress Cleaning',
+      'Post-Renovation Cleaning',
+    ],
+    Repair: [
+      'Air Conditioner Repair',
+      'Electrical Repair',
+      'Plumbing Services',
+      'Refrigerator Repair',
+      'Washing Machine Repair',
+      'Door & Lock Repair',
+      'Ceiling Repair',
+    ],
+    Maintenance: [
+      'Furniture Assembly',
+      'Mounting',
+      'Painting & Touch-up Work',
+      'Curtain or Blind Installation',
+      'Minor Welding Jobs',
+      'Kitchen Remodeling',
+      'Tiling & Flooring',
+      'Electrical Safety Check',
+      'Gas Leak Detection',
+      'Fire Extinguisher Servicing',
+    ],
+    Moving: [
+      'House Moving',
+      'Large Item Delivery',
+      'Small Item Delivery',
+      'Outdoor Services',
+      'Lawn Mowing',
+      'Gardening',
+      'Tree Cutting',
+      'Roof or Gutter Cleaning',
+    ],
   };
 
-  console.log("grey", colours.grey);
+  const groupColorMap = {
+    Cleaning: '#fcd6c5',
+    Maintenance: '#d1a03f',
+    Moving: '#a6d1e6',
+    Outdoor: '#b0e0a8',
+    Repair: '#f5c16c',
+  };
+
+  function getColorForType(type) {
+    for (const group in serviceGroups) {
+      if (serviceGroups[group].includes(type)) {
+        return groupColorMap[group];
+      }
+    }
+    return colours.darkest_coco;
+  }
+  
+
 
   const renderUpcomingTask = ({ item }) => {
     const date = new Date(item.time);
@@ -58,7 +113,7 @@ export default function Biz_activitypage({ navigation }) {
       month: "long",
       day: "numeric",
     });
-    const dotColor = typeColorMap[item.type] || colours.darkest_coco;
+    const dotColor = getColorForType(item.type) || colours.darkest_coco;
 
     return (
       <TouchableOpacity
@@ -94,60 +149,87 @@ export default function Biz_activitypage({ navigation }) {
     );
   };
 
-  useEffect(() => {
+  useFocusEffect(
+    useCallback(() => {
     const fetchSelectedTasks = async () => {
       const user = auth.currentUser;
       if (!user) {
         return;
       }
 
-      const selectedTasksRef = collection(db, "users", user.uid, "schedules");
-      const selectedTasksSnap = await getDocs(selectedTasksRef);
+      const recentsTasksRef = query(
+        collection(db, "users", user.uid, "schedules"),
+        where('status' ,'==', 'completed')
+      );
+      const recentTasksSnap = await getDocs(recentsTasksRef);
+      const snapshot = await getDocs(recentsTasksRef);
+      console.log("snapshot size:", snapshot.size); 
 
-      const tasksList = [];
+      snapshot.forEach(doc => {
+        console.log("Doc:", doc.id, doc.data());
+      });
 
-      selectedTasksSnap.forEach((docSnap) => {
+      const upcomingTasksRef = query(
+        collection(db, "users", user.uid, "schedules"),
+        where('status', '==', 'scheduled')
+      );
+      const upcomingTasksSnap = await getDocs(upcomingTasksRef);
+
+      const recentTasksList = [];
+
+      recentTasksSnap.forEach((docSnap) => {
         const data = docSnap.data();
         // console.log('data',data);
         //add object into tasksList array
-        tasksList.push({
+        recentTasksList.push({
           orderID: data.orderID,
           type: data.type,
           time: data.availability,
         });
       });
-      tasksList.sort((a, b) => new Date(a.time) - new Date(b.time));
-      
-      setSelectedTasks(tasksList);
+      recentTasksList.sort((a, b) => new Date(a.time) - new Date(b.time));
+      setRecentTasks(recentTasksList);
 
-      const marked = [];
-      tasksList.forEach((task) => {
-        const dotColor = typeColorMap[task.type] || colours.darkest_coco;
-        const [dateOnly] = task.time.split(" ");
-        marked.push({
-          date: dateOnly,
-          style: {
-            backgroundColor: dotColor,
-            borderRadius: 20,
-          },
-          textStyle: {
-            color: colours.white,
-          },
+      //upcoming
+      const upcomingTasksList = [];
+
+      upcomingTasksSnap.forEach((docSnap) => {
+        const data = docSnap.data();
+        // console.log('data',data);
+        //add object into tasksList array
+        upcomingTasksList.push({
+          orderID: data.orderID,
+          type: data.type,
+          time: data.availability,
         });
       });
+      upcomingTasksList.sort((a, b) => new Date(a.time) - new Date(b.time));
+      
+      setUpcomingTasks(upcomingTasksList);
+
+      const marked = {};
+      [...recentTasksList, ...upcomingTasksList].forEach((task) => {
+        const dotColor = getColorForType(task.type) || colours.darkest_coco;
+        const [dateOnly] = task.time.split(" ");
+        marked[dateOnly] = {
+          customStyles: {
+            container: {
+            backgroundColor: dotColor,
+            borderRadius: 20,
+            },
+          text: {
+            color: colours.white,
+          },
+        },
+      };
+    });
       setMarkedDates(marked);
       console.log("markedDates state updated", marked);
     };
     fetchSelectedTasks();
-  }, []);
+  }, [])
+);
 
-  useEffect(() => {
-    console.log("State changed - selectedTasks:", selectedTasks);
-  }, [selectedTasks]);
-
-  useEffect(() => {
-    console.log("State changed - markedDates:", markedDates);
-  }, [markedDates]);
 
   return (
     <ImageBackground style={style.background} source={BgImage}>
@@ -165,32 +247,85 @@ export default function Biz_activitypage({ navigation }) {
           <View style={style.backButton} />
         </View>
 
-        {/* Calendar Component
-        <View style = {style.calendarContainer}>
-            <CalendarPicker
-                onDateChange={setSelectedDate}
-                selectedDayColor= {colours.yellow_brown}
-                todayBackgroundColor= {colours.main_coco}
-                selectedDayTextColor={colours.darkest_coco}
-                textStyle={{ color: colours.darkest_coco, fontFamily: 'Sora', fontSize :17}}
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+        {/* Calendar Component */}
+        <View style={style.calendarContainer}>
+          <Calendar
+            onDayPress={(day) => setSelectedDate(day.dateString)}
+            markedDates={{
+              ...markedDates,
+              [selectedDate]: {
+                ...(markedDates[selectedDate] || {}),
+                selected: true,
+                selectedColor: colours.yellow_brown,
+                selectedTextColor: colours.darkest_coco,
+              },
+              [today]:{
+                ...(markedDates[today] || {}),
+                customStyles:{
+                  container: {
+                    backgroundColor: '#456882',
+                  },
+                  text: {
+                    color: colours.white,
+                  
+                  },
+                },
+              },
+            }}
+            markingType= {"custom"}
+            theme={{
+              backgroundColor: 'transparent',
+              calendarBackground: 'transparent',
+              textSectionTitleColor: colours.darkest_coco,
+              selectedDayBackgroundColor: colours.yellow_brown,
+              selectedDayTextColor: colours.darkest_coco,
+              dayTextColor: colours.darkest_coco,
+              textDayFontFamily: 'Sora',
+              textDayFontSize: 17,
+              textDayFontWeight: '600',
+              textMonthFontColor: colours.darkest_coco,
+              textMonthFontSize: 18,
+              textMonthFontWeight: 'bold',
+              textMonthFontFamily: 'Sora',
+              textYearFontFamily: 'Sora',
+              arrowColor: colours.darkest_coco,
+            }}
+            renderArrow={(direction) =>
+              direction === 'left' ? (
+                <Ionicons name='chevron-back' size={20} color={colours.darkest_coco} />
+              ) : (
+                <Ionicons name='chevron-forward' size={20} color={colours.darkest_coco} />
+              )
+            }
+            style={{ width: 360 }}
+          />
+        {/* Scrollable area */}
+        
+        </View>
+        {/* Recent Section */}
+        <Text style={style.subHeader}>Recent</Text>
 
-                monthTitleStyle={{ color: colours.darkest_coco, fontWeight: 'bold', fontSize: 18 }}
-                yearTitleStyle={{ color: colours.darkest_coco }}
-                previousComponent ={<Ionicons name = 'chevron-back' size = {20} color= {colours.darkest_coco}/>}
-                nextComponent = {<Ionicons name = 'chevron-forward' size = {20} color= {colours.darkest_coco}/>}
-                customDatesStyles = {markedDates}
-                width={360}
-            />
-        </View> */}
+        <FlatList
+          data={recentTasks}
+          keyExtractor={(item) => item.orderID}
+          renderItem={renderUpcomingTask}
+          scrollEnabled={false}
+          
+        />
+
+
 
         {/* Upcoming Section */}
         <Text style={style.subHeader}>Upcoming</Text>
 
         <FlatList
-          data={selectedTasks}
+          data={upcomingTasks}
           keyExtractor={(item) => item.orderID}
           renderItem={renderUpcomingTask}
+          scrollEnabled={false}
         />
+        </ScrollView>
       </View>
     </ImageBackground>
   );
