@@ -59,13 +59,13 @@ jest.mock("expo-font", () => ({
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
-jest.mock("../components/KeyboardAvoidingWrapper", () => {
+jest.mock("../../components/KeyboardAvoidingWrapper", () => {
   const React = require("react");
   return ({ children }) => React.createElement(">{children}", {}, children);
 });
 
 // firebaseConfig stub
-jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
+jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
 
 // Auth mocks
 jest.mock("firebase/auth", () => ({

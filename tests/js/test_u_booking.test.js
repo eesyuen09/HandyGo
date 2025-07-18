@@ -18,7 +18,7 @@ import { Alert, Text } from "react-native";
 //   }),
 // }));
 
-jest.mock("../components/style_u_booking.js", () => ({
+jest.mock("../../components/style_u_booking.js", () => ({
   colours: {},
   styles: {},
 }));
@@ -27,7 +27,7 @@ jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
 
-jest.mock("../components/KeyboardAvoidingWrapper.js", () => {
+jest.mock("../../components/KeyboardAvoidingWrapper.js", () => {
   const React = require("react");
   const { View } = require("react-native");
   return ({ children }) => React.createElement(View, null, children);
@@ -70,7 +70,7 @@ jest.mock("@expo/vector-icons", () => {
 jest.mock("react-native-dropdown-picker", () => "DropDownPicker");
 jest.mock("@react-native-community/datetimepicker", () => "DateTimePicker");
 
-jest.mock("../firebaseConfig", () => ({ auth: {}, db: {} }));
+jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
 
 jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(() => ({ currentUser: { uid: "u1" } })),
