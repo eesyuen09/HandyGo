@@ -17,7 +17,7 @@ import {
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, deleteField} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, getDocs, query, where} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -175,6 +175,46 @@ export default function OrderSummary({navigation}){
         if (!selectedTime) {
             Alert.alert("Please select a time slot before accepting the booking.");
             return;
+        }
+
+        //Prevent double booking
+        //1. abstract new slots start and end date as date obj
+        const [datePart, timePart] = selectedTime.split(" ");
+        const startOfDay = `${datePart} 00:00`;
+        const endOfDay = `${datePart} 23:59`;
+        const newStart = new Date(`${datePart}T${timePart}:00`);
+        const durationHours = bookingData.duration; // e.g. 2
+        const newEnd   = new Date(newStart.getTime() + durationHours * 3600e3);
+        console.log('start, end',newStart, newEnd);
+
+        //2. query this workers schedules for the same day
+        const schedRef = collection(db, 'users', currentWorkerId, 'schedules');
+        const dayQuery = query(
+          schedRef,
+          where('availability', '>=', startOfDay),
+          where('availability', '<=', endOfDay)
+        );
+        const snap = await getDocs(dayQuery);
+
+        //3. check each existing schedule overlap
+        for ( let doc of snap.docs){
+          const rec = doc.data();
+          const availStr = rec.availability;
+          const [exDate, exTime] = availStr.split(' ');
+          const existingStart = new Date(`${exDate}T${exTime}:00`);
+          const existingEnd   = new Date(existingStart.getTime() + rec.duration * 3600e3);
+
+          console.log('existing:', existingStart, '->', existingEnd);
+
+          if(newStart < existingEnd && existingStart < newEnd) {
+            Alert.alert(
+              "Time Conflict",
+              "You already have a booking at that time. Please choose another slot."
+            );
+            navigation.goBack();
+            return;
+          }
+
         }
 
         const bookingRef = doc(db, "booking", bookingId);
