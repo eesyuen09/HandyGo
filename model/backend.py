@@ -53,6 +53,12 @@ services = [
     "Roof or Gutter Cleaning",
 ]
 
+# map human-readable names to snake_case keys matching base_rates
+service_key_map = {
+    human: human.lower().replace(" & ", "_").replace(" ", "_").replace("-", "_")
+    for human in services
+}
+
 base_rates = {
     "general_house_cleaning": 24,
     "home_organizing": 22,
@@ -118,15 +124,20 @@ def predict():
                 "gender_pref": int(data["gender_pref"]),
                 "min_rating_required": data["min_rating_required"],
                 "demand_supply_ratio": 1,
-                # one-hot for service type
-                **{f"service_{s}": int(data["service_type"] == s) for s in services},
+                **{
+                    f"service_{sk}": int(service_key == sk)
+                    for sk in service_key_map.values()
+                },
                 "base_rate": base_rate_val,
             }
         ]
     )
 
     # Predict
-    features = df[model.feature_names_in_]  # ensure correct column order
+    feature_cols = getattr(model, "feature_names_in_", None) or getattr(
+        model, "feature_names", None
+    )
+    features = df[feature_cols]
     pred = model.predict(features.values)[0]
 
     return jsonify({"predicted_price": round(float(pred), 2)})
