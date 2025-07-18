@@ -91,7 +91,7 @@ jest.mock("firebase/firestore", () => ({
 
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import UserHome from "../screen/user_home";
+import UserHome from "../../screen/user_home";
 
 describe("UserHome Screen", () => {
   let mockNavigate;

@@ -7,7 +7,7 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import Login from "../screen/login.js";
+import Login from "../../screen/login.js";
 
 // Polyfill missing globals
 global.clearImmediate = global.clearImmediate || ((id) => clearTimeout(id));

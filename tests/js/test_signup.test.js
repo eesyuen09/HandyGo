@@ -15,7 +15,7 @@ jest.mock("@react-native-community/datetimepicker", () => {
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 import { Alert } from "react-native";
-import Signup from "../screen/signup.js";
+import Signup from "../../screen/signup.js";
 
 // Silence Formik act warnings
 const originalError = console.error;

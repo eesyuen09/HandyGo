@@ -91,7 +91,7 @@ Alert.alert = jest.fn();
 import UserBooking, {
   calculateEndTime,
   handleBookingSubmit,
-} from "../screen/user_booking.js";
+} from "../../screen/user_booking.js";
 
 describe("UserBooking Screen", () => {
   beforeEach(async () => {
