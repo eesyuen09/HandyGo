@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 import joblib
 import pandas as pd
 import os
+import xgboost as xgb
 from geopy.distance import distance
 
 
@@ -138,7 +139,8 @@ def predict():
         model, "feature_names", None
     )
     features = df[feature_cols]
-    pred = model.predict(features.values)[0]
+    dmatrix = xgb.DMatrix(features.values, feature_names=model.feature_names)
+    pred = model.predict(dmatrix)[0]
 
     return jsonify({"predicted_price": round(float(pred), 2)})
 
