@@ -23,7 +23,7 @@ import {
   Feather,
   FontAwesome6,
 } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
 import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";
@@ -52,6 +52,7 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
+export { calculateEndTime, handleBookingSubmit };
 export default function UserBooking() {
   const route = useRoute();
   const { serviceType, subcategory, description, price } = route.params || {};
@@ -72,6 +73,7 @@ export default function UserBooking() {
   const [showDatePicker, setShowDatePicker] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const auth = getAuth(app);
+  const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -88,7 +90,8 @@ export default function UserBooking() {
         serviceType: serviceType,
         type: subcategory,
         urgency: false,
-        duration: "",
+        isCompleted: false,
+        duration: null,
         availability: [{ date: "", time: "" }],
         state: "",
         postcode: "",
@@ -102,7 +105,7 @@ export default function UserBooking() {
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
         urgency: Yup.string().required("Urgency is required"),
-        duration: Yup.string().required("duration is required"),
+        duration: Yup.number().required("duration is required"),
         availability: Yup.array().of(
           Yup.object().shape({
             date: Yup.string().required("Date is required"),
@@ -113,7 +116,7 @@ export default function UserBooking() {
           .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
           .required("State is required"),
         postcode: Yup.string()
-          .matches(/^[0-9]+$/, "Postcode can only contain numbers")
+          .matches(/^\d{6}$/, "Postcode must be 6 digits")
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
       })}
@@ -131,6 +134,7 @@ export default function UserBooking() {
           notif,
           notes,
           status,
+          isCompleted,
         } = values;
 
         try {
@@ -138,6 +142,7 @@ export default function UserBooking() {
             ...values,
             createdAt: new Date(),
             userId: auth.currentUser.uid,
+            price: 30, //assume its a fixed price for now for worker's analysis
           });
 
           await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
@@ -146,6 +151,7 @@ export default function UserBooking() {
             "Your booking has been successfully submitted!"
           );
           resetForm();
+          navigation.goBack();
         } catch (error) {
           console.error("Error submitting booking:", error);
           Alert.alert("Error", "Booking submission failed. Please try again.");
@@ -188,7 +194,7 @@ export default function UserBooking() {
                 {/* Type */}
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
-                    {icon}
+                    {icon && icon}
                     <Text style={styles.input}>Service Type</Text>
                   </View>
 
@@ -269,15 +275,15 @@ export default function UserBooking() {
                       style={styles.dropdownContainer}
                       open={openDuration}
                       value={values.duration}
-                      items={[...Array(15)].map((_, i) => ({
+                      items={[...Array(7)].map((_, i) => ({
                         label: `${i + 1} hour${i + 1 > 1 ? "s" : ""}`,
-                        value: `${i + 1}`,
+                        value: i + 1,
                       }))}
                       setOpen={setOpenDuration}
                       setValue={(val) => setFieldValue("duration", val())}
                       setItems={() => {}}
                       placeholder="Select Duration"
-                      ontainerStyle={{ zIndex: 800 }}
+                      containerStyle={{ zIndex: 800 }}
                       zIndex={800}
                       listMode="SCROLLVIEW"
                     />
@@ -698,5 +704,3 @@ export default function UserBooking() {
     </Formik>
   );
 }
-
-export { calculateEndTime, handleBookingSubmit };

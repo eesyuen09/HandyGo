@@ -171,7 +171,7 @@ const handleCompleteTask = async () => {
     const earningsRef = doc(db, "users", workerId, "earnings", bookingRef.id);
     await setDoc(earningsRef, {
       date: data.availability?.[0]?.date || data.createdAt?.toDate()?.toISOString().slice(0,10),
-      // price: data.price,
+      price: data.price,
       serviceType: data.type,
       bookingId: bookingRef.id,
       timestamp: Timestamp.now(),

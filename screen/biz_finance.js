@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons, FontAwesome5, MaterialIcons } from '@expo/vector-icons';
-import { getDocs, collection, query, orderBy, limit, doc, updateDoc, Timestamp } from 'firebase/firestore';
+import { getDocs, collection, query, orderBy, limit, doc, updateDoc, Timestamp, getDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { useNavigation } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
@@ -27,6 +27,8 @@ export default function FinanceScreen() {
   const userId = auth.currentUser.uid;
   const navigation = useNavigation();
   const { width } = Dimensions.get('window');
+  const [ totalEarnings, setTotalEarnings ] = useState(0);
+
 
   // Load custom fonts
   const [fontsLoaded] = useFonts({
@@ -42,16 +44,23 @@ export default function FinanceScreen() {
   const [summary, setSummary] = useState('');
   const [loading, setLoading] = useState(false);
 
-  //record earnings
-  async function recordEarning(workerId, amount, dateString) {
-    const monthKey = dateString.slice(0, 7);     // e.g. "2025-07"
-    const workerRef = doc(db, "workers", workerId);
+  //get total earnings
+  useEffect(() =>{
+    async function fetchEarnings(){
+      try{
+        const auth = getAuth();
+        const userRef = doc(db, 'users',auth.currentUser.uid );
+        const userSnap = await getDoc(userRef);
+        if(userSnap.exists()){
+         setTotalEarnings(userSnap.data().totalEarnings || 0);
+        }
+    }catch (error) {
+      console.warn("Error fetching data",error);
+    }
+  };
+    fetchEarnings();
+  }, []);
 
-    await updateDoc(workerRef, {
-      totalEarnings:       increment(amount),
-      [`monthlyEarnings.${monthKey}`]: increment(amount)
-    });
-  }
 
   // Fetch & summarize on mount
   useEffect(() => {
@@ -89,6 +98,7 @@ export default function FinanceScreen() {
     loadSummary();
   }, [userId]);
 
+
   // Dummy earnings data
   const rating = 4.5;
   const topEarnings = [
@@ -111,7 +121,7 @@ export default function FinanceScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Total Income */}
         <Text style={style.totalIncomeLabel}>Total Income</Text>
-        <Text style={style.totalIncome}>$600.00</Text>
+        <Text style={style.totalIncome}>${totalEarnings}</Text>
 
         {/* Tab Switcher */}
         <View style={style.tabContainer}>

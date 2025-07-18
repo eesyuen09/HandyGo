@@ -62,8 +62,9 @@ export default function IncomeChart({ startMonth = 0, endMonth = 6}) {
       const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
 
       
-      const monthKeys = Array.from({ length: months }).map((_, i) => {
-        const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+      const monthKeys = Array.from({ length: 12 }).map((_, i) => {
+         // i = 0 → Jan, 1 → Feb, … 11 → Dec
+        const d = new Date(now.getFullYear(), i, 1);
         return d.toISOString().slice(0, 7);   // e.g. "2025-07"
       });
 
@@ -82,7 +83,7 @@ export default function IncomeChart({ startMonth = 0, endMonth = 6}) {
     }
 
     loadEarnings();
-  }, [fontsLoaded, months]);
+  }, [fontsLoaded]);
 
   const data = fullData.slice(startMonth, endMonth);
 const labels = fullLabels.slice(startMonth, endMonth);
