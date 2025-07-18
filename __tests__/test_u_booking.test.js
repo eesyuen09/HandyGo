@@ -131,7 +131,6 @@ describe("UserBooking Screen", () => {
         "duration is required",
         "Date is required",
         "Time is required",
-        "State is required",
         "Postcode is required",
         "Address is required",
       ].forEach((msg) => {

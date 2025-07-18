@@ -1,11 +1,18 @@
 // components/KeyboardAvoidingWrapper.js
-import React from 'react';
-import { KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard, Platform, View } from 'react-native';
+import React from "react";
+import {
+  KeyboardAvoidingView,
+  ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
+  View,
+} from "react-native";
 
 const KeyboardAvoidingWrapper = ({ children }) => {
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -13,9 +20,7 @@ const KeyboardAvoidingWrapper = ({ children }) => {
           contentContainerStyle={{ flexGrow: 1 }}
           keyboardShouldPersistTaps="handled"
         >
-          <View>
-          {children}
-          </View>
+          <View>{children}</View>
         </ScrollView>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>

@@ -71,7 +71,7 @@ const RootStack = () => {
           <>
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Signup" component={Signup} />
-            
+
           </>
         ) : role === "business" ? (
           <Stack.Screen name="workerTabs" component={workerTabs} />
