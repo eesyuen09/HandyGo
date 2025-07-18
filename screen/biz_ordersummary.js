@@ -195,7 +195,8 @@ const handleCompleteTask = async () => {
 
     await updateDoc(userRef, {
       totalEarnings: increment(data.price || 0),
-      [`monthlyEarnings.${monthKey}`]: increment(data.price || 0)
+      [`monthlyEarnings.${monthKey}`]: increment(data.price || 0),
+      [`pieSummary.${data.serviceType}`]: increment(data.price || 0),
     });
 
 
