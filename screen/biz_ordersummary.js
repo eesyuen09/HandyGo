@@ -35,7 +35,7 @@ export default function OrderSummary({ navigation }) {
   const [role, setRole] = useState(null);
 
   const route = useRoute();
-  const { orderID, userID } = route.params || {};
+  const { orderID, userID, bookingInfo } = route.params || {};
 
   const [bookingData, setBookingData] = useState(null); // reused booking snapshot
 

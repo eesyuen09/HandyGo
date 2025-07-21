@@ -128,6 +128,23 @@ export default function UserBooking() {
     return () => unsubscribe();
   }, []);
 
+  // handle booking submission
+  const handlePress = () => {
+    const serviceData = services_categories.find(
+      (c) => c.title === serviceType
+    );
+    console.log(serviceData);
+    navigation.navigate("UserBooking", {
+      serviceType: serviceData.title,
+      subcategory: serviceData.subcategories[0],
+      description: serviceData.description,
+      price: serviceData.price,
+      questions: serviceData.questions,
+      // bannerImage: serviceData.bannerImage,
+      // icon: serviceData.icon,
+    });
+  };
+
   return (
     <Formik
       initialValues={{
@@ -240,25 +257,36 @@ export default function UserBooking() {
 
           console.log("Predicted price from API:", predicted_price);
 
-          const bookingRef = await addDoc(collection(db, "booking"), {
+          // const bookingRef = await addDoc(collection(db, "booking"), {
+          //   ...values,
+          //   createdAt: new Date(),
+          //   userId: auth.currentUser.uid,
+          //   severity: avgSeverity,
+          //   price: predicted_price, //assume its a fixed price for now for worker's analysis
+          // });
+
+          const bookingDetails = {
             ...values,
-            createdAt: new Date(),
             userId: auth.currentUser.uid,
             severity: avgSeverity,
-            price: predicted_price, //assume its a fixed price for now for worker's analysis
-          });
+            price: predicted_price,
+          };
 
-          await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
-          Alert.alert(
-            "Success",
-            "Your booking has been successfully submitted!"
-          );
-          console.log(bookingRef);
-          resetForm();
-          navigation.goBack();
+          // await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
+          // Alert.alert(
+          //   "Success",
+          //   "Your booking has been successfully submitted!"
+          // );
+          // console.log(bookingRef);
+          // resetForm();
+          // navigation.goBack();
+
+          navigation.navigate("Order Summary", {
+            bookingDetails: bookingDetails,
+          });
         } catch (error) {
-          console.error("Error submitting booking:", error);
-          Alert.alert("Error", "Booking submission failed. Please try again.");
+          console.error("Error processing booking:", error);
+          Alert.alert("Error", "Could not process booking. Please try again.");
         }
       }}
     >
