@@ -132,7 +132,7 @@ export default function UserHome({ navigation }) {
     console.log(serviceData);
     navigation.navigate("UserBooking", {
       serviceType: serviceData.title,
-      subcategory: serviceData.subcategories[0],
+      subcategory: serviceData.subcategories[0].label,
       description: serviceData.description,
       price: serviceData.price,
       questions: serviceData.questions,
