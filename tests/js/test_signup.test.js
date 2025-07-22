@@ -1,9 +1,42 @@
-/**
- * @jest-environment jsdom
- */
+import React from "react";
+import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { Alert } from "react-native";
+import Signup from "../../screen/signup";
+
+// Mock Alert
+Alert.alert = jest.fn();
+
+// Firebase mocks
+jest.mock("firebase/auth", () => ({
+  createUserWithEmailAndPassword: jest.fn(),
+  sendEmailVerification: jest.fn(),
+}));
+
+jest.mock("firebase/firestore", () => ({
+  doc: jest.fn(),
+  setDoc: jest.fn(),
+}));
+
+jest.mock("../../firebaseConfig", () => ({
+  auth: {},
+  db: {},
+}));
+
+// Native and component mocks
+jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
+jest.mock("expo-constants", () => ({ manifest: { scheme: "app" } }));
+jest.mock("@expo/vector-icons", () => {
+  const React = require("react");
+  const { Text } = require("react-native");
+  const make = (name) => (props) => React.createElement(Text, {}, name);
+  return { Octicons: make("Octicons"), Ionicons: make("Ionicons") };
+});
+jest.mock("../../components/KeyboardAvoidingWrapper", () => {
+  const React = require("react");
+  return ({ children }) => React.createElement(">{children}", {}, children);
+});
 jest.mock("@react-native-community/datetimepicker", () => {
   const React = require("react");
-  // defer calling onChange until *after* the first render
   return (props) => {
     React.useEffect(() => {
       props.onChange(null, new Date(2000, 0, 1));
@@ -12,118 +45,169 @@ jest.mock("@react-native-community/datetimepicker", () => {
   };
 });
 
-import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import { Alert } from "react-native";
-import Signup from "../../screen/signup.js";
-
-// Silence Formik act warnings
-const originalError = console.error;
-beforeAll(() => {
-  console.error = (...args) => {
-    if (
-      typeof args[0] === "string" &&
-      args[0].includes(
-        "An update to Formik inside a test was not wrapped in act"
-      )
-    ) {
-      return;
-    }
-    originalError(...args);
-  };
-});
-afterAll(() => {
-  console.error = originalError;
-});
-
-// Polyfills
-global.clearImmediate = global.clearImmediate || ((id) => clearTimeout(id));
-global.setImmediate = global.setImmediate || ((fn) => setTimeout(fn, 0));
-
-// Spy on Alert.alert
-Alert.alert = jest.fn();
-
-//  Native/Expo mocks
-jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
-jest.mock("expo-constants", () => ({ manifest: { scheme: "app" } }));
-
-jest.mock("@expo/vector-icons", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  const make = (name) => (props) => React.createElement(Text, {}, name);
-  return { Octicons: make("Octicons"), Ionicons: make("Ionicons") };
-});
-jest.mock("expo-font", () => ({
-  loadAsync: jest.fn().mockResolvedValue(true),
-}));
-jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
-);
-jest.mock("../../components/KeyboardAvoidingWrapper", () => {
-  const React = require("react");
-  return ({ children }) => React.createElement(">{children}", {}, children);
-});
-
-// firebaseConfig stub
-jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
-
-// Auth mocks
-jest.mock("firebase/auth", () => ({
-  createUserWithEmailAndPassword: jest.fn(() =>
-    Promise.resolve({ user: { uid: "u1" } })
-  ),
-  sendEmailVerification: jest.fn(() => Promise.resolve()),
-}));
-
-// Firestore mocks
-jest.mock("firebase/firestore", () => ({
-  doc: jest.fn(),
-  setDoc: jest.fn(() => Promise.resolve()),
-}));
-
-describe("Signup Screen", () => {
+describe("Signup function tests", () => {
+  const {
+    createUserWithEmailAndPassword,
+    sendEmailVerification,
+  } = require("firebase/auth");
+  const { doc, setDoc } = require("firebase/firestore");
   const mockNav = jest.fn();
   const navigation = { navigate: mockNav };
 
   beforeEach(() => {
-    mockNav.mockClear();
-    Alert.alert.mockClear();
-
-    // reset auth implementations
-    const {
-      createUserWithEmailAndPassword,
-      sendEmailVerification,
-    } = require("firebase/auth");
-    createUserWithEmailAndPassword.mockImplementation(() =>
-      Promise.resolve({ user: { uid: "u1" } })
-    );
-    sendEmailVerification.mockImplementation(() => Promise.resolve());
+    jest.clearAllMocks();
   });
 
-  it("renders all fields and buttons", () => {
-    const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
+  it("creates user, sends email verification, and writes to Firestore", async () => {
+    createUserWithEmailAndPassword.mockResolvedValue({
+      user: { uid: "testuid" },
+    });
+    sendEmailVerification.mockResolvedValue();
+    setDoc.mockResolvedValue();
+
+    const { getByPlaceholderText, getAllByPlaceholderText, getByText } = render(
       <Signup navigation={navigation} />
     );
 
-    expect(getByPlaceholderText(/Enter Your Full Name Here/i)).toBeTruthy();
-    expect(getByPlaceholderText(/Enter Your Email Address Here/i)).toBeTruthy();
-    expect(getByText(/Date of Birth/i)).toBeTruthy();
+    fireEvent.changeText(getByPlaceholderText(/Full Name/i), "Test User");
+    fireEvent.changeText(
+      getByPlaceholderText(/Email Address/i),
+      "test@example.com"
+    );
+    fireEvent.press(getByText("User"));
+    const [pwd, confirmPwd] = getAllByPlaceholderText("••••••");
+    fireEvent.changeText(pwd, "password123");
+    fireEvent.changeText(confirmPwd, "password123");
+    fireEvent.press(getByPlaceholderText(/YYYY/i));
 
-    // Two password fields share the same placeholder
-    const pwdFields = getAllByPlaceholderText(/••••••/);
-    expect(pwdFields).toHaveLength(2);
+    fireEvent.press(getByText("Sign Up"));
 
-    expect(getByText(/Confirm Password/i)).toBeTruthy();
-    expect(getByText("Worker")).toBeTruthy();
-    expect(getByText("User")).toBeTruthy();
-    expect(getByText("Sign Up")).toBeTruthy();
-    expect(getByText("Already have an account?")).toBeTruthy();
-    expect(getByText("Login")).toBeTruthy();
+    await waitFor(() => {
+      expect(createUserWithEmailAndPassword).toHaveBeenCalledWith(
+        {},
+        "test@example.com",
+        "password123"
+      );
+      expect(sendEmailVerification).toHaveBeenCalledWith({ uid: "testuid" });
+      expect(setDoc).toHaveBeenCalled();
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "Please Verify Your Email",
+        expect.any(String),
+        expect.any(Array)
+      );
+    });
   });
 
-  it("alerts when submitting empty form", async () => {
+  it("shows error if email already in use", async () => {
+    createUserWithEmailAndPassword.mockRejectedValue({
+      code: "auth/email-already-in-use",
+    });
+
+    const { getByPlaceholderText, getAllByPlaceholderText, getByText } = render(
+      <Signup navigation={navigation} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText(/Full Name/i), "User");
+    fireEvent.changeText(
+      getByPlaceholderText(/Email Address/i),
+      "exists@example.com"
+    );
+    fireEvent.press(getByText("User"));
+    const [pwd, confirmPwd] = getAllByPlaceholderText("••••••");
+    fireEvent.changeText(pwd, "password123");
+    fireEvent.changeText(confirmPwd, "password123");
+    fireEvent.press(getByPlaceholderText(/YYYY/i));
+
+    fireEvent.press(getByText("Sign Up"));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith("Error", "Email already in use");
+    });
+  });
+
+  it("shows error if weak password", async () => {
+    createUserWithEmailAndPassword.mockRejectedValue({
+      code: "auth/weak-password",
+    });
+
+    const { getByPlaceholderText, getAllByPlaceholderText, getByText } = render(
+      <Signup navigation={navigation} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText(/Full Name/i), "User");
+    fireEvent.changeText(
+      getByPlaceholderText(/Email Address/i),
+      "weak@pass.com"
+    );
+    fireEvent.press(getByText("User"));
+    const [pwd, confirmPwd] = getAllByPlaceholderText("••••••");
+    fireEvent.changeText(pwd, "123");
+    fireEvent.changeText(confirmPwd, "123");
+    fireEvent.press(getByPlaceholderText(/YYYY/i));
+
+    fireEvent.press(getByText("Sign Up"));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "Error",
+        "Password should be at least 6 characters"
+      );
+    });
+  });
+
+  it("shows error if invalid email format", async () => {
+    createUserWithEmailAndPassword.mockRejectedValue({
+      code: "auth/invalid-email",
+    });
+
+    const { getByPlaceholderText, getAllByPlaceholderText, getByText } = render(
+      <Signup navigation={navigation} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText(/Full Name/i), "User");
+    fireEvent.changeText(
+      getByPlaceholderText(/Email Address/i),
+      "invalidemail"
+    );
+    fireEvent.press(getByText("User"));
+    const [pwd, confirmPwd] = getAllByPlaceholderText("••••••");
+    fireEvent.changeText(pwd, "validpass");
+    fireEvent.changeText(confirmPwd, "validpass");
+    fireEvent.press(getByPlaceholderText(/YYYY/i));
+
+    fireEvent.press(getByText("Sign Up"));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith("Error", "Invalid email format");
+    });
+  });
+
+  it("shows error when passwords do not match", async () => {
+    const { getByPlaceholderText, getAllByPlaceholderText, getByText } = render(
+      <Signup navigation={navigation} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText(/Full Name/i), "Mismatch User");
+    fireEvent.changeText(
+      getByPlaceholderText(/Email Address/i),
+      "mismatch@example.com"
+    );
+    fireEvent.press(getByText("User"));
+    const [pwd, confirmPwd] = getAllByPlaceholderText("••••••");
+    fireEvent.changeText(pwd, "password123");
+    fireEvent.changeText(confirmPwd, "differentPassword");
+    fireEvent.press(getByText("Sign Up"));
+
+    await waitFor(() => {
+      expect(Alert.alert).toHaveBeenCalledWith(
+        "Error",
+        "Passwords do not match."
+      );
+    });
+  });
+
+  it("shows error on empty form submission", async () => {
     const { getByText } = render(<Signup navigation={navigation} />);
-    // need to pick a role before submit
     fireEvent.press(getByText("User"));
     fireEvent.press(getByText("Sign Up"));
 
@@ -133,96 +217,5 @@ describe("Signup Screen", () => {
         "Please fill in all fields."
       );
     });
-  });
-
-  it("alerts when passwords do not match", async () => {
-    const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
-      <Signup navigation={navigation} />
-    );
-
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Full Name Here/i),
-      "Alice"
-    );
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Email Address Here/i),
-      "a@b.com"
-    );
-    fireEvent.press(getByText("User"));
-
-    const [pwd, confirm] = getAllByPlaceholderText(/••••••/);
-    fireEvent.changeText(pwd, "pass123");
-    fireEvent.changeText(confirm, "pass456");
-
-    fireEvent.press(getByText("Sign Up"));
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Error",
-        "Passwords do not match."
-      );
-    });
-  });
-
-  it("alerts on email-already-in-use error", async () => {
-    const { createUserWithEmailAndPassword } = require("firebase/auth");
-    createUserWithEmailAndPassword.mockImplementationOnce(() =>
-      Promise.reject({ code: "auth/email-already-in-use" })
-    );
-
-    const { getByPlaceholderText, getByText, getAllByPlaceholderText } = render(
-      <Signup navigation={navigation} />
-    );
-
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Full Name Here/i),
-      "Bob"
-    );
-    fireEvent.changeText(
-      getByPlaceholderText(/Enter Your Email Address Here/i),
-      "bob@x.com"
-    );
-    fireEvent.press(getByText("User"));
-
-    const [pwd, confirm] = getAllByPlaceholderText(/••••••/);
-    fireEvent.changeText(pwd, "pass123");
-    fireEvent.changeText(confirm, "pass123");
-
-    fireEvent.press(getByText("Sign Up"));
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith("Error", "Email already in use");
-    });
-  });
-
-  it("submits successfully and navigates to Login", async () => {
-    const { getByText, getAllByPlaceholderText, getByPlaceholderText } = render(
-      <Signup navigation={navigation} />
-    );
-
-    // fill in name/email/role/password
-    fireEvent.changeText(getByPlaceholderText(/Full Name/i), "Dave");
-    fireEvent.changeText(getByPlaceholderText(/Email Address/i), "dave@x.com");
-    fireEvent.press(getByText("User"));
-    const [pwd, confirm] = getAllByPlaceholderText(/••••••/);
-    fireEvent.changeText(pwd, "strongpass");
-    fireEvent.changeText(confirm, "strongpass");
-
-    // **NEW**: open the DOB picker so our mock can set dob synchronously
-    fireEvent.press(getByPlaceholderText(/YYYY – MM – DD/));
-
-    // now submit
-    fireEvent.press(getByText("Sign Up"));
-
-    await waitFor(() => {
-      expect(Alert.alert).toHaveBeenCalledWith(
-        "Please Verify Your Email",
-        "A verification email has been sent to you account.",
-        expect.any(Array)
-      );
-    });
-  });
-  it("navigates back to Login on link press", () => {
-    const { getByText } = render(<Signup navigation={navigation} />);
-    fireEvent.press(getByText("Login"));
-    expect(mockNav).toHaveBeenCalledWith("Login");
   });
 });

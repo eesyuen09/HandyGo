@@ -71,8 +71,6 @@ function bucketAreaSize(m2) {
   return 3;
 }
 
-export { calculateEndTime, handleBookingSubmit };
-
 export default function UserBooking() {
   const route = useRoute();
   const {
@@ -871,3 +869,10 @@ export default function UserBooking() {
     </Formik>
   );
 }
+
+export {
+  calculateEndTime,
+  bucketItemCount,
+  bucketAreaSize,
+  handleBookingSubmit,
+};

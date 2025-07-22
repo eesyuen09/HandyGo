@@ -1,214 +1,186 @@
 // /**
 //  * @jest-environment jsdom
 //  */
+// import React from "react";
+// import { render, fireEvent, act } from "@testing-library/react-native";
+// import UserHome, { shuffleArray } from "../../screen/user_home";
+// import { services_categories as realCategories } from "../../constants/category_constant";
 
-// jest.mock("@react-native-picker/picker", () => {
+// // --- 1) Mocks for all external dependencies ---
+// jest.mock("../../components/style_u_home", () => ({
+//   colours: { darkest_coco: "#000" },
+//   styles: {
+//     frame: {},
+//     container: {},
+//     searchBar: {},
+//     searchIcon: {},
+//     searchInput: {},
+//     suggestionBox: {},
+//     suggestionItem: {},
+//     suggestionText: {},
+//     section: {},
+//     sectionTitle: {},
+//     iconRow: {},
+//     icon: {},
+//     circle: {},
+//     iconLabel: {},
+//     serviceBanner: {},
+//     bannerLabel: {},
+//   },
+// }));
+// jest.mock("react-native-safe-area-context", () => ({
+//   SafeAreaView: ({ children }) => children,
+// }));
+// jest.mock("../../components/KeyboardAvoidingWrapper", () => {
 //   const React = require("react");
-//   const { View } = require("react-native");
-//   return { Picker: (props) => React.createElement(View, null, props.children) };
+//   return ({ children }) => React.createElement("View", null, children);
 // });
-// jest.mock("react-native-safe-area-context", () => {
-//   const React = require("react");
-//   const { View } = require("react-native");
-//   return {
-//     SafeAreaView: ({ children }) => React.createElement(View, null, children),
-//   };
-// });
-// jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
-// jest.mock("expo-constants", () => ({ manifest: { scheme: "app" } }));
 // jest.mock("@expo/vector-icons", () => {
 //   const React = require("react");
 //   const { Text } = require("react-native");
-//   const make = (name) => (props) => React.createElement(Text, null, name);
 //   return {
-//     Octicons: make("Octicons"),
-//     Ionicons: make("Ionicons"),
-//     Feather: make("Feather"),
-//     AntDesign: make("AntDesign"),
-//     MaterialIcons: make("MaterialIcons"),
-//     FontAwesome5: make("FontAwesome5"),
-//     FontAwesome6: make("FontAwesome6"),
-//     MaterialCommunityIcons: make("MaterialCommunityIcons"),
+//     Feather: () => React.createElement(Text, null, "Feather"),
+//     AntDesign: () => React.createElement(Text, null, "AntDesign"),
+//     MaterialIcons: () => React.createElement(Text, null, "MaterialIcons"),
+//     FontAwesome5: () => React.createElement(Text, null, "FontAwesome5"),
+//     FontAwesome6: () => React.createElement(Text, null, "FontAwesome6"),
+//     MaterialCommunityIcons: () =>
+//       React.createElement(Text, null, "MaterialCommunityIcons"),
 //   };
 // });
-// jest.mock("expo-font", () => ({
-//   loadAsync: jest.fn().mockResolvedValue(true),
-// }));
-// jest.mock("@react-native-async-storage/async-storage", () =>
-//   require("@react-native-async-storage/async-storage/jest/async-storage-mock")
-// );
-// jest.mock("../../components/KeyboardAvoidingWrapper", () => {
+// jest.mock("@react-native-picker/picker", () => {
 //   const React = require("react");
-//   const { View } = require("react-native");
-//   return ({ children }) => React.createElement(View, null, children);
+//   return {
+//     Picker: ({ children }) => React.createElement("Picker", null, children),
+//   };
+// });
+// jest.mock("firebase/firestore", () => ({
+//   collection: jest.fn(),
+//   query: jest.fn(),
+//   where: jest.fn(),
+//   getDocs: jest.fn(),
+// }));
+// jest.mock("../../firebaseConfig", () => ({ db: {} }));
+// const navigateMock = jest.fn();
+// jest.mock("@react-navigation/native", () => ({
+//   useNavigation: () => ({ navigate: navigateMock }),
+//   useRoute: () => ({ params: {} }),
+// }));
+
+// // --- 2) Stub out your categories to match the shortcuts in UserHome ---
+// jest.mock("../../constants/category_constant", () => ({
+//   services_categories: [
+//     {
+//       title: "Cleaning",
+//       description: "CleanDesc",
+//       price: 10,
+//       subcategories: [
+//         { label: "Deep Clean", bannerImage: "img-clean.png" },
+//         { label: "Quick Clean", bannerImage: "img-quick.png" },
+//       ],
+//       questions: [],
+//     },
+//     {
+//       title: "Moving",
+//       description: "MoveDesc",
+//       price: 20,
+//       subcategories: [{ label: "Truck Move", bannerImage: "img-move.png" }],
+//       questions: [],
+//     },
+//   ],
+// }));
+
+// // --- 3) Tests ---
+
+// describe("shuffleArray()", () => {
+//   it("ensure that shuffleArray returns a permutation containing exactly the same items", () => {
+//     const arr = [1, 2, 3, 4, 5];
+//     const result = shuffleArray(arr);
+//     expect(result.sort()).toEqual(arr.sort());
+//   });
+
+//   it("check if shuffleArray actually changes order when Math.random is predictable", () => {
+//     const seq = [0, 0.5, 0.1, 0.9, 0.2];
+//     let idx = 0;
+//     jest.spyOn(Math, "random").mockImplementation(() => seq[idx++]);
+//     const original = [1, 2, 3];
+//     const shuffled = shuffleArray(original);
+//     expect(shuffled).not.toEqual(original);
+//     Math.random.mockRestore();
+//   });
 // });
 
-// // 1) Mirror exactly the categories & subcategories your component uses:
-// const SERVICES = [
-//   {
-//     title: "Cleaning",
-//     subcategories: ["Deep Cleaning", "Home Organizing"],
-//     description: "All cleaning services",
-//     price: 50,
-//   },
-//   {
-//     title: "Moving",
-//     subcategories: ["House Moving"],
-//     description: "All moving services",
-//     price: 100,
-//   },
-//   {
-//     title: "Repair",
-//     subcategories: ["Air Conditioner Repair"],
-//     description: "All repair services",
-//     price: 75,
-//   },
-//   {
-//     title: "Outdoor Services",
-//     subcategories: ["Gardening"],
-//     description: "All outdoor services",
-//     price: 60,
-//   },
-//   {
-//     title: "Maintenance",
-//     subcategories: ["Gas Leak Detection"],
-//     description: "All maintenance services",
-//     price: 120,
-//   },
-// ];
-// jest.mock("../../constants/category_constant", () => ({
-//   services_categories: SERVICES,
-// }));
-
-// // 2) Stub firebase so imports don't break:
-// jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
-// jest.mock("firebase/auth", () => ({
-//   /* unused here */
-// }));
-// jest.mock("firebase/firestore", () => ({
-//   /* unused here */
-// }));
-
-// import React from "react";
-// import { render, fireEvent } from "@testing-library/react-native";
-// import UserHome from "../../screen/user_home";
-
-// describe("UserHome Screen", () => {
-//   let mockNavigate;
-//   beforeAll(() => {
-//     mockNavigate = jest.fn();
-//   });
+// describe("<UserHome /> interactions", () => {
+//   let utils;
 //   beforeEach(() => {
-//     mockNavigate.mockClear();
+//     navigateMock.mockClear();
+//     utils = render(<UserHome />);
 //   });
 
-//   // The exact banners your component renders:
-//   const BANNERS = [
-//     "Deep Cleaning",
-//     "Home Organizing",
-//     "Air Conditioner Repair",
-//     "House Moving",
-//     "Gas Leak Detection",
-//     "Gardening",
-//   ];
+//   it("check if component initializes randomBanners containing all subcategory labels", () => {
+//     const { getAllByText } = utils;
+//     // we stubbed two categories: total subcategories = 3
+//     const banners = getAllByText(/Deep Clean|Quick Clean|Truck Move/);
+//     expect(banners).toHaveLength(3);
+//   });
 
-//   it("renders search bar, shortcuts, and banners", () => {
-//     const { getByPlaceholderText, getByText } = render(
-//       <UserHome navigation={{ navigate: mockNavigate }} />
-//     );
-
-//     // search
-//     expect(getByPlaceholderText(/Looking for any service\?/i)).toBeTruthy();
-
-//     // each shortcut
-//     SERVICES.forEach(({ title }) => {
-//       expect(getByText(title)).toBeTruthy();
-//     });
-
-//     // each banner
-//     BANNERS.forEach((label) => {
-//       expect(getByText(label)).toBeTruthy();
+//   it("check if pressing the 'Cleaning' shortcut navigates with correct params", () => {
+//     const btn = utils.getByText("Cleaning");
+//     fireEvent.press(btn);
+//     expect(navigateMock).toHaveBeenCalledWith("UserBooking", {
+//       serviceType: "Cleaning",
+//       subcategory: "Deep Clean",
+//       description: "CleanDesc",
+//       price: 10,
+//       questions: [],
 //     });
 //   });
 
-//   it("navigates via search (category → first subcategory)", () => {
-//     const { getByPlaceholderText } = render(
-//       <UserHome navigation={{ navigate: mockNavigate }} />
-//     );
-//     const input = getByPlaceholderText(/Looking for any service\?/i);
-
-//     SERVICES.forEach(({ title, subcategories, description, price }) => {
-//       fireEvent.changeText(input, title.toLowerCase());
-//       fireEvent(input, "submitEditing");
-//       expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
-//         serviceType: title,
-//         subcategory: subcategories[0],
-//         description,
-//         price,
-//       });
+//   it("check if pressing a service banner calls handleSubcategoryPress with correct params", () => {
+//     // pick whichever banner first renders
+//     const banner = utils.getByText("Deep Clean");
+//     fireEvent.press(banner);
+//     expect(navigateMock).toHaveBeenCalledWith("UserBooking", {
+//       serviceType: "Cleaning",
+//       subcategory: "Deep Clean",
+//       description: "CleanDesc",
+//       price: 10,
 //     });
 //   });
 
-//   it("navigates via search (matching subcategory)", () => {
-//     const { getByPlaceholderText } = render(
-//       <UserHome navigation={{ navigate: mockNavigate }} />
-//     );
-//     const input = getByPlaceholderText(/Looking for any service\?/i);
+//   it("check if typing into search shows matching category suggestions", () => {
+//     const input = utils.getByPlaceholderText("Looking for any service?");
+//     act(() => fireEvent.changeText(input, "clean"));
+//     expect(utils.getByText("Deep Clean (Cleaning)")).toBeTruthy();
+//   });
 
-//     SERVICES.forEach(({ title, subcategories, description, price }) => {
-//       subcategories.forEach((sub) => {
-//         fireEvent.changeText(input, sub.toLowerCase());
-//         fireEvent(input, "submitEditing");
-//         expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
-//           serviceType: title,
-//           subcategory: sub,
-//           description,
-//           price,
-//         });
-//       });
+//   it("check if pressing return on empty search does nothing", () => {
+//     const input = utils.getByPlaceholderText("Looking for any service?");
+//     act(() => fireEvent(input, "submitEditing"));
+//     expect(navigateMock).not.toHaveBeenCalled();
+//   });
+
+//   it("check if submitting a category search navigates correctly", () => {
+//     const input = utils.getByPlaceholderText("Looking for any service?");
+//     act(() => fireEvent.changeText(input, "moving"));
+//     act(() => fireEvent(input, "submitEditing"));
+//     expect(navigateMock).toHaveBeenCalledWith("UserBooking", {
+//       serviceType: "Moving",
+//       subcategory: "Truck Move",
+//       description: "MoveDesc",
+//       price: 20,
 //     });
 //   });
 
-//   it("navigates when tapping shortcuts", () => {
-//     const { getByText } = render(
-//       <UserHome navigation={{ navigate: mockNavigate }} />
-//     );
-
-//     SERVICES.forEach(({ title, subcategories, description, price }) => {
-//       fireEvent.press(getByText(title));
-//       expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
-//         serviceType: title,
-//         subcategory: subcategories[0],
-//         description,
-//         price,
-//       });
-//     });
-//   });
-
-//   it("navigates when tapping banners", () => {
-//     const { getByText } = render(
-//       <UserHome navigation={{ navigate: mockNavigate }} />
-//     );
-
-//     // find which category each banner belongs to:
-//     const bannerMap = SERVICES.reduce((map, cat) => {
-//       cat.subcategories.forEach((sub) => {
-//         map[sub] = cat;
-//       });
-//       return map;
-//     }, {});
-
-//     BANNERS.forEach((label) => {
-//       const { title, subcategories, description, price } = bannerMap[label];
-//       // if label isn't in subcategories, default to first
-//       const sub = subcategories.includes(label) ? label : subcategories[0];
-//       fireEvent.press(getByText(label));
-//       expect(mockNavigate).toHaveBeenLastCalledWith("UserBooking", {
-//         serviceType: title,
-//         subcategory: sub,
-//         description,
-//         price,
-//       });
+//   it("check if submitting a subcategory search navigates correctly", () => {
+//     const input = utils.getByPlaceholderText("Looking for any service?");
+//     act(() => fireEvent.changeText(input, "quick"));
+//     act(() => fireEvent(input, "submitEditing"));
+//     expect(navigateMock).toHaveBeenCalledWith("UserBooking", {
+//       serviceType: "Cleaning",
+//       subcategory: "Quick Clean",
+//       description: "CleanDesc",
+//       price: 10,
 //     });
 //   });
 // });

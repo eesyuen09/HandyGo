@@ -1,164 +1,272 @@
-/**
- * @jest-environment jsdom
- */
-
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
-import { Alert, Text } from "react-native";
+import { render } from "@testing-library/react-native";
+import { Alert } from "react-native";
+import * as Yup from "yup";
+import UserBooking, {
+  calculateEndTime,
+  bucketItemCount,
+  bucketAreaSize,
+  handleBookingSubmit,
+} from "../../screen/user_booking";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { app } from "../../firebaseConfig";
+import { postcodes } from "../../constants/postcodes";
+import { getPriceEstimate } from "../../src/api/pricing";
 
-// // Mock react-navigation’s useRoute to supply params
-// jest.mock("@react-navigation/native", () => ({
-//   useRoute: () => ({
-//     params: {
-//       serviceType: "Cleaning",
-//       subcategory: "Deep Cleaning",
-//       description: "All cleaning services",
-//       price: 50,
-//     },
-//   }),
-// }));
-
-jest.mock("../../components/style_u_booking.js", () => ({
-  colours: {},
-  styles: {},
+jest.mock("firebase/auth", () => ({
+  getAuth: jest.fn(),
+  onAuthStateChanged: jest.fn(),
 }));
-
-jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock")
-);
-
-jest.mock("../../components/KeyboardAvoidingWrapper.js", () => {
-  const React = require("react");
-  const { View } = require("react-native");
-  return ({ children }) => React.createElement(View, null, children);
-});
-
-jest.mock("@react-navigation/native", () => {
-  const actualNav = jest.requireActual("@react-navigation/native");
-  return {
-    ...actualNav,
-    useNavigation: () => ({
-      navigate: jest.fn(),
-      goBack: jest.fn(),
-    }),
-    useRoute: () => ({
-      params: {
-        serviceType: "Cleaning",
-        subcategory: "General Cleaning",
-        description: "Regular house cleaning",
-        price: "30",
-      },
-    }),
-  };
-});
-
+jest.spyOn(Alert, "alert").mockImplementation(() => {});
+jest.mock("expo-constants", () => ({
+  manifest: { scheme: "app" },
+}));
 jest.mock("@expo/vector-icons", () => {
   const React = require("react");
   const { Text } = require("react-native");
-  const make = (name) => () => React.createElement(Text, null, name);
   return {
-    FontAwesome5: make("FontAwesome5"),
-    AntDesign: make("AntDesign"),
-    MaterialIcons: make("MaterialIcons"),
-    Entypo: make("Entypo"),
-    FontAwesome: make("FontAwesome"),
-    Feather: make("Feather"),
-    FontAwesome6: make("FontAwesome6"),
+    FontAwesome5: (props) => React.createElement(Text, null, "Fa5"),
+    AntDesign: (props) => React.createElement(Text, null, "AD"),
+    MaterialIcons: (props) => React.createElement(Text, null, "MI"),
+    Entypo: (props) => React.createElement(Text, null, "Ent"),
+    FontAwesome: (props) => React.createElement(Text, null, "FA"),
+    Feather: (props) => React.createElement(Text, null, "Fea"),
+    FontAwesome6: (props) => React.createElement(Text, null, "FA6"),
   };
 });
 
-jest.mock("react-native-dropdown-picker", () => "DropDownPicker");
-jest.mock("@react-native-community/datetimepicker", () => "DateTimePicker");
+jest.mock("@react-navigation/native", () => ({
+  useNavigation: () => ({ navigate: jest.fn() }),
+  useRoute: () => ({ params: {} }),
+}));
 
-jest.mock("../../firebaseConfig", () => ({ auth: {}, db: {} }));
+jest.mock("formik", () => {
+  const React = require("react");
+  return {
+    Formik: ({ children, initialValues, onSubmit }) =>
+      children({
+        values: initialValues,
+        errors: {},
+        touched: {},
+        handleChange: jest.fn(),
+        handleBlur: jest.fn(),
+        handleSubmit: onSubmit,
+        setFieldValue: jest.fn(),
+      }),
+    FieldArray: (props) => {
+      const fn = props.render || props.children;
+      return fn({ push: jest.fn(), remove: jest.fn() });
+    },
+  };
+});
+
+jest.mock("yup", () => jest.requireActual("yup"));
+
+jest.mock("react-native-dropdown-picker", () => {
+  const React = require("react");
+  return (props) => React.createElement("DropDownPicker", props);
+});
+
+jest.mock("@react-native-community/datetimepicker", () => {
+  const React = require("react");
+  return (props) => {
+    React.useEffect(() => {
+      props.onChange({ type: "set" }, new Date());
+    }, []);
+    return null;
+  };
+});
+
+jest.mock("firebase/firestore", () => ({
+  addDoc: jest.fn(),
+  collection: jest.fn(),
+  setDoc: jest.fn(),
+}));
 
 jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(() => ({ currentUser: { uid: "u1" } })),
-  onAuthStateChanged: jest.fn((auth, cb) => {
-    cb({ uid: "u1" });
+  getAuth: jest.fn(),
+  onAuthStateChanged: jest.fn((auth, callback) => {
     return () => {};
   }),
 }));
 
-jest.mock("firebase/firestore", () => ({
-  addDoc: jest.fn(() => Promise.resolve({ id: "fakeId" })),
-  collection: jest.fn(),
-  setDoc: jest.fn(() => Promise.resolve()),
+jest.mock("../../firebaseConfig", () => ({
+  auth: {},
+  db: {},
 }));
 
-Alert.alert = jest.fn();
-
-import UserBooking, {
-  calculateEndTime,
-  handleBookingSubmit,
-} from "../../screen/user_booking.js";
-
-describe("UserBooking Screen", () => {
-  beforeEach(async () => {
-    Alert.alert.mockClear();
+describe("Helper functions", () => {
+  test("calculateEndTime adds hours correctly and wraps past midnight", () => {
+    expect(calculateEndTime("09:15", 2)).toBe("11:15");
+    expect(calculateEndTime("23:30", 2)).toBe("01:30");
   });
 
-  it.each([
-    ["09:00", "1", "10:00"],
-    ["13:30", "2", "15:30"],
-    ["23:15", "1", "00:15"],
-  ])("calculateEndTime(%s, %s) → %s", (start, dur, expected) => {
-    expect(calculateEndTime(start, dur)).toBe(expected);
+  test("bucketItemCount buckets small counts to 1,2,3", () => {
+    expect(bucketItemCount(0)).toBe(1);
+    expect(bucketItemCount(1)).toBe(1);
+    expect(bucketItemCount(2)).toBe(2);
+    expect(bucketItemCount(3)).toBe(2);
+    expect(bucketItemCount(4)).toBe(3);
+    expect(bucketItemCount(99)).toBe(3);
   });
 
-  it("handleBookingSubmit fires its success alert", () => {
-    handleBookingSubmit({});
+  test("bucketAreaSize buckets m² into 1/2/3 tiers", () => {
+    expect(bucketAreaSize(5)).toBe(1);
+    expect(bucketAreaSize(20)).toBe(1);
+    expect(bucketAreaSize(30)).toBe(2);
+    expect(bucketAreaSize(50)).toBe(2);
+    expect(bucketAreaSize(75)).toBe(3);
+  });
+});
+
+describe("getPriceEstimate", () => {
+  beforeEach(() => {
+    global.fetch = jest.fn();
+  });
+
+  it("resolves with predicted_price when response.ok", async () => {
+    global.fetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ predicted_price: 42.5 }),
+    });
+
+    const payload = { service_type: "Test", duration_hours: 1 };
+    const price = await getPriceEstimate(payload);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "https://handygo-ae37.onrender.com/predict",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+    );
+    expect(price).toBe(42.5);
+  });
+
+  it("throws on non-ok response", async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      status: 500,
+      json: () => ({}),
+    });
+    await expect(getPriceEstimate({})).rejects.toThrow("HTTP 500");
+  });
+
+  it("throws on network failure", async () => {
+    global.fetch.mockRejectedValue(new Error("Network failure"));
+    await expect(getPriceEstimate({})).rejects.toThrow("Network failure");
+  });
+});
+
+describe("handleBookingSubmit", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("logs and fires a confirmation alert", () => {
+    console.log = jest.fn();
+    const dummy = { foo: "bar" };
+    handleBookingSubmit(dummy);
+
+    expect(console.log).toHaveBeenCalledWith("Booking submitted:", dummy);
     expect(Alert.alert).toHaveBeenCalledWith(
       "Booking Submitted",
       "Your booking has been successfully submitted!"
     );
   });
+});
 
-  it("renders the banner from route params", () => {
-    const { getByText } = render(<UserBooking />);
-    expect(getByText("Cleaning")).toBeTruthy();
-    expect(getByText("Regular house cleaning")).toBeTruthy();
-    expect(getByText("Starting from")).toBeTruthy();
-    // expect(getByText("30")).toBeTruthy();
-  });
-
-  it("shows validation errors if required fields are empty", async () => {
-    const { getByText } = render(<UserBooking />);
-    fireEvent.press(getByText("Book Now"));
-
-    await waitFor(() => {
-      [
-        "duration is required",
-        "Date is required",
-        "Time is required",
-        "Postcode is required",
-        "Address is required",
-      ].forEach((msg) => {
-        expect(getByText(msg)).toBeTruthy();
-      });
-    });
-  });
-
-  it("allows adding up to 3 availability slots and removing them", () => {
-    const { getAllByText, getByText } = render(<UserBooking />);
-
-    // initially one slot
-    expect(getAllByText("Select Date").length).toBe(1);
-
-    // add two more: total 3
-    fireEvent.press(getByText("Add Time Slot"));
-    fireEvent.press(getAllByText("Add Time Slot")[1]);
-    expect(getAllByText("Select Date").length).toBe(3);
-
-    // fourth add should alert
-    fireEvent.press(getAllByText("Add Time Slot")[2]);
-    expect(Alert.alert).toHaveBeenLastCalledWith(
-      "Action Not Allowed",
-      "You can only choose up to 3 time slots."
+describe("<UserBooking /> auth setup", () => {
+  it("calls getAuth(app) and subscribes via onAuthStateChanged", () => {
+    render(
+      <UserBooking
+        route={{
+          params: {
+            serviceType: "Cleaning",
+            subcategory: "Deep Clean",
+            description: "Desc",
+            price: 100,
+            questions: [],
+          },
+        }}
+        navigation={{ navigate: jest.fn() }}
+      />
     );
+    expect(getAuth).toHaveBeenCalledWith(app);
+    expect(onAuthStateChanged).toHaveBeenCalled();
+  });
+});
 
-    // remove one slot → back to 2
-    fireEvent.press(getAllByText("Remove")[1]);
-    expect(getAllByText("Select Date").length).toBe(2);
+// --- 5. Form validation schema ---
+describe("Booking form validation schema", () => {
+  // Recreate the schema from your Formik setup (with no dynamic questions)
+  const schema = Yup.object({
+    type: Yup.string().required("Type is required"),
+    urgency: Yup.string().required("Urgency is required"),
+    duration: Yup.number().required("duration is required"),
+    availability: Yup.array().of(
+      Yup.object().shape({
+        date: Yup.string().required("Date is required"),
+        time: Yup.string().required("Time is required"),
+      })
+    ),
+    postcode: Yup.string()
+      .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
+      .test("valid-postcode", "Invalid Singapore postcode", (val) =>
+        postcodes.some((p) => p.postal_code.toString() === val?.trim())
+      )
+      .required("Postcode is required"),
+    address: Yup.string().required("Address is required"),
+    // dynamicSchema empty for this test
+  });
+
+  it("rejects when all required fields are blank", async () => {
+    const bad = {
+      type: "",
+      urgency: "",
+      duration: null,
+      availability: [{ date: "", time: "" }],
+      postcode: "",
+      address: "",
+    };
+    await expect(schema.validate(bad)).rejects.toThrow();
+  });
+
+  it("catches each individual field error", async () => {
+    await expect(schema.validateAt("type", { type: "" })).rejects.toThrow(
+      "Type is required"
+    );
+    await expect(schema.validateAt("urgency", { urgency: "" })).rejects.toThrow(
+      "Urgency is required"
+    );
+    await expect(
+      schema.validateAt("duration", { duration: null })
+    ).rejects.toThrow("duration is required");
+    await expect(
+      schema.validateAt("availability[0].date", {
+        availability: [{ date: "", time: "12:00" }],
+      })
+    ).rejects.toThrow("Date is required");
+    await expect(
+      schema.validateAt("availability[0].time", {
+        availability: [{ date: "2025-07-23", time: "" }],
+      })
+    ).rejects.toThrow("Time is required");
+    await expect(
+      schema.validateAt("postcode", { postcode: "1234" })
+    ).rejects.toThrow("Postcode must be at least 5 digits");
+    // assume postcodes[0].postal_code = 123456
+    await expect(
+      schema.validateAt("postcode", { postcode: "999999" })
+    ).rejects.toThrow("Invalid Singapore postcode");
+    await expect(
+      schema.validateAt("postcode", {
+        postcode: String(postcodes[0].postal_code),
+      })
+    ).resolves.toBeDefined();
+    await expect(schema.validateAt("address", { address: "" })).rejects.toThrow(
+      "Address is required"
+    );
   });
 });

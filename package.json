@@ -6,8 +6,8 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
-    
+    "web": "expo start --web",
+    "test": "jest"
   },
   "dependencies": {
     "@expo-google-fonts/sora": "^0.3.0",
@@ -42,14 +42,13 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0",
+    "@babel/core": "^7.28.0",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.2.0",
-    "babel-jest": "^30.0.2",
-    "jest-expo": "^53.0.7",
+    "babel-jest": "^30.0.5",
+    "jest-expo": "^53.0.9",
     "react-test-renderer": "^19.0.0"
   },
   "private": true
-  
 }
