@@ -323,8 +323,8 @@ export default function UserBooking() {
                       open={openType}
                       value={values.type}
                       items={subcategories.map((sub) => ({
-                        label: sub,
-                        value: sub,
+                        label: sub.label,
+                        value: sub.label,
                       }))}
                       setOpen={setOpenType}
                       setValue={(val) => setFieldValue("type", val())}

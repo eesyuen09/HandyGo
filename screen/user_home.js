@@ -188,7 +188,7 @@ export default function UserHome({ navigation }) {
           title: category.title,
           description: category.description,
           price: category.price,
-          subcategory: category.subcategories[0], // default for nav
+          subcategory: category.subcategories[0].label,
         });
       }
 
@@ -216,7 +216,7 @@ export default function UserHome({ navigation }) {
       if (category.title.toLowerCase().includes(query)) {
         navigation.navigate("UserBooking", {
           serviceType: category.title,
-          subcategory: category.subcategories[0],
+          subcategory: category.subcategories[0].label,
           description: category.description,
           price: category.price,
         });
@@ -224,10 +224,10 @@ export default function UserHome({ navigation }) {
       }
 
       for (const sub of category.subcategories) {
-        if (sub.toLowerCase().includes(query)) {
+        if (sub.label.toLowerCase().includes(query)) {
           navigation.navigate("UserBooking", {
             serviceType: category.title,
-            subcategory: sub,
+            subcategory: sub.label,
             description: category.description,
             price: category.price,
           });
@@ -277,7 +277,7 @@ export default function UserHome({ navigation }) {
                     onPress={() => {
                       navigation.navigate("UserBooking", {
                         serviceType: item.title,
-                        subcategory: item.subcategory,
+                        subcategory: item.label,
                         description: item.description,
                         price: item.price,
                       });
@@ -287,9 +287,7 @@ export default function UserHome({ navigation }) {
                     style={styles.suggestionItem}
                   >
                     <Text style={styles.suggestionText}>
-                      {item.subcategory
-                        ? `${item.subcategory} (${item.title})`
-                        : item.title}
+                      {item.label} ({item.title})
                     </Text>
                   </TouchableOpacity>
                 ))}
