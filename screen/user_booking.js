@@ -23,7 +23,7 @@ import {
   Feather,
   FontAwesome6,
 } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
 import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";
@@ -37,7 +37,7 @@ const handleBookingSubmit = (values) => {
   console.log("Booking submitted:", values);
   Alert.alert(
     "Booking Submitted",
-    "Your booking has been successfully submitted!",
+    "Your booking has been successfully submitted!"
   );
 };
 
@@ -52,17 +52,18 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
+export { calculateEndTime, handleBookingSubmit };
 export default function UserBooking() {
   const route = useRoute();
   const { serviceType, subcategory, description, price } = route.params || {};
   const icon = services_categories.find(
-    (category) => category.title === serviceType,
+    (category) => category.title === serviceType
   )?.icon;
   const bannerImage = services_categories.find(
-    (category) => category.title === serviceType,
+    (category) => category.title === serviceType
   )?.bannerImage;
   const subcategories = services_categories.find(
-    (category) => category.title === serviceType,
+    (category) => category.title === serviceType
   )?.subcategories;
   const [openUrgency, setOpenUrgency] = useState(false);
   const [openType, setOpenType] = useState(false);
@@ -72,6 +73,7 @@ export default function UserBooking() {
   const [showDatePicker, setShowDatePicker] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const auth = getAuth(app);
+  const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -88,7 +90,8 @@ export default function UserBooking() {
         serviceType: serviceType,
         type: subcategory,
         urgency: false,
-        duration: "",
+        isCompleted: false,
+        duration: null,
         availability: [{ date: "", time: "" }],
         state: "",
         postcode: "",
@@ -102,18 +105,18 @@ export default function UserBooking() {
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
         urgency: Yup.string().required("Urgency is required"),
-        duration: Yup.string().required("duration is required"),
+        duration: Yup.number().required("duration is required"),
         availability: Yup.array().of(
           Yup.object().shape({
             date: Yup.string().required("Date is required"),
             time: Yup.string().required("Time is required"),
-          }),
+          })
         ),
         state: Yup.string()
           .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
           .required("State is required"),
         postcode: Yup.string()
-          .matches(/^[0-9]+$/, "Postcode can only contain numbers")
+          .matches(/^\d{6}$/, "Postcode must be 6 digits")
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
       })}
@@ -131,7 +134,7 @@ export default function UserBooking() {
           notif,
           notes,
           status,
-          price,
+          isCompleted,
         } = values;
 
         try {
@@ -139,14 +142,16 @@ export default function UserBooking() {
             ...values,
             createdAt: new Date(),
             userId: auth.currentUser.uid,
+            price: 30, //assume its a fixed price for now for worker's analysis
           });
 
           await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
           Alert.alert(
             "Success",
-            "Your booking has been successfully submitted!",
+            "Your booking has been successfully submitted!"
           );
           resetForm();
+          navigation.goBack();
         } catch (error) {
           console.error("Error submitting booking:", error);
           Alert.alert("Error", "Booking submission failed. Please try again.");
@@ -189,7 +194,7 @@ export default function UserBooking() {
                 {/* Type */}
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
-                    {icon}
+                    {icon && icon}
                     <Text style={styles.input}>Service Type</Text>
                   </View>
 
@@ -270,15 +275,15 @@ export default function UserBooking() {
                       style={styles.dropdownContainer}
                       open={openDuration}
                       value={values.duration}
-                      items={[...Array(15)].map((_, i) => ({
+                      items={[...Array(7)].map((_, i) => ({
                         label: `${i + 1} hour${i + 1 > 1 ? "s" : ""}`,
-                        value: `${i + 1}`,
+                        value: i + 1,
                       }))}
                       setOpen={setOpenDuration}
                       setValue={(val) => setFieldValue("duration", val())}
                       setItems={() => {}}
                       placeholder="Select Duration"
-                      ontainerStyle={{ zIndex: 800 }}
+                      containerStyle={{ zIndex: 800 }}
                       zIndex={800}
                       listMode="SCROLLVIEW"
                     />
@@ -342,16 +347,16 @@ export default function UserBooking() {
                                       // Extract local date
                                       const year = selectedDate.getFullYear();
                                       const month = String(
-                                        selectedDate.getMonth() + 1,
+                                        selectedDate.getMonth() + 1
                                       ).padStart(2, "0");
                                       const day = String(
-                                        selectedDate.getDate(),
+                                        selectedDate.getDate()
                                       ).padStart(2, "0");
                                       const formatted = `${year}-${month}-${day}`;
 
                                       setFieldValue(
                                         `availability[${index}].date`,
-                                        formatted,
+                                        formatted
                                       );
                                     }}
                                   />
@@ -391,7 +396,7 @@ export default function UserBooking() {
                                     value={
                                       slot.time
                                         ? new Date(
-                                            `2025-05-301T${slot.time}:00`,
+                                            `2025-05-301T${slot.time}:00`
                                           )
                                         : new Date()
                                     }
@@ -409,10 +414,10 @@ export default function UserBooking() {
 
                                       const year = now.getFullYear();
                                       const month = String(
-                                        now.getMonth() + 1,
+                                        now.getMonth() + 1
                                       ).padStart(2, "0");
                                       const day = String(
-                                        now.getDate(),
+                                        now.getDate()
                                       ).padStart(2, "0");
                                       const today = `${year}-${month}-${day}`;
                                       const isToday =
@@ -429,7 +434,7 @@ export default function UserBooking() {
                                       if (isPastTime) {
                                         Alert.alert(
                                           "Invalid Time",
-                                          "You cannot select a time in the past.",
+                                          "You cannot select a time in the past."
                                         );
                                         return;
                                       }
@@ -438,7 +443,7 @@ export default function UserBooking() {
                                         .slice(0, 5);
                                       setFieldValue(
                                         `availability[${index}].time`,
-                                        formatted,
+                                        formatted
                                       );
                                     }}
                                   />
@@ -458,7 +463,7 @@ export default function UserBooking() {
                                   if (values.availability.length === 1) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "At least one time slot must be chosen.",
+                                      "At least one time slot must be chosen."
                                     );
                                   } else {
                                     remove(index);
@@ -474,7 +479,7 @@ export default function UserBooking() {
                                   if (values.availability.length >= 3) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "You can only choose up to 3 time slots.",
+                                      "You can only choose up to 3 time slots."
                                     );
                                   } else {
                                     push({ date: "", time: "" });
@@ -699,5 +704,3 @@ export default function UserBooking() {
     </Formik>
   );
 }
-
-export { calculateEndTime, handleBookingSubmit };

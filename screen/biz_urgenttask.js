@@ -340,7 +340,7 @@ if (minDuration > 0) constraint.push(where("duration", ">=", minDuration))
               handleSearch(text);
             }}
           />
-          <TouchableOpacity onPress={() => navigation.navigate("FilterScreen")}>
+          <TouchableOpacity onPress={() => navigation.navigate("FilterScreen", {urgency: true})}>
             <Feather name="filter" size={20} color={colours.darkest_coco} />
           </TouchableOpacity>
         </View>

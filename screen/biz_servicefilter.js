@@ -16,9 +16,15 @@ import { useFonts } from "expo-font";
 import { FlatList } from "react-native";
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import { max } from "moment";
+import { useRoute } from "@react-navigation/native";
+
 
 
 export default function FilterScreen({navigation}){
+    const route = useRoute();
+    const {urgency} = route.params;
+    console.log(urgency);
+
     const [minPrice, setMinPrice] = useState(0);
     const [maxPrice, setMaxPrice] = useState(0);
     const [minDuration, setMinDuration] = useState(0);
@@ -93,8 +99,12 @@ export default function FilterScreen({navigation}){
             // if (orderByDate) {
             //     filter.orderByDate = orderByDate;
             // }
+            if(urgency){
 
             navigation.navigate("Business Urgent Task", { filter });
+            }else{
+                navigation.navigate("Business Scheduled Task", { filter });
+            }
             console.log(filter);
             };
             
