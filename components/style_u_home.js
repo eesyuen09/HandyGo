@@ -146,7 +146,7 @@ export const styles = StyleSheet.create({
     resizeMode: "cover",
     height: imageHeight,
     width: imageWidth,
-    marginBottom: 25,
+    marginBottom: 50,
     borderRadius: 8,
   },
 

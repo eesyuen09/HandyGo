@@ -82,15 +82,16 @@ export default function UserBooking() {
     price,
     questions = [],
   } = route.params || {};
+  console.log("Route params:", route.params);
   const icon = services_categories.find(
     (category) => category.title === serviceType
   )?.icon;
   const bannerImage = services_categories.find(
     (category) => category.title === serviceType
   )?.bannerImage;
-  const subcategories = services_categories.find(
-    (category) => category.title === serviceType
-  )?.subcategories;
+  const subcategories =
+    services_categories.find((category) => category.title === serviceType)
+      ?.subcategories || [];
   const dynamicInitial = {
     ...questions.reduce((acc, q) => {
       acc[q.key] = 0;
@@ -127,23 +128,6 @@ export default function UserBooking() {
 
     return () => unsubscribe();
   }, []);
-
-  // handle booking submission
-  const handlePress = () => {
-    const serviceData = services_categories.find(
-      (c) => c.title === serviceType
-    );
-    console.log(serviceData);
-    navigation.navigate("UserBooking", {
-      serviceType: serviceData.title,
-      subcategory: serviceData.subcategories[0],
-      description: serviceData.description,
-      price: serviceData.price,
-      questions: serviceData.questions,
-      // bannerImage: serviceData.bannerImage,
-      // icon: serviceData.icon,
-    });
-  };
 
   return (
     <Formik
@@ -282,7 +266,7 @@ export default function UserBooking() {
           // navigation.goBack();
 
           navigation.navigate("Order Summary", {
-            bookingDetails: bookingDetails,
+            bookingInfo: bookingDetails,
           });
         } catch (error) {
           console.error("Error processing booking:", error);
