@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -148,6 +148,43 @@ export default function UserHome({ navigation }) {
   const searchInputRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+
+    const matches = [];
+
+    for (const category of services_categories) {
+      if (category.title.toLowerCase().includes(query)) {
+        matches.push({
+          type: "category",
+          title: category.title,
+          description: category.description,
+          price: category.price,
+          subcategory: category.subcategories[0], // default for nav
+        });
+      }
+
+      for (const sub of category.subcategories) {
+        if (sub.toLowerCase().includes(query)) {
+          matches.push({
+            type: "subcategory",
+            title: category.title,
+            subcategory: sub,
+            description: category.description,
+            price: category.price,
+          });
+        }
+      }
+    }
+
+    setSuggestions(matches);
+  }, [searchQuery]);
 
   const handleSearch = () => {
     const query = searchQuery.trim().toLowerCase();
@@ -207,6 +244,34 @@ export default function UserHome({ navigation }) {
                 onSubmitEditing={handleSearch}
               />
             </View>
+
+            {/* Suggestions List */}
+            {suggestions.length > 0 && (
+              <View style={styles.suggestionBox}>
+                {suggestions.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      navigation.navigate("UserBooking", {
+                        serviceType: item.title,
+                        subcategory: item.subcategory,
+                        description: item.description,
+                        price: item.price,
+                      });
+                      setSuggestions([]);
+                      setSearchQuery("");
+                    }}
+                    style={styles.suggestionItem}
+                  >
+                    <Text style={styles.suggestionText}>
+                      {item.subcategory
+                        ? `${item.subcategory} (${item.title})`
+                        : item.title}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </SafeAreaView>
         </TouchableWithoutFeedback>
 

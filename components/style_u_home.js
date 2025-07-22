@@ -163,4 +163,27 @@ export const styles = StyleSheet.create({
     textShadowRadius: 2,
     zIndex: 1,
   },
+
+  suggestionBox: {
+    backgroundColor: colours.beige,
+    borderRadius: 5,
+    marginTop: 4,
+    marginHorizontal: 10,
+    elevation: 3,
+    // shadowColor: colours.grey,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+
+  suggestionItem: {
+    padding: 10,
+    borderBottomColor: colours.darkest_coco,
+    borderBottomWidth: 1,
+  },
+
+  suggestionText: {
+    fontSize: 14,
+    color: colours.darkest_coco,
+  },
 });
