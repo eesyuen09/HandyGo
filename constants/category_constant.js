@@ -202,7 +202,7 @@ export const services_categories = [
       },
     ],
     description:
-      "Connect with experienced maintenance professionals to perform safety checks, fix minor wear and tear, and ensure your home systems stay in top working condition.",
+      "Connect with experienced maintenance professionals to ensure your home systems stay in top working condition.",
     price: 38,
     bannerImage: require("../assets/images/maintenance_banner.png"),
     icon: (

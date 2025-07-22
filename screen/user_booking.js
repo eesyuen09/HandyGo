@@ -266,7 +266,7 @@ export default function UserBooking() {
           // navigation.goBack();
 
           navigation.navigate("Order Summary", {
-            bookingInfo: bookingDetails,
+            tempBookingInfo: bookingDetails,
           });
         } catch (error) {
           console.error("Error processing booking:", error);
@@ -394,21 +394,31 @@ export default function UserBooking() {
                       style={[styles.inputRow, { zIndex: 600 - i }]}
                     >
                       <Text style={styles.input}>{q.prompt}</Text>
-                      <DropDownPicker
-                        open={openStates[q.key]}
-                        value={values[q.key]}
-                        items={q.options.map((opt, idx) => ({
-                          label: opt.label,
-                          value: opt.value,
-                        }))}
-                        setOpen={(v) =>
-                          setOpenStates((s) => ({ ...s, [q.key]: v }))
-                        }
-                        setValue={(cb) => setFieldValue(q.key, cb())}
-                        containerStyle={{ zIndex: 600 - i }}
-                        placeholder={`Select ${q.prompt.toLowerCase()}`}
-                        listMode="SCROLLVIEW"
-                      />
+                      {q.type === "select" ? (
+                        <DropDownPicker
+                          open={openStates[q.key]}
+                          value={values[q.key]}
+                          items={q.options.map((opt, idx) => ({
+                            label: opt.label,
+                            value: opt.value,
+                          }))}
+                          setOpen={(v) =>
+                            setOpenStates((s) => ({ ...s, [q.key]: v }))
+                          }
+                          setValue={(cb) => setFieldValue(q.key, cb())}
+                          containerStyle={{ zIndex: 600 - i }}
+                          placeholder={`Select ${q.prompt.toLowerCase()}`}
+                          listMode="SCROLLVIEW"
+                        />
+                      ) : (
+                        <TextInput
+                          value={String(values[q.key] ?? "")}
+                          onChangeText={(text) => setFieldValue(q.key, text)}
+                          keyboardType="numeric"
+                          placeholder={q.prompt}
+                          style={styles.numberInput}
+                        />
+                      )}
                       {touched[q.key] && errors[q.key] && (
                         <Text style={styles.error}>{errors[q.key]}</Text>
                       )}

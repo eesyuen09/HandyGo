@@ -23,6 +23,7 @@ import {
   getDocs,
   query,
   where,
+  addDoc,
 } from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
@@ -36,6 +37,8 @@ const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
 
 export default function OrderSummary({ navigation }) {
+  console.log("OrderSummary mounted, params =", useRoute().params);
+
   const [booking, setBooking] = useState([]);
   const [openDate, setOpenDate] = useState(false);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -114,7 +117,8 @@ export default function OrderSummary({ navigation }) {
           <Text style={style.cardTitle}>{item.title}</Text>
           {isAvailabilityCard &&
           Array.isArray(item.content) &&
-          bookingData?.status !== "accepted" && !isTemp ? (
+          bookingData?.status !== "accepted" &&
+          !isTemp ? (
             <DropDownPicker
               open={openDate}
               value={selectedTime}
@@ -138,7 +142,8 @@ export default function OrderSummary({ navigation }) {
                 ))
               ) : typeof bookingData?.availability === "object" ? (
                 <Text style={style.cardContent}>
-                  {bookingData.availability.date} | {bookingData.availability.time}
+                  {bookingData.availability.date} |{" "}
+                  {bookingData.availability.time}
                 </Text>
               ) : (
                 <Text style={style.cardContent}>
@@ -180,24 +185,35 @@ export default function OrderSummary({ navigation }) {
 
   async function confirmBooking() {
     try {
+      if (!tempBookingInfo) {
+        console.error("tempBookingInfo is undefined or null");
+        Alert.alert("Error", "Booking info is missing.");
+        return;
+      }
+
+      console.log("tempBookingInfo:", tempBookingInfo);
+
       const bookingRef = await addDoc(collection(db, "booking"), {
         ...tempBookingInfo,
       });
 
-      //2. write the generated id back into the same document
+      console.log("Booking created:", bookingRef.id);
+
       await setDoc(
         bookingRef,
-        {
-          orderID: bookingRef.id,
-        },
+        { orderID: bookingRef.id },
         { merge: true }
-      );
+      ).catch((err) => {
+        console.error("Failed to merge orderID:", err);
+      });
+
+      Alert.alert("Booking confirmed!", "Your booking has been created.");
+      navigation.navigate("UserHome");
     } catch (err) {
       console.error("Failed to confirm booking:", err);
       Alert.alert("Error", "Failed to confirm booking.");
     }
   }
-
   const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
       if (!selectedTime) {
@@ -280,6 +296,7 @@ export default function OrderSummary({ navigation }) {
     if (tempBookingInfo) {
       setBookingData(tempBookingInfo);
       setIsTemp(true);
+      console.log("istemp", isTemp);
 
       const formatted = [
         {
@@ -299,21 +316,53 @@ export default function OrderSummary({ navigation }) {
         },
         {
           type: "location",
-          title: tempBookingInfo.state,
+          title: tempBookingInfo.postcode,
           icon: "map-marker-alt",
-          content: `${tempBookingInfo.address}, ${tempBookingInfo.postcode}, ${tempBookingInfo.state}`,
+          content: `${tempBookingInfo.address}, ${tempBookingInfo.postcode}`,
         },
         {
           type: "note",
           title: tempBookingInfo.notes || "No notes",
           icon: "file-alt",
-          content: "tempingBookingInfo.notes || 'No notes'",
+          content: tempBookingInfo.notes || "No notes",
         },
         {
           type: "price",
           title: "Price",
           icon: "dollar-sign",
           content: `$${tempBookingInfo.price || "35.99"}`,
+        },
+        {
+          type: "Urgency",
+          title: tempBookingInfo.urgency ? "Urgent" : "Scheduled",
+          icon: tempBookingInfo.urgency ? "exclamation-triangle" : "clock",
+          content: tempBookingInfo.urgency
+            ? "This is an urgent task."
+            : "This is a scheduled task.",
+        },
+        {
+          type: "Notification",
+          title: "Notification",
+          icon: "bell",
+          content: tempBookingInfo.notif
+            ? "You will be notified when a worker accepts your booking."
+            : "You will not be notified when a worker accepts your booking.",
+        },
+
+        {
+          type: "Rating",
+          title: "Rating",
+          icon: "star",
+          content: tempBookingInfo.rating
+            ? `Your worker will has at least${tempBookingInfo.rating} stars.`
+            : " No rating required",
+        },
+
+        {
+          type: "Payment Method",
+          title: "Cash On Delivery",
+          icon: "money-bill-wave",
+          content: "Pay in cash to the worker upon completion of the task.",
         },
       ];
       setBooking(formatted);
@@ -343,9 +392,9 @@ export default function OrderSummary({ navigation }) {
         },
         {
           type: "location",
-          title: data.state,
+          title: data.postcode,
           icon: "map-marker-alt",
-          content: `${data.address}, ${data.postcode}, ${data.state}`,
+          content: `${data.address}, ${data.postcode}`,
         },
         {
           type: "note",
@@ -358,6 +407,12 @@ export default function OrderSummary({ navigation }) {
           title: "Price",
           icon: "dollar-sign",
           content: `$${data.price || "35.99"}`,
+        },
+        {
+          type: "Payment Method",
+          title: "Cash On Delivery",
+          icon: "money-bill-wave",
+          content: "Pay in cash to the worker upon completion of the task.",
         },
       ];
       setBooking(formatted);
@@ -421,7 +476,7 @@ export default function OrderSummary({ navigation }) {
           {/* Divider */}
           <View style={style.line} />
 
-          {!userID && (
+          {!userID && !isTemp && (
             <TouchableOpacity
               style={style.button}
               onPress={() => acceptBooking(orderID, auth.currentUser.uid)}
