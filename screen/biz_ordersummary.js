@@ -40,6 +40,7 @@ export default function OrderSummary({ navigation }) {
   const [openDate, setOpenDate] = useState(false);
   const [selectedTime, setSelectedTime] = useState(null);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isTemp, setIsTemp] = useState(false);
 
   const route = useRoute();
   const params = route?.params ?? {};
@@ -113,7 +114,7 @@ export default function OrderSummary({ navigation }) {
           <Text style={style.cardTitle}>{item.title}</Text>
           {isAvailabilityCard &&
           Array.isArray(item.content) &&
-          bookingData?.status !== "accepted" ? (
+          bookingData?.status !== "accepted" && !isTemp ? (
             <DropDownPicker
               open={openDate}
               value={selectedTime}
@@ -128,11 +129,23 @@ export default function OrderSummary({ navigation }) {
             />
           ) : isAvailabilityCard ? (
             // Show selected time string when accepted
-            <Text style={style.cardContent}>
-              {typeof bookingData?.availability === "object"
-                ? `${bookingData.availability.date} | ${bookingData.availability.time}`
-                : bookingData?.availability || "No time selected"}
-            </Text>
+            <View>
+              {Array.isArray(bookingData?.availability) ? (
+                bookingData.availability.map((slot, index) => (
+                  <Text key={index} style={style.cardContent}>
+                    {slot.date} | {slot.time}
+                  </Text>
+                ))
+              ) : typeof bookingData?.availability === "object" ? (
+                <Text style={style.cardContent}>
+                  {bookingData.availability.date} | {bookingData.availability.time}
+                </Text>
+              ) : (
+                <Text style={style.cardContent}>
+                  {bookingData?.availability || "No time selected"}
+                </Text>
+              )}
+            </View>
           ) : (
             // For non-availability items
             <Text style={style.cardContent}>{item.content}</Text>
@@ -266,6 +279,7 @@ export default function OrderSummary({ navigation }) {
   useEffect(() => {
     if (tempBookingInfo) {
       setBookingData(tempBookingInfo);
+      setIsTemp(true);
 
       const formatted = [
         {
