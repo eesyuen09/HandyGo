@@ -43,7 +43,7 @@ export default function OrderSummary({ navigation }) {
 
   const route = useRoute();
   const params = route?.params ?? {};
-  const { orderID, userID, bookingInfo } = params || {};
+  const { orderID, userID, tempBookingInfo } = params || {};
 
   const [bookingData, setBookingData] = useState(null); // reused booking snapshot
 
@@ -165,6 +165,26 @@ export default function OrderSummary({ navigation }) {
     }
   };
 
+  async function confirmBooking() {
+    try {
+      const bookingRef = await addDoc(collection(db, "booking"), {
+        ...tempBookingInfo,
+      });
+
+      //2. write the generated id back into the same document
+      await setDoc(
+        bookingRef,
+        {
+          orderID: bookingRef.id,
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error("Failed to confirm booking:", err);
+      Alert.alert("Error", "Failed to confirm booking.");
+    }
+  }
+
   const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
       if (!selectedTime) {
@@ -244,6 +264,47 @@ export default function OrderSummary({ navigation }) {
   };
 
   useEffect(() => {
+    if (tempBookingInfo) {
+      setBookingData(tempBookingInfo);
+
+      const formatted = [
+        {
+          type: "category",
+          title: tempBookingInfo.type,
+          image: services_categories.find(
+            (cat) => cat.title === tempBookingInfo.serviceType
+          )?.bannerImage,
+        },
+        {
+          type: "availability",
+          icon: "clock",
+          title: `${tempBookingInfo.duration} hours`,
+          content: Array.isArray(tempBookingInfo.availability)
+            ? tempBookingInfo.availability
+            : [tempBookingInfo.availability],
+        },
+        {
+          type: "location",
+          title: tempBookingInfo.state,
+          icon: "map-marker-alt",
+          content: `${tempBookingInfo.address}, ${tempBookingInfo.postcode}, ${tempBookingInfo.state}`,
+        },
+        {
+          type: "note",
+          title: tempBookingInfo.notes || "No notes",
+          icon: "file-alt",
+          content: "tempingBookingInfo.notes || 'No notes'",
+        },
+        {
+          type: "price",
+          title: "Price",
+          icon: "dollar-sign",
+          content: `$${tempBookingInfo.price || "35.99"}`,
+        },
+      ];
+      setBooking(formatted);
+      return;
+    }
     const bookingRef = doc(db, "booking", orderID);
 
     const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
@@ -352,6 +413,15 @@ export default function OrderSummary({ navigation }) {
               onPress={() => acceptBooking(orderID, auth.currentUser.uid)}
             >
               <Text style={style.buttonText}>Accept Booking</Text>
+            </TouchableOpacity>
+          )}
+
+          {tempBookingInfo && (
+            <TouchableOpacity
+              style={style.button}
+              onPress={() => confirmBooking()}
+            >
+              <Text style={style.buttonText}>Confirm Booking</Text>
             </TouchableOpacity>
           )}
 
