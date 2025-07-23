@@ -219,6 +219,7 @@ export default function UserActivity({ navigation }) {
                 orderId: item.id,
                 workerId: item.workerId,
                 userId: item.userId,
+                type : item.type
               })
             }
           >
