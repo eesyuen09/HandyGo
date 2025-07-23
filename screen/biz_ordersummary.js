@@ -24,6 +24,7 @@ import {
   query,
   where,
   addDoc,
+  orderBy
 } from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
@@ -222,45 +223,47 @@ export default function OrderSummary({ navigation }) {
       }
 
       //Prevent double booking
-      //1. abstract new slots start and end date as date obj
-      const [datePart, timePart] = selectedTime.split(" ");
-      const startOfDay = `${datePart} 00:00`;
-      const endOfDay = `${datePart} 23:59`;
-      const newStart = new Date(`${datePart}T${timePart}:00`);
-      const durationHours = bookingData.duration; // e.g. 2
-      const newEnd = new Date(newStart.getTime() + durationHours * 3600e3);
-      console.log("start, end", newStart, newEnd);
+// helper: pad a number or string to two digits
+const pad2 = (x) => String(x).padStart(2, "0");
 
-      //2. query this workers schedules for the same day
-      const schedRef = collection(db, "users", currentWorkerId, "schedules");
-      const dayQuery = query(
-        schedRef,
-        where("availability", ">=", startOfDay),
-        where("availability", "<=", endOfDay)
-      );
-      const snap = await getDocs(dayQuery);
+// normalize any “YYYY-M-D H:mm” into “YYYY-MM-DD HH:mm”
+function normalizeTimestamp(ts) {
+  let [dp, tp] = ts.split(" ");
+  let [y, m, d] = dp.split("-").map(pad2);
+  let [h, min] = tp.split(":").map(pad2);
+  return `${y}-${m}-${d} ${h}:${min}`;
+}
 
-      //3. check each existing schedule overlap
-      for (let doc of snap.docs) {
-        const rec = doc.data();
-        const availStr = rec.availability;
-        const [exDate, exTime] = availStr.split(" ");
-        const existingStart = new Date(`${exDate}T${exTime}:00`);
-        const existingEnd = new Date(
-          existingStart.getTime() + rec.duration * 3600e3
-        );
+// in acceptBooking…
+const [datePart, timePart] = selectedTime.split(" ");
+const startOfDay = `${datePart} 00:00`;
+const endOfDay   = `${datePart} 23:59`;
 
-        console.log("existing:", existingStart, "->", existingEnd);
+// build your range query (still as strings)
+const dayQuery = query(
+  schedRef,
+  where("availability", ">=", startOfDay),
+  where("availability", "<=", endOfDay),
+  orderBy("availability")      // ← Firestore requires you to order by the same field
+);
 
-        if (newStart < existingEnd && existingStart < newEnd) {
-          Alert.alert(
-            "Time Conflict",
-            "You already have a booking at that time. Please choose another slot."
-          );
-          navigation.goBack();
-          return;
-        }
-      }
+// then later, when you loop through the returned docs…
+for (let docSnap of (await getDocs(dayQuery)).docs) {
+  const rec = docSnap.data();
+  // normalize the stored string into exactly the same shape
+  const avail = normalizeTimestamp(rec.availability);
+  const [exDate, exTime] = avail.split(" ");
+
+  const existingStart = new Date(`${exDate}T${exTime}:00`);
+  const existingEnd   = new Date(existingStart.getTime() + rec.duration * 3600e3);
+
+  if (newStart < existingEnd && existingStart < newEnd) {
+    Alert.alert("Time Conflict",
+      "You already have a booking at that time. Please choose another slot."
+    );
+    return;
+  }
+}
 
       const bookingRef = doc(db, "booking", bookingId);
 
