@@ -38,6 +38,15 @@ import {
 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 export default function UserHome({ navigation }) {
   const services = [
     {
@@ -82,22 +91,6 @@ export default function UserHome({ navigation }) {
     // { icon: <FontAwesome6 name="border-all" size={30} color = {colours.darkest_coco}/>, label: 'All' },
   ];
 
-  // const iconMap = {
-  //     'cleaning.png': require('../assets/icons/cleaning.png'),
-  //     'organizing.png': require('../assets/icons/organizing.png'),
-  //     'repair_icon.png': require('../assets/icons/repair_icon.png'),
-  //     'all.png': require('../assets/icons/all.png'),
-  // };
-
-  // const serviceBanners = [
-  //   { image: "cleaning_banner.png", label: "Deep Cleaning" },
-  //   { image: "home_organization.png", label: "Home Organizing" },
-  //   { image: "aircond_repair.png", label: "Air Conditioner Repair" },
-  //   { image: "Moving.png", label: "House Moving" },
-  //   { image: "gasleak.png", label: "Gas Leak Detection" },
-  //   { image: "outdoor_banner.png", label: "Gardening" },
-  // ];
-
   const serviceBanners = services_categories.flatMap((cat) =>
     cat.subcategories.map((sub) => ({
       label: sub.label,
@@ -105,15 +98,6 @@ export default function UserHome({ navigation }) {
       serviceType: cat.title,
     }))
   );
-
-  function shuffleArray(arr) {
-    const a = arr.slice();
-    for (let i = a.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
-    }
-    return a;
-  }
 
   // const bannerImageMap = {
   //   "Moving.png": require("../assets/images/Moving.png"),
@@ -287,7 +271,7 @@ export default function UserHome({ navigation }) {
                     style={styles.suggestionItem}
                   >
                     <Text style={styles.suggestionText}>
-                      {item.label} ({item.title})
+                      {item.label ?? item.subcategory} ({item.title})
                     </Text>
                   </TouchableOpacity>
                 ))}
@@ -350,3 +334,5 @@ export default function UserHome({ navigation }) {
     </SafeAreaView>
   );
 }
+
+export { shuffleArray };
