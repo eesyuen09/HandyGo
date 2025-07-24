@@ -21,6 +21,7 @@ import { getSummaryForUser } from './openaiService';
 import { style } from '../components/style_bizfinance';
 import { colours } from '../components/IncomeChart';
 import { increment } from "firebase/firestore";
+import ReviewsList from '../components/reviewList'
 
 export default function FinanceScreen() {
   const auth = getAuth();
@@ -28,6 +29,8 @@ export default function FinanceScreen() {
   const navigation = useNavigation();
   const { width } = Dimensions.get('window');
   const [ totalEarnings, setTotalEarnings ] = useState(0);
+
+  
 
 
   // Load custom fonts
@@ -143,6 +146,8 @@ export default function FinanceScreen() {
         {/* Ratings & Reviews */}
         <Text style={style.subtitle}>Ratings and Reviews</Text>
         <Text style={style.subtitle}>Current Ratings: {rating}</Text>
+        <ReviewsList workerId = {userId}/>
+
 
         {/* Top Earnings */}
         <View style={style.earningHeader}>
