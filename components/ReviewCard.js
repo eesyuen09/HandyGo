@@ -26,7 +26,7 @@ export default function ReviewCard({ review }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.username}>{review.userId}</Text>
+        <Text style={styles.username}>{review.type}</Text>
         <View style={styles.ratingContainer}>
           <Text style={styles.ratingText}>{review.rating}/5</Text>
         </View>
