@@ -112,6 +112,7 @@ export default function UserActivity({ navigation }) {
           status: data.status || "pending",
           workerId: data.workerId,
           userId: data.userId || "unknown",
+          type: data.type || 'unknown'
         };
 
         if (task.isCompleted) {
@@ -211,7 +212,7 @@ export default function UserActivity({ navigation }) {
       </View>
 
       {/* Completed Task Actions */}
-      {item.isCompleted && (
+     {item.isCompleted && (
         <View style={style.buttonRow}>
           <TouchableOpacity
             onPress={() =>
@@ -222,7 +223,7 @@ export default function UserActivity({ navigation }) {
                 type : item.type
               })
             }
-          >
+          > 
             <Text style={style.actionText}> 👍 Review</Text>
           </TouchableOpacity>
 
