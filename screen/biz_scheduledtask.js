@@ -315,7 +315,7 @@ if (minDuration > 0) constraint.push(where("duration", ">=", minDuration))
       <View style={style.container}>
         <View style={style.header}>
           <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={() => navigation.navigate('Business Home Page')}
             style={style.backButton}
           >
             <Ionicons
