@@ -37,11 +37,11 @@ export default function ReviewCard({ review }) {
   );
 }
 
-const { darkest_coco } = colours;
+const { darkest_coco, beige } = colours;
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: beige,
     borderRadius: 12,
     padding: 12,
     marginVertical: 6,
@@ -66,10 +66,11 @@ const styles = StyleSheet.create({
   ratingText: {
     color: '#fff',
     fontWeight: 'bold',
+
   },
   reviewText: {
     marginTop: 8,
-    color: '#333',
+    color: darkest_coco,
     lineHeight: 18,
   },
   dateText: {

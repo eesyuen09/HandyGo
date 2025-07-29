@@ -29,6 +29,7 @@ export default function FinanceScreen() {
   const navigation = useNavigation();
   const { width } = Dimensions.get('window');
   const [ totalEarnings, setTotalEarnings ] = useState(0);
+  const [ aveRating, setAveRating] = useState(0);
 
   
 
@@ -49,19 +50,20 @@ export default function FinanceScreen() {
 
   //get total earnings
   useEffect(() =>{
-    async function fetchEarnings(){
+    async function fetchEarningsAndRating(){
       try{
         const auth = getAuth();
         const userRef = doc(db, 'users',auth.currentUser.uid );
         const userSnap = await getDoc(userRef);
         if(userSnap.exists()){
          setTotalEarnings(userSnap.data().totalEarnings || 0);
+         setAveRating(userSnap.data().averageRating || 0);
         }
     }catch (error) {
       console.warn("Error fetching data",error);
     }
   };
-    fetchEarnings();
+    fetchEarningsAndRating();
   }, []);
 
 
@@ -103,12 +105,12 @@ export default function FinanceScreen() {
 
 
   // Dummy earnings data
-  const rating = 4.5;
-  const topEarnings = [
-    { id: '1', title: 'Cleaning', icon: <FontAwesome5 name="broom" size={20} />, date: 'Jan 12, 2025', amount: 150 },
-    { id: '2', title: 'Home Organising', icon: <MaterialIcons name="home-repair-service" size={20} />, date: 'Yesterday', amount: 85 },
-    { id: '3', title: 'Youtube', icon: <Ionicons name="logo-youtube" size={20} />, date: 'Jan 16, 2025', amount: 50 },
-  ];
+  // const rating = 4.5;
+  // const topEarnings = [
+  //   { id: '1', title: 'Cleaning', icon: <FontAwesome5 name="broom" size={20} />, date: 'Jan 12, 2025', amount: 150 },
+  //   { id: '2', title: 'Home Organising', icon: <MaterialIcons name="home-repair-service" size={20} />, date: 'Yesterday', amount: 85 },
+  //   { id: '3', title: 'Youtube', icon: <Ionicons name="logo-youtube" size={20} />, date: 'Jan 16, 2025', amount: 50 },
+  // ];
 
   return (
     <View style={style.container}>
@@ -145,16 +147,16 @@ export default function FinanceScreen() {
 
         {/* Ratings & Reviews */}
         <Text style={style.subtitle}>Ratings and Reviews</Text>
-        <Text style={style.subtitle}>Current Ratings: {rating}</Text>
+        <Text style={style.subtitle}>Current Ratings: {aveRating}/5</Text>
         <ReviewsList workerId = {userId}/>
 
 
         {/* Top Earnings */}
-        <View style={style.earningHeader}>
+        {/* <View style={style.earningHeader}>
           <Text style={style.subtitle}>Top Earning</Text>
         </View>
         {topEarnings.map(item => <EarningCard key={item.id} {...item} />)}
-        <View style={style.line} />
+        <View style={style.line} /> */}
 
         {/* AI Suggestion */}
         {loading && <ActivityIndicator size="large" style={{ marginVertical: 16 }} />}
