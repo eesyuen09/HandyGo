@@ -15,63 +15,53 @@ import { colours, style } from "../components/style_adddetails";
 import { useFonts } from "expo-font";
 
 //firebase storage
-import {
-  updateDoc,
-  doc,
-  getDoc,
-  arrayRemove,
-  arrayUnion,
-} from "firebase/firestore";
+import { updateDoc, doc, getDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 //category import
-import { categoryMap } from "../constants/categorymap";
 import { services_categories } from "../constants/category_constant";
 
 import { auth } from "../firebaseConfig";
 
-const uid = auth.currentUser?.uid;
-
 //keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
-import { Octicons, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 
-export function deleteEmptyCategory() {
-  this.setCategory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
-  this.setSubcategory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+export function addEmptyCategory(setCategory, setSubcategory) {
+  setCategory((prev) => [...prev, ""]);
+  setSubcategory((prev) => [...prev, ""]);
 }
-export function updateTitle(index, newTitle, setFieldValue) {
-  if (typeof Alert.alert === "function" && Alert.alert.mockClear) {
-    Alert.alert.mockClear();
-  }
 
-  this.setCategory((prev) => {
+export function deleteEmptyCategory(setCategory, setSubcategory) {
+  setCategory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  setSubcategory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+}
+
+export function updateTitle(setCategory, index, newTitle, setFieldValue) {
+  setCategory((prev) => {
     const updated = [...prev];
     if (updated.includes(newTitle) && updated[index] !== newTitle) {
       Alert.alert("Category already selected.");
-      return prev;
+      return updated;
     }
     updated[index] = newTitle;
     setFieldValue("category", updated);
     return updated;
   });
 }
-export function addSubtitle(subtitle, setFieldValue) {
-  this.setSubcategory((prev) => {
-    let updated = prev.includes(subtitle)
-      ? prev.filter((x) => x !== subtitle)
-      : [...prev, subtitle];
+
+export function addSubtitle(setSubcategory, subtitle, setFieldValue) {
+  setSubcategory((prev) => {
+    let updated;
+    if (prev.includes(subtitle)) {
+      updated = prev.filter((item) => item !== subtitle);
+    } else {
+      updated = [...prev, subtitle];
+    }
     setFieldValue("subcategory", updated);
     return updated;
   });
-}
-
-//function for categories
-export function addEmptyCategory() {
-  this.setCategory((prev) => [...prev, ""]);
-  this.setSubcategory((prev) => [...prev, ""]);
 }
 
 export async function handleBusinessDetailsSubmit(values) {
@@ -92,30 +82,22 @@ export async function handleBusinessDetailsSubmit(values) {
     subcategory,
     introduction,
   } = values;
-
-  {
-    /* validation check */
-  }
   if (!contact || !address || !NRIC || !bankName || !bankNumber) {
     Alert.alert("Error", "Please fill in all required fields.");
     return;
   }
-
   if (/[a-zA-Z]/.test(contact)) {
     Alert.alert("Invalid Contact", "Contact number must not contain letters.");
     return;
   }
-
   if (!/^[a-zA-Z0-9]+$/.test(NRIC)) {
     Alert.alert("Invalid NRIC/Passport", "Only letters and numbers allowed.");
     return;
   }
-
   if (/[a-zA-Z]/.test(bankNumber)) {
     Alert.alert("Invalid Bank Number", "Bank number must contain digits only.");
     return;
   }
-
   if (!category.length || !subcategory.length) {
     Alert.alert(
       "Error",
@@ -123,50 +105,33 @@ export async function handleBusinessDetailsSubmit(values) {
     );
     return;
   }
-
-  {
-    /* submit to firestore */
+  await updateDoc(doc(db, "users", uid), {
+    contact,
+    address,
+    NRIC,
+    bankName,
+    bankNumber,
+    category,
+    subcategory,
+    introduction,
+  });
+  for (const cat of category) {
+    await updateDoc(doc(db, "categoryToWorker", cat), {
+      workers: arrayUnion(uid),
+    });
   }
-  try {
-    await updateDoc(doc(db, "users", uid), {
-      //await updateDoc(doc(db, 'serviceProviders', uid) in dev
-      contact: values.contact,
-      address: values.address,
-      NRIC: values.NRIC,
-      bankName: values.bankName,
-      bankNumber: values.bankNumber,
-      category: values.category,
-      subcategory: values.subcategory,
-      introduction: values.introduction,
+  for (const sub of subcategory) {
+    await updateDoc(doc(db, "subcategoryToWorker", sub), {
+      workers: arrayUnion(uid),
     });
-
-    alert("Data saved successfully!");
-    values.category.forEach(async (category) => {
-      console.log(category);
-      console.log("UID", uid);
-      await updateDoc(doc(db, "categoryToWorker", category), {
-        workers: arrayUnion(uid), //
-      });
-    });
-
-    values.subcategory.forEach(async (subcategory) => {
-      await updateDoc(doc(db, "subcategoryToWorker", subcategory), {
-        workers: arrayUnion(uid),
-      });
-    });
-
-    navigation.navigate("Business Home Page");
-  } catch (error) {
-    console.error("Error adding document: ", error);
-    alert("Failed to save data.");
   }
+  alert("Data saved successfully!");
+  navigation.navigate("Business Home Page");
 }
 
 // route: contain parameters passed from the previous screen
-export default function Moredetails() {
-  const navigation = useNavigation();
-  const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
-    colours;
+export default function Moredetails({ navigation }) {
+  const { darkest_coco } = colours;
 
   useEffect(() => {
     const checkIfDetailsExist = async () => {
@@ -199,105 +164,101 @@ export default function Moredetails() {
     checkIfDetailsExist();
   }, []);
 
-  // const handleBusinessDetailsSubmit = async (values) => {
-  //   const user = auth.currentUser;
-  //   if (!user) {
-  //     Alert.alert("Error", "User not logged in");
-  //     return;
-  //   }
-  //   const uid = user.uid;
-  //   const {
-  //     contact,
-  //     address,
-  //     NRIC,
-  //     bankName,
-  //     bankNumber,
-  //     category,
-  //     subcategory,
-  //     introduction,
-  //   } = values;
+  const handleBusinessDetailsSubmit = async (values) => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Error", "User not logged in");
+      return;
+    }
+    const uid = user.uid;
+    const {
+      contact,
+      address,
+      NRIC,
+      bankName,
+      bankNumber,
+      category,
+      subcategory,
+    } = values;
 
-  //   {
-  //     /* validation check */
-  //   }
-  //   if (!contact || !address || !NRIC || !bankName || !bankNumber) {
-  //     Alert.alert("Error", "Please fill in all required fields.");
-  //     return;
-  //   }
+    {
+      /* validation check */
+    }
+    if (!contact || !address || !NRIC || !bankName || !bankNumber) {
+      Alert.alert("Error", "Please fill in all required fields.");
+      return;
+    }
 
-  //   if (/[a-zA-Z]/.test(contact)) {
-  //     Alert.alert(
-  //       "Invalid Contact",
-  //       "Contact number must not contain letters."
-  //     );
-  //     return;
-  //   }
+    if (/[a-zA-Z]/.test(contact)) {
+      Alert.alert(
+        "Invalid Contact",
+        "Contact number must not contain letters."
+      );
+      return;
+    }
 
-  //   if (!/^[a-zA-Z0-9]+$/.test(NRIC)) {
-  //     Alert.alert("Invalid NRIC/Passport", "Only letters and numbers allowed.");
-  //     return;
-  //   }
+    if (!/^[a-zA-Z0-9]+$/.test(NRIC)) {
+      Alert.alert("Invalid NRIC/Passport", "Only letters and numbers allowed.");
+      return;
+    }
 
-  //   if (/[a-zA-Z]/.test(bankNumber)) {
-  //     Alert.alert(
-  //       "Invalid Bank Number",
-  //       "Bank number must contain digits only."
-  //     );
-  //     return;
-  //   }
+    if (/[a-zA-Z]/.test(bankNumber)) {
+      Alert.alert(
+        "Invalid Bank Number",
+        "Bank number must contain digits only."
+      );
+      return;
+    }
 
-  //   if (!category.length || !subcategory.length) {
-  //     Alert.alert(
-  //       "Error",
-  //       "Please select at least one category and subcategory."
-  //     );
-  //     return;
-  //   }
+    if (!category.length || !subcategory.length) {
+      Alert.alert(
+        "Error",
+        "Please select at least one category and subcategory."
+      );
+      return;
+    }
 
-  //   {
-  //     /* submit to firestore */
-  //   }
-  //   try {
-  //     await updateDoc(doc(db, "users", uid), {
-  //       //await updateDoc(doc(db, 'serviceProviders', uid) in dev
-  //       contact: values.contact,
-  //       address: values.address,
-  //       NRIC: values.NRIC,
-  //       bankName: values.bankName,
-  //       bankNumber: values.bankNumber,
-  //       category: values.category,
-  //       subcategory: values.subcategory,
-  //       introduction: values.introduction,
-  //     });
+    {
+      /* submit to firestore */
+    }
+    try {
+      await updateDoc(doc(db, "users", uid), {
+        //await updateDoc(doc(db, 'serviceProviders', uid) in dev
+        contact: values.contact,
+        address: values.address,
+        NRIC: values.NRIC,
+        bankName: values.bankName,
+        bankNumber: values.bankNumber,
+        category: values.category,
+        subcategory: values.subcategory,
+        introduction: values.introduction,
+      });
 
-  //     alert("Data saved successfully!");
-  //     values.category.forEach(async (category) => {
-  //       console.log(category);
-  //       console.log("UID", uid);
-  //       await updateDoc(doc(db, "categoryToWorker", category), {
-  //         workers: arrayUnion(uid), //
-  //       });
-  //     });
+      alert("Data saved successfully!");
+      values.category.forEach(async (category) => {
+        console.log(category);
+        console.log("UID", uid);
+        await updateDoc(doc(db, "categoryToWorker", category), {
+          workers: arrayUnion(uid), //
+        });
+      });
 
-  //     values.subcategory.forEach(async (subcategory) => {
-  //       await updateDoc(doc(db, "subcategoryToWorker", subcategory), {
-  //         workers: arrayUnion(uid),
-  //       });
-  //     });
+      values.subcategory.forEach(async (subcategory) => {
+        await updateDoc(doc(db, "subcategoryToWorker", subcategory), {
+          workers: arrayUnion(uid),
+        });
+      });
 
-  //     navigation.navigate("Business Home Page");
-  //   } catch (error) {
-  //     console.error("Error adding document: ", error);
-  //     alert("Failed to save data.");
-  //   }
-  // };
+      navigation.navigate("Business Home Page");
+    } catch (error) {
+      console.error("Error adding document: ", error);
+      alert("Failed to save data.");
+    }
+  };
 
-  const [step, setStep] = useState("title");
   const [showPickerIndex, setShowPickerIndex] = useState(null);
-
   const [category, setCategory] = useState([]);
-  const [subcategory, setSubcategory] = useState([]);
-  const [selectedBank, setSelectedBank] = useState("");
+  const [, setSubcategory] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
@@ -306,17 +267,12 @@ export default function Moredetails() {
   if (!fontsLoaded) {
     return null;
   }
-  // //function for categories
-  // function addEmptyCategory() {
-  //   setCategory((prev) => [...prev, ""]);
-  //   setSubcategory((prev) => [...prev, ""]);
-  // }
   // cat = titles
   function renderCategoryBlock(cat, index, setFieldValue, subcategory) {
     const selectedCategory = services_categories.find((c) => c.title === cat);
 
     return (
-      <View key={cat} style={style.inputGroup}>
+      <View key={`category-${index}`} style={style.inputGroup}>
         <Text style={style.inputLabel}>Service Category</Text>
         <TouchableOpacity
           style={style.dropdown}
@@ -330,8 +286,8 @@ export default function Moredetails() {
           <Picker
             selectedValue={cat}
             onValueChange={(value) => {
-              updateTitle(index, value, setCategory, setFieldValue);
-              setShowPickerIndex(null); // hide picker after selection
+              updateTitle(setCategory, index, value, setFieldValue);
+              setShowPickerIndex(null);
             }}
           >
             <Picker.Item label="Select..." value="" />
@@ -349,15 +305,15 @@ export default function Moredetails() {
         {selectedCategory && (
           <>
             <Text style={{ marginTop: 10 }}>Select subcategories</Text>
-            {selectedCategory.subcategories.map((subtitle) => (
+            {selectedCategory.subcategories.map((subObj) => (
               <TouchableOpacity
-                key={subtitle}
+                key={subObj.label}
                 onPress={() =>
-                  addSubtitle(subtitle, setSubcategory, setFieldValue)
+                  addSubtitle(setSubcategory, subObj.label, setFieldValue)
                 }
                 style={{
                   flexDirection: "row",
-                  alignItems: "Center",
+                  alignItems: "center",
                   marginVertical: 6,
                 }}
               >
@@ -368,12 +324,12 @@ export default function Moredetails() {
                     borderWidth: 1,
                     borderRadius: 4,
                     marginRight: 10,
-                    backgroundColor: subcategory.includes(subtitle)
+                    backgroundColor: subcategory.includes(subObj.label)
                       ? "#9A5A3C"
                       : "transparent",
                   }}
                 />
-                <Text>{subtitle}</Text>
+                <Text>{subObj.label}</Text>
               </TouchableOpacity>
             ))}
           </>
