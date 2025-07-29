@@ -17,7 +17,7 @@ import {
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, getDocs, query, where} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, getDocs, query, where, addDoc, orderBy} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -45,9 +45,12 @@ export default function OrderSummary({navigation}){
     const [openDate, setOpenDate] = useState(false);
     const [selectedTime, setSelectedTime] = useState(null);
     const [isCompleted, setIsCompleted] = useState(false);
+    const [isTemp, setIsTemp] = useState(false);
+
 
     const route = useRoute();
-    const { orderID, userID } = route.params || {};
+    const params = route?.params ?? {};
+    const { orderID, userID, tempBookingInfo } = route.params || {};
 
     const [bookingData, setBookingData] = useState(null); // reused booking snapshot
     
@@ -113,7 +116,10 @@ export default function OrderSummary({navigation}){
             </View>
             <View style={style.taskInfo}>
                 <Text style={style.cardTitle}>{item.title}</Text>
-            {isAvailabilityCard && Array.isArray(item.content) && bookingData?.status !== 'accepted' ? (
+            {isAvailabilityCard && 
+            Array.isArray(item.content) && 
+            bookingData?.status !== 'accepted' && 
+            !isTemp ? (
                 <DropDownPicker
                     open={openDate}
                     value={selectedTime}
@@ -127,21 +133,33 @@ export default function OrderSummary({navigation}){
                     textStyle={style.cardContent}
                 />
                 ) : isAvailabilityCard ? (
-                // Show selected time string when accepted
+            // Show selected time string when accepted
+            <View>
+              {Array.isArray(bookingData?.availability) ? (
+                bookingData.availability.map((slot, index) => (
+                  <Text key={index} style={style.cardContent}>
+                    {slot.date} | {slot.time}
+                  </Text>
+                ))
+              ) : typeof bookingData?.availability === "object" ? (
                 <Text style={style.cardContent}>
-                {typeof bookingData?.availability === 'object'
-                    ? `${bookingData.availability.date} | ${bookingData.availability.time}`
-                    : bookingData?.availability || "No time selected"}
+                  {bookingData.availability.date} |{" "}
+                  {bookingData.availability.time}
                 </Text>
-                ) : (
-                // For non-availability items
-                <Text style={style.cardContent}>{item.content}</Text>
-                )}
-
+              ) : (
+                <Text style={style.cardContent}>
+                  {bookingData?.availability || "No time selected"}
+                </Text>
+              )}
             </View>
+          ) : (
+            // For non-availability items
+            <Text style={style.cardContent}>{item.content}</Text>
+          )}
         </View>
-        );
-    };
+      </View>
+    );
+  };
     const changeIsComplete = async (bookingId) => {
         
             if(!bookingData) {
@@ -168,6 +186,38 @@ export default function OrderSummary({navigation}){
                 Alert.alert("Error", "Failed to complete booking.");
             }
             };
+
+    async function confirmBooking() {
+        try {
+          if (!tempBookingInfo) {
+            console.error("tempBookingInfo is undefined or null");
+            Alert.alert("Error", "Booking info is missing.");
+            return;
+          }
+
+          console.log("tempBookingInfo:", tempBookingInfo);
+
+          const bookingRef = await addDoc(collection(db, "booking"), {
+            ...tempBookingInfo,
+          });
+
+          console.log("Booking created:", bookingRef.id);
+
+          await setDoc(
+            bookingRef,
+            { orderID: bookingRef.id },
+            { merge: true }
+          ).catch((err) => {
+            console.error("Failed to merge orderID:", err);
+          });
+
+          Alert.alert("Booking confirmed!", "Your booking has been created.");
+          navigation.navigate("UserHome");
+        } catch (err) {
+          console.error("Failed to confirm booking:", err);
+          Alert.alert("Error", "Failed to confirm booking.");
+        }
+      }
 
 
     const acceptBooking = async (bookingId, currentWorkerId) => {
@@ -232,6 +282,9 @@ export default function OrderSummary({navigation}){
         }
         
         await updateDoc(bookingRef, {
+
+
+          
             status: "accepted",
             workerId: currentWorkerId,
             acceptedAt: new Date(),
@@ -248,6 +301,82 @@ export default function OrderSummary({navigation}){
         };
 
 useEffect(() => {
+
+    if (tempBookingInfo) {
+      setBookingData(tempBookingInfo);
+      setIsTemp(true);
+      console.log("istemp", isTemp);
+
+      const formatted = [
+        {
+          type: "category",
+          title: tempBookingInfo.type,
+          image: services_categories.find(
+            (cat) => cat.title === tempBookingInfo.serviceType
+          )?.bannerImage,
+        },
+        {
+          type: "availability",
+          icon: "clock",
+          title: `${tempBookingInfo.duration} hours`,
+          content: Array.isArray(tempBookingInfo.availability)
+            ? tempBookingInfo.availability
+            : [tempBookingInfo.availability],
+        },
+        {
+          type: "location",
+          title: tempBookingInfo.postcode,
+          icon: "map-marker-alt",
+          content: `${tempBookingInfo.address}, ${tempBookingInfo.postcode}`,
+        },
+        {
+          type: "note",
+          title: tempBookingInfo.notes || "No notes",
+          icon: "file-alt",
+          content: tempBookingInfo.notes || "No notes",
+        },
+        {
+          type: "price",
+          title: "Price",
+          icon: "dollar-sign",
+          content: `$${tempBookingInfo.price || "35.99"}`,
+        },
+        {
+          type: "Urgency",
+          title: tempBookingInfo.urgency ? "Urgent" : "Scheduled",
+          icon: tempBookingInfo.urgency ? "exclamation-triangle" : "clock",
+          content: tempBookingInfo.urgency
+            ? "This is an urgent task."
+            : "This is a scheduled task.",
+        },
+        {
+          type: "Notification",
+          title: "Notification",
+          icon: "bell",
+          content: tempBookingInfo.notif
+            ? "You will be notified when a worker accepts your booking."
+            : "You will not be notified when a worker accepts your booking.",
+        },
+
+        {
+          type: "Rating",
+          title: "Rating",
+          icon: "star",
+          content: tempBookingInfo.rating
+            ? `Your worker will has at least${tempBookingInfo.rating} stars.`
+            : " No rating required",
+        },
+
+        {
+          type: "Payment Method",
+          title: "Cash On Delivery",
+          icon: "money-bill-wave",
+          content: "Pay in cash to the worker upon completion of the task.",
+        },
+      ];
+      setBooking(formatted);
+      return;
+    }
     const bookingRef = doc(db,'booking', orderID);
 
     const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
@@ -263,9 +392,15 @@ useEffect(() => {
       const formatted = [
         { type: "category", title: data.type, image },
         { type: "availability", icon: "clock", title: `${data.duration} hours`, content: data.availability || [] },
-        { type: "location", title: data.state, icon: "map-marker-alt", content: `${data.address}, ${data.postcode}, ${data.state}` },
+        { type: "location", title: data.postcode, icon: "map-marker-alt", content: `${data.address}, ${data.postcode}` },
         { type: "note", title: data.notes || "No notes", icon: "file-alt", content: "To be uploaded picture" },
         { type: "price", title: "Price", icon: "dollar-sign", content: `$${data.price || "35.99"}` },
+        {
+          type: "Payment Method",
+          title: "Cash On Delivery",
+          icon: "money-bill-wave",
+          content: "Pay in cash to the worker upon completion of the task.",
+        },
       ];
       setBooking(formatted);
  
@@ -318,7 +453,7 @@ useEffect(() => {
                 {/* Divider */}
                 <View style={style.line} />
 
-                {!userID && (
+                {!userID && !isTemp && (
                 <TouchableOpacity 
                     style = {style.button}
                     onPress={() => acceptBooking(orderID,auth.currentUser.uid)}>
