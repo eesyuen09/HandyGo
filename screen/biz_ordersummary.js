@@ -460,6 +460,15 @@ useEffect(() => {
                     <Text style = {style.buttonText}>Accept Booking</Text>
                 </TouchableOpacity>
                 )}
+
+                {tempBookingInfo && (
+                  <TouchableOpacity
+                    style={style.button}
+                    onPress={() => confirmBooking()}
+                  >
+                    <Text style={style.buttonText}>Confirm Booking</Text>
+                  </TouchableOpacity>
+                )}
                 
                 {userID && !isCompleted && (
                     <TouchableOpacity
