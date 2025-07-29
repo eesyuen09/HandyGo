@@ -112,69 +112,76 @@ useFocusEffect(
     }, [])  // stringify so React re-runs whenever filters change
   );
 
-
-  async function fetchFilteredBookings({
+    async function fetchFilteredBookings({
     minPrice, maxPrice,
-    subcategory, 
-    minDuration, maxDuration,
-
+    subcategory = [], 
+    minDuration, maxDuration
   }) {
-    
-    const bookingsRef = collection(db, "booking");
-    console.log(maxDuration);
-    console.log(minDuration);
-    const constraint = [
-      where("status", "==", "pending"),
-      where("urgency", "==", true),
+    const baseFilters = [
+      where("status",  "==", "pending"),
+      where("urgency", "==", false)
+    ];
   
-  ];
-      if (subcategory.length > 0) {
-          constraint.push(where("type", "in", subcategory));
-        }
-
-
-      // PRICE filter & sort (index: price DESC)
-      // if (minPrice > 0) constraint.push(where("price", ">=", minPrice))
-      // if (isFinite(maxPrice)) constraint.push(where("price", "<=", maxPrice))
-
-
-      // LOCATION filter & sort (index: location ASC)
-      // where("location", "==", location),
-      // orderBy("location", "asc"),
-
-      // SUBCATEGORY filter & sort (index: subcategory DESC)
-if (minDuration > 0) constraint.push(where("duration", ">=", minDuration))
-  if (isFinite(maxDuration)) constraint.push(where("duration", "<=", maxDuration))
-
-
-    const q = query(
-      bookingsRef,
-      ...constraint
+    if (subcategory.length > 0) {
+      baseFilters.push(where("type", "in", subcategory));
+    }
+  
+    // 1) Query A: price range
+    const priceQ = query(
+      collection(db, "booking"),
+      ...baseFilters,
+      where("price", ">=", minPrice),
+      where("price", "<=", maxPrice),
+      orderBy("price", "desc")
     );
-
-    // 3) Execute and return results
-    try{
-    const snapshot = await getDocs(q);
-    const formatted = snapshot.docs.map(docSnap => {
-      const data = docSnap.data();
-      const iconData = getIcon(data.serviceType);
-      return {
-        id: data.orderID || docSnap.id,
-        category: data.type || "Unknown",
-        time: `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
-        location: `${data.state || ""}, ${data.postcode || ""}`,
-        price: data.price || '35.99',
-        icon: iconData.name,
-        iconFamily: iconData.family,
-      };
-    });
-    return formatted;
-  }catch (error) {
+  
+    // 2) Query B: duration range
+    const durationQ = query(
+      collection(db, "booking"),
+      ...baseFilters,
+      where("duration", ">=", minDuration),
+      where("duration", "<=", maxDuration),
+      orderBy("duration", "asc")
+    );
+  
+    try {
+      // Run both in parallel
+      const [priceSnap, durationSnap] = await Promise.all([
+        getDocs(priceQ),
+        getDocs(durationQ)
+      ]);
+  
+      // Build set of IDs matching price
+      const priceIds = new Set(priceSnap.docs.map(d => d.id));
+  
+      // Intersect: only keep duration docs whose ID is in priceIds
+      const intersected = durationSnap.docs
+        .filter(d => priceIds.has(d.id))
+        .map(docSnap => docSnap.data());
+  
+      // Format for your UI
+      return intersected.map(data => {
+        const iconData = getIcon(data.serviceType);
+        return {
+          id:        data.orderID || data.id,
+          category:  data.type     || "Unknown",
+          time:      `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
+          location:  `${data.state || ""}, ${data.postcode || ""}`,
+          price:     data.price    || "N/A",
+          icon:      iconData.name,
+          iconFamily:iconData.family,
+        };
+      });
+    } catch (error) {
       console.error("Error fetching tasks:", error);
       Alert.alert("Error", "Failed to load tasks");
       return [];
+    }
   }
-}
+  
+
+
+  
 
   const fetchUrgentTasks = async () => {
     const user = auth.currentUser;
