@@ -35,24 +35,24 @@ import { FlatList } from "react-native";
 import { services_categories } from "../constants/category_constant";
 
 function navigateToBooking(navigation, item) {
-  // find service category data
-  const serviceData = services_categories.find((cat) =>
-    cat.subcategories.includes(item.category)
+  // find service category data by title or subcategory
+  const serviceData = services_categories.find(
+    (cat) => cat.title === item.serviceType
   );
+  if (!serviceData) {
+    console.error("Service type not found for retry/rebook:", item.category);
+    return;
+  }
   navigation.navigate("UserBooking", {
     serviceType: serviceData.title,
     subcategory: item.category,
     description: serviceData.description,
     price: item.price,
     duration: item.duration,
-    availability: item.time,
     postcode: item.postcode,
     address: item.address,
     notes: item.notes || "",
-    urgency: item.urgency,
-    notif: item.notif,
-    rating: item.rating,
-    // any other original fields...
+    questions: serviceData.questions || [],
   });
 }
 
@@ -126,6 +126,7 @@ export default function UserActivity({ navigation }) {
         const task = {
           id: data.orderID || docSnap.id,
           category: data.type || "Unknown",
+          serviceType: data.serviceType,
           time: `${date} | ${time}`,
           location: `${data.postcode || ""}, ${data.state || ""}`,
           price: data.price || "35.99",
@@ -138,6 +139,10 @@ export default function UserActivity({ navigation }) {
           duration: data.duration,
           address: data.address || "",
           postcode: data.postcode,
+          gender: data.gender || "",
+          rating: data.rating || 0,
+          notes: data.notes || "",
+          questions: data.questions || [],
         };
 
         if (task.isCompleted) {

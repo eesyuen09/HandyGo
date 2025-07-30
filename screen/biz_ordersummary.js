@@ -37,18 +37,188 @@ import { FlatList } from "react-native";
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
 
-export default function OrderSummary({ navigation }) {
-  console.log("OrderSummary mounted, params =", useRoute().params);
+//add schedule as subcollection in workers' firestore
+const addScheduleForWorker = async (workerID, orderID, selectedTime) => {
+  // const scheduleRef = collection(db, 'users', workerId, 'schedules');
+  const docRef = doc(db, "booking", orderID);
+  //creates reference to the document you want to retrieve
+  const docSnap = await getDoc(docRef);
+  //getDoc is the function to retrieve data from the document reference
 
+  if (!docSnap.exists()) {
+    console.log("No such booking!");
+    return;
+  }
+  const data = docSnap.data();
+  const scheduleDocRef = doc(db, "users", workerID, "schedules", orderID);
+
+  await setDoc(scheduleDocRef, {
+    address: data.address,
+    availability: selectedTime,
+    duration: data.duration,
+    gender: data.gender,
+    notes: data.notes,
+    orderID: data.orderID,
+    postcode: data.postcode,
+    rating: data.rating,
+    serviceType: data.serviceType,
+    // state: data.state,
+    status: data.status,
+    type: data.type,
+    userId: data.userId,
+    workerId: data.workerId,
+  });
+};
+function renderCard(
+  item,
+  index,
+  openDate,
+  setOpenDate,
+  selectedTime,
+  setSelectedTime,
+  role, // "user" or "worker"
+  bookingData,
+  isTemp // true for a newly created, not-yet-saved booking
+) {
+  const isAvailabilityCard = item.type === "availability";
+  const availabilityOptions =
+    isAvailabilityCard && Array.isArray(item.content)
+      ? item.content.map((slot, i) => ({
+          label: `${slot.date} | ${slot.time}`,
+          value: `${slot.date} ${slot.time}`,
+          key: String(i),
+        }))
+      : [];
+
+  // Pending if not yet accepted and not a temp booking
+  const stillPending = isTemp || bookingData?.status !== "scheduled";
+
+  return (
+    <View key={index} style={style.cardContainer}>
+      <View style={style.taskIconWrap}>
+        <FontAwesome5 name={item.icon} size={18} color={main_coco} />
+      </View>
+      <View style={style.taskInfo}>
+        <Text style={style.cardTitle}>{item.title}</Text>
+
+        {isAvailabilityCard && Array.isArray(item.content) ? (
+          stillPending ? (
+            role === "user" ? (
+              // 1) User sees plain list
+              <View>
+                {item.content.map((slot, i) => (
+                  <Text key={i} style={style.cardContent}>
+                    {slot.date} | {slot.time}
+                  </Text>
+                ))}
+              </View>
+            ) : (
+              // 2) Business sees dropdown
+              <DropDownPicker
+                open={openDate}
+                value={selectedTime}
+                items={availabilityOptions}
+                setOpen={setOpenDate}
+                setValue={setSelectedTime}
+                setItems={() => {}}
+                placeholder="Select a time slot"
+                zIndex={1000}
+                style={style.dropdownContainer}
+                textStyle={style.cardContent}
+              />
+            )
+          ) : (
+            // 3) Once accepted (and not temp), show the chosen slot
+            <Text style={style.cardContent}>
+              {typeof bookingData.availability === "object"
+                ? `${bookingData.availability.date} | ${bookingData.availability.time}`
+                : bookingData.availability || "No time selected"}
+            </Text>
+          )
+        ) : (
+          // Non-availability fields
+          <Text style={style.cardContent}>{item.content}</Text>
+        )}
+      </View>
+    </View>
+  );
+}
+
+async function changeIsComplete(workerID, bookingId, bookingData, onSuccess) {
+  if (!bookingData) {
+    Alert.alert("Data not ready yet.");
+    return;
+  }
+  if (bookingData.isCompleted) {
+    Alert.alert("Error! This booking has already been completed.");
+    return;
+  }
+
+  try {
+    const bookingRef = doc(db, "booking", bookingId);
+    const scheduledDocRef = doc(db, "users", workerID, "schedules", bookingId); // use bookingId
+    await updateDoc(bookingRef, {
+      isCompleted: true,
+      completedAt: new Date(),
+      status: "completed",
+    });
+
+    await updateDoc(scheduledDocRef, {
+      status: "completed",
+    });
+
+    Alert.alert("Booking Completed!");
+    onSuccess();
+  } catch (err) {
+    console.error("Failed to complete booking:", err);
+    Alert.alert("Error", "Failed to complete booking.");
+  }
+}
+
+async function confirmBooking(tempBookingInfo, onSuccess) {
+  try {
+    if (!tempBookingInfo) {
+      console.error("tempBookingInfo is undefined or null");
+      Alert.alert("Error", "Booking info is missing.");
+      return;
+    }
+
+    console.log("tempBookingInfo:", tempBookingInfo);
+
+    const bookingRef = await addDoc(collection(db, "booking"), {
+      ...tempBookingInfo,
+    });
+
+    console.log("Booking created:", bookingRef.id);
+
+    await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true }).catch(
+      (err) => {
+        console.error("Failed to merge orderID:", err);
+      }
+    );
+
+    Alert.alert("Booking confirmed!", "Your booking has been created.");
+    onSuccess();
+  } catch (err) {
+    console.error("Failed to confirm booking:", err);
+    Alert.alert("Error", "Failed to confirm booking.");
+  }
+}
+
+export { addScheduleForWorker, renderCard, changeIsComplete, confirmBooking };
+
+export default function OrderSummary({ navigation }) {
   const [booking, setBooking] = useState([]);
   const [openDate, setOpenDate] = useState(false);
   const [selectedTime, setSelectedTime] = useState(null);
   const [isCompleted, setIsCompleted] = useState(false);
   const [isTemp, setIsTemp] = useState(false);
 
+  const [role, setRole] = useState(null);
+
   const route = useRoute();
   const params = route?.params ?? {};
-  const { orderID, userID, tempBookingInfo } = params || {};
+  const { orderID, userID, tempBookingInfo } = route.params || {};
 
   const [bookingData, setBookingData] = useState(null); // reused booking snapshot
 
@@ -57,165 +227,93 @@ export default function OrderSummary({ navigation }) {
   const categoryItem = booking.find((item) => item.type === "category");
   const bookingDetails = booking.filter((item) => item.type !== "category");
 
-  //add schedule as subcollection in workers' firestore
-  const addScheduleForWorker = async (workerID, orderID) => {
-    // const scheduleRef = collection(db, 'users', workerId, 'schedules');
-    const docRef = doc(db, "booking", orderID);
-    //creates reference to the document you want to retrieve
-    const docSnap = await getDoc(docRef);
-    //getDoc is the function to retrieve data from the document reference
-
-    if (!docSnap.exists()) {
-      console.log("No such booking!");
-      return;
-    }
-    const data = docSnap.data();
-    const scheduleDocRef = doc(db, "users", workerID, "schedules", orderID);
-
-    await setDoc(scheduleDocRef, {
-      address: data.address,
-      availability: selectedTime,
-      duration: data.duration,
-      gender: data.gender,
-      notes: data.notes,
-      orderID: data.orderID,
-      postcode: data.postcode,
-      rating: data.rating,
-      serviceType: data.serviceType,
-      state: data.state,
-      status: data.status,
-      type: data.type,
-      userId: data.userId,
-      workerId: data.workerId,
-    });
-  };
-
-  const renderCard = (
-    item,
-    index,
-    openDate,
-    setOpenDate,
-    selectedTime,
-    setSelectedTime
-  ) => {
-    const isAvailabilityCard = item.type === "availability";
-    //convert availability array to dropdown items
-    const availabilityOptions =
-      isAvailabilityCard && Array.isArray(item.content)
-        ? item.content.map((slot, index) => ({
-            label: `${slot.date} | ${slot.time}`,
-            value: `${slot.date} ${slot.time}`,
-            key: index.toString(),
-          }))
-        : [];
-
-    return (
-      <View style={style.cardContainer}>
-        <View style={style.taskIconWrap}>
-          <FontAwesome5 name={item.icon} size={18} color={main_coco} />
-        </View>
-        <View style={style.taskInfo}>
-          <Text style={style.cardTitle}>{item.title}</Text>
-          {isAvailabilityCard &&
-          Array.isArray(item.content) &&
-          bookingData?.status !== "accepted" &&
-          !isTemp ? (
-            <DropDownPicker
-              open={openDate}
-              value={selectedTime}
-              items={availabilityOptions}
-              setOpen={setOpenDate}
-              setValue={setSelectedTime}
-              setItems={() => {}}
-              placeholder="Select a time slot"
-              zIndex={1000}
-              style={style.dropdownContainer}
-              textStyle={style.cardContent}
-            />
-          ) : isAvailabilityCard ? (
-            // Show selected time string when accepted
-            <View>
-              {Array.isArray(bookingData?.availability) ? (
-                bookingData.availability.map((slot, index) => (
-                  <Text key={index} style={style.cardContent}>
-                    {slot.date} | {slot.time}
-                  </Text>
-                ))
-              ) : typeof bookingData?.availability === "object" ? (
-                <Text style={style.cardContent}>
-                  {bookingData.availability.date} |{" "}
-                  {bookingData.availability.time}
-                </Text>
-              ) : (
-                <Text style={style.cardContent}>
-                  {bookingData?.availability || "No time selected"}
-                </Text>
-              )}
-            </View>
-          ) : (
-            // For non-availability items
-            <Text style={style.cardContent}>{item.content}</Text>
-          )}
-        </View>
-      </View>
+  const handleCompletePress = () =>
+    changeIsComplete(auth.currentUser.uid, orderID, bookingData, () =>
+      navigation.goBack()
     );
-  };
-  const changeIsComplete = async (bookingId) => {
-    if (!bookingData) {
-      Alert.alert("Data not ready yet.");
-      return;
-    }
-    if (bookingData.isCompleted) {
-      Alert.alert("Error! This booking has already been completed.");
-      return;
-    }
+
+  const handleConfirmPress = () =>
+    confirmBooking(tempBookingInfo, () => navigation.navigate("UserHome"));
+
+  const cancelBooking = async (bookingId, role) => {
     try {
       const bookingRef = doc(db, "booking", bookingId);
+
+      // Update booking status
       await updateDoc(bookingRef, {
-        isCompleted: true,
-        completedAt: new Date(),
+        status: "cancelled",
+        cancelledBy: role, // "user" or "business"
+        cancelledAt: new Date(),
       });
 
-      Alert.alert("Booking Completed!");
+      Alert.alert("Booking Cancelled");
       navigation.goBack();
     } catch (err) {
-      console.error("Failed to complete booking:", err);
-      Alert.alert("Error", "Failed to complete booking.");
+      console.error("Failed to cancel booking:", err);
+      Alert.alert("Error", "Failed to cancel booking.");
     }
   };
 
-  async function confirmBooking() {
-    try {
-      if (!tempBookingInfo) {
-        console.error("tempBookingInfo is undefined or null");
-        Alert.alert("Error", "Booking info is missing.");
-        return;
-      }
+  // const changeIsComplete = async (bookingId) => {
 
-      console.log("tempBookingInfo:", tempBookingInfo);
+  //         if(!bookingData) {
+  //             Alert.alert('Data not ready yet.');
+  //             return;
+  //         }
+  //         if(bookingData.isCompleted){
+  //             Alert.alert("Error! This booking has already been completed.");
+  //             return;
+  //         }
+  //     try {
 
-      const bookingRef = await addDoc(collection(db, "booking"), {
-        ...tempBookingInfo,
-      });
+  //         const bookingRef = doc(db, "booking", bookingId);
+  //         await updateDoc(bookingRef, {
+  //             isCompleted: true,
+  //             completedAt: new Date(),
+  //             });
 
-      console.log("Booking created:", bookingRef.id);
+  //             Alert.alert("Booking Completed!");
+  //             navigation.goBack();
 
-      await setDoc(
-        bookingRef,
-        { orderID: bookingRef.id },
-        { merge: true }
-      ).catch((err) => {
-        console.error("Failed to merge orderID:", err);
-      });
+  //         } catch (err) {
+  //             console.error("Failed to complete booking:", err);
+  //             Alert.alert("Error", "Failed to complete booking.");
+  //         }
+  //         };
 
-      Alert.alert("Booking confirmed!", "Your booking has been created.");
-      navigation.navigate("UserHome");
-    } catch (err) {
-      console.error("Failed to confirm booking:", err);
-      Alert.alert("Error", "Failed to confirm booking.");
-    }
-  }
-  const acceptBooking = async (bookingId, currentWorkerId) => {
+  // async function confirmBooking() {
+  //     try {
+  //       if (!tempBookingInfo) {
+  //         console.error("tempBookingInfo is undefined or null");
+  //         Alert.alert("Error", "Booking info is missing.");
+  //         return;
+  //       }
+
+  //       console.log("tempBookingInfo:", tempBookingInfo);
+
+  //       const bookingRef = await addDoc(collection(db, "booking"), {
+  //         ...tempBookingInfo,
+  //       });
+
+  //       console.log("Booking created:", bookingRef.id);
+
+  //       await setDoc(
+  //         bookingRef,
+  //         { orderID: bookingRef.id },
+  //         { merge: true }
+  //       ).catch((err) => {
+  //         console.error("Failed to merge orderID:", err);
+  //       });
+
+  //       Alert.alert("Booking confirmed!", "Your booking has been created.");
+  //       navigation.navigate("UserHome");
+  //     } catch (err) {
+  //       console.error("Failed to confirm booking:", err);
+  //       Alert.alert("Error", "Failed to confirm booking.");
+  //     }
+  //   }
+
+  const acceptBooking = async (bookingId, currentWorkerId, selectedTime) => {
     try {
       if (!selectedTime) {
         Alert.alert("Please select a time slot before accepting the booking.");
@@ -223,48 +321,42 @@ export default function OrderSummary({ navigation }) {
       }
 
       //Prevent double booking
-      // helper: pad a number or string to two digits
-      const pad2 = (x) => String(x).padStart(2, "0");
-
-      // normalize any “YYYY-M-D H:mm” into “YYYY-MM-DD HH:mm”
-      function normalizeTimestamp(ts) {
-        let [dp, tp] = ts.split(" ");
-        let [y, m, d] = dp.split("-").map(pad2);
-        let [h, min] = tp.split(":").map(pad2);
-        return `${y}-${m}-${d} ${h}:${min}`;
-      }
-
-      // in acceptBooking…
+      //1. abstract new slots start and end date as date obj
       const [datePart, timePart] = selectedTime.split(" ");
       const startOfDay = `${datePart} 00:00`;
       const endOfDay = `${datePart} 23:59`;
-      const schedRef = collection(db, "users", currentWorkerId, "schedules");
+      const newStart = new Date(`${datePart}T${timePart}:00`);
+      const durationHours = bookingData.duration; // e.g. 2
+      const newEnd = new Date(newStart.getTime() + durationHours * 3600e3);
+      console.log("start, end", newStart, newEnd);
 
-      // build your range query (still as strings)
+      //2. query this workers schedules for the same day
+      const schedRef = collection(db, "users", currentWorkerId, "schedules");
       const dayQuery = query(
         schedRef,
         where("availability", ">=", startOfDay),
-        where("availability", "<=", endOfDay),
-        orderBy("availability") // ← Firestore requires you to order by the same field
+        where("availability", "<=", endOfDay)
       );
+      const snap = await getDocs(dayQuery);
 
-      // then later, when you loop through the returned docs…
-      for (let docSnap of (await getDocs(dayQuery)).docs) {
-        const rec = docSnap.data();
-        // normalize the stored string into exactly the same shape
-        const avail = normalizeTimestamp(rec.availability);
-        const [exDate, exTime] = avail.split(" ");
-
+      //3. check each existing schedule overlap
+      for (let doc of snap.docs) {
+        const rec = doc.data();
+        const availStr = rec.availability;
+        const [exDate, exTime] = availStr.split(" ");
         const existingStart = new Date(`${exDate}T${exTime}:00`);
         const existingEnd = new Date(
           existingStart.getTime() + rec.duration * 3600e3
         );
 
-        if (newStart <= existingEnd && existingStart <= newEnd) {
+        console.log("existing:", existingStart, "->", existingEnd);
+
+        if (newStart < existingEnd && existingStart < newEnd) {
           Alert.alert(
             "Time Conflict",
             "You already have a booking at that time. Please choose another slot."
           );
+          navigation.goBack();
           return;
         }
       }
@@ -278,20 +370,20 @@ export default function OrderSummary({ navigation }) {
         return;
       }
 
-      if (bookingData.status === "accepted") {
+      if (bookingData.status === "scheduled") {
         Alert.alert("Error! This booking has already been accepted.");
         return;
       }
 
       await updateDoc(bookingRef, {
-        status: "accepted",
+        status: "scheduled",
         workerId: currentWorkerId,
         acceptedAt: new Date(),
         availability: selectedTime,
       });
 
       Alert.alert("Booking accepted!");
-      addScheduleForWorker(currentWorkerId, orderID);
+      await addScheduleForWorker(currentWorkerId, orderID, selectedTime);
       navigation.goBack();
     } catch (err) {
       console.error("Failed to accept booking:", err);
@@ -377,12 +469,22 @@ export default function OrderSummary({ navigation }) {
     }
     const bookingRef = doc(db, "booking", orderID);
 
-    const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
+    const unsubscribe = onSnapshot(bookingRef, async (docSnap) => {
       if (!docSnap.exists()) return;
       const data = docSnap.data();
 
       setBookingData(data);
       setIsCompleted(data.isCompleted || false);
+
+      //set role
+      const uid = userID || auth.currentUser?.uid;
+      if (uid) {
+        const userRef = doc(db, "users", uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) {
+          setRole(userSnap.data().role);
+        }
+      }
 
       const matched_cat = services_categories.find(
         (cat) => cat.title === data.serviceType
@@ -472,7 +574,10 @@ export default function OrderSummary({ navigation }) {
                 openDate,
                 setOpenDate,
                 selectedTime,
-                setSelectedTime
+                setSelectedTime,
+                role,
+                bookingData,
+                isTemp
               )
             }
             keyExtractor={(item, index) => index.toString()}
@@ -483,30 +588,41 @@ export default function OrderSummary({ navigation }) {
           {/* Divider */}
           <View style={style.line} />
 
-          {!userID && !isTemp && (
-            <TouchableOpacity
-              style={style.button}
-              onPress={() => acceptBooking(orderID, auth.currentUser.uid)}
-            >
-              <Text style={style.buttonText}>Accept Booking</Text>
-            </TouchableOpacity>
-          )}
+          {!userID &&
+            !isTemp &&
+            bookingData?.status !== "scheduled" &&
+            role === "business" && (
+              <TouchableOpacity
+                style={style.button}
+                onPress={() =>
+                  acceptBooking(orderID, auth.currentUser.uid, selectedTime)
+                }
+              >
+                <Text style={style.buttonText}>Accept Booking</Text>
+              </TouchableOpacity>
+            )}
 
           {tempBookingInfo && (
-            <TouchableOpacity
-              style={style.button}
-              onPress={() => confirmBooking()}
-            >
+            <TouchableOpacity style={style.button} onPress={handleConfirmPress}>
               <Text style={style.buttonText}>Confirm Booking</Text>
             </TouchableOpacity>
           )}
 
-          {userID && !isCompleted && (
+          {userID && !isCompleted && role === "business" && (
             <TouchableOpacity
               style={style.button}
-              onPress={() => changeIsComplete(orderID)}
+              onPress={handleCompletePress}
             >
               <Text style={style.buttonText}>Completed Task</Text>
+            </TouchableOpacity>
+          )}
+
+          {bookingData?.status === "scheduled" && role === "user" && (
+            <TouchableOpacity
+              style={style.button}
+              onPress={() => cancelBooking(orderID, role)}
+            >
+              <Text style={style.buttonText}>Cancel Booking</Text>
             </TouchableOpacity>
           )}
 
