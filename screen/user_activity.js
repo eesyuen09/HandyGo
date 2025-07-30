@@ -32,6 +32,29 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { FlatList } from "react-native";
+import { services_categories } from "../constants/category_constant";
+
+function navigateToBooking(navigation, item) {
+  // find service category data
+  const serviceData = services_categories.find((cat) =>
+    cat.subcategories.includes(item.category)
+  );
+  navigation.navigate("UserBooking", {
+    serviceType: serviceData.title,
+    subcategory: item.category,
+    description: serviceData.description,
+    price: item.price,
+    duration: item.duration,
+    availability: item.time,
+    postcode: item.postcode,
+    address: item.address,
+    notes: item.notes || "",
+    urgency: item.urgency,
+    notif: item.notif,
+    rating: item.rating,
+    // any other original fields...
+  });
+}
 
 export default function UserActivity({ navigation }) {
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -104,7 +127,7 @@ export default function UserActivity({ navigation }) {
           id: data.orderID || docSnap.id,
           category: data.type || "Unknown",
           time: `${date} | ${time}`,
-          location: `${data.state || ""}, ${data.postcode || ""}`,
+          location: `${data.postcode || ""}, ${data.state || ""}`,
           price: data.price || "35.99",
           icon: getIcon(data.serviceType).name,
           iconFamily: getIcon(data.serviceType).family,
@@ -112,6 +135,9 @@ export default function UserActivity({ navigation }) {
           status: data.status || "pending",
           workerId: data.workerId,
           userId: data.userId || "unknown",
+          duration: data.duration,
+          address: data.address || "",
+          postcode: data.postcode,
         };
 
         if (task.isCompleted) {
@@ -169,10 +195,10 @@ export default function UserActivity({ navigation }) {
                   item.status === "pending"
                     ? style.statusPending
                     : item.status === "confirmed" || item.status === "scheduled"
-                    ? style.statusConfirmed
-                    : item.status === "cancelled"
-                    ? style.statusCancelled
-                    : style.statusFailed,
+                      ? style.statusConfirmed
+                      : item.status === "cancelled"
+                        ? style.statusCancelled
+                        : style.statusFailed,
                 ]}
               >
                 <Text
@@ -181,30 +207,33 @@ export default function UserActivity({ navigation }) {
                     item.status === "pending"
                       ? style.textPending
                       : item.status === "Confirmed" ||
-                        item.status === "scheduled"
-                      ? style.textScheduled
-                      : item.status === "cancelled"
-                      ? style.textCancelled
-                      : style.textFailed,
+                          item.status === "scheduled"
+                        ? style.textScheduled
+                        : item.status === "cancelled"
+                          ? style.textCancelled
+                          : style.textFailed,
                   ]}
                 >
                   {item.status === "pending"
                     ? "Pending"
-                    : item.status === "confirmed" || item.status === "scheduled"
-                    ? "Confirmed"
-                    : item.status === "cancelled"
-                    ? "Cancelled"
-                    : "Failed"}
+                    : item.status === "scheduled"
+                      ? "Scheduled"
+                      : item.status === "cancelled"
+                        ? "Cancelled"
+                        : "Failed"}
                 </Text>
               </View>
 
-              {item.status === "failed" && (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate("UserBooking")}
-                >
-                  <Text style={style.viewText}>Retry Booking</Text>
-                </TouchableOpacity>
-              )}
+              {item.status.toLowerCase() === "failed" ||
+                (item.status.toLowerCase() === "cancelled" && (
+                  <View style={style.retryRow}>
+                    <TouchableOpacity
+                      onPress={() => navigateToBooking(navigation, item)}
+                    >
+                      <Text style={style.viewText}>Retry Booking</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
             </View>
           )}
         </View>
@@ -225,9 +254,7 @@ export default function UserActivity({ navigation }) {
             <Text style={style.actionText}> 👍 Review</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => Alert.alert("Rebook", "Rebook the service?")}
-          >
+          <TouchableOpacity onPress={() => navigateToBooking(navigation, item)}>
             <Text style={style.actionText}>🔁 Rebook</Text>
           </TouchableOpacity>
         </View>
