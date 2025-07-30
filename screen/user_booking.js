@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  StyleSheet,
   Alert,
+  ActivityIndicator,
   Switch,
   KeyboardAvoidingView,
   Platform,
@@ -32,12 +34,14 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { addDoc, collection, setDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db, app } from "../firebaseConfig";
+import { getPriceEstimate } from "../src/api/pricing.js";
+import { postcodes } from "../constants/postcodes.js";
 
 const handleBookingSubmit = (values) => {
   console.log("Booking submitted:", values);
   Alert.alert(
     "Booking Submitted",
-    "Your booking has been successfully submitted!"
+    "Your booking has been successfully submitted!",
   );
 };
 
@@ -52,19 +56,54 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
-export { calculateEndTime, handleBookingSubmit };
+function bucketItemCount(count) {
+  if (count <= 1) {
+    return 1;
+  }
+  if (count <= 3) {
+    return 2;
+  } else {
+    return 3;
+  }
+}
+
+function bucketAreaSize(m2) {
+  if (m2 <= 20) return 1;
+  if (m2 <= 50) return 2;
+  return 3;
+}
+
 export default function UserBooking() {
   const route = useRoute();
-  const { serviceType, subcategory, description, price } = route.params || {};
+  const {
+    serviceType,
+    subcategory,
+    description,
+    price,
+    questions = [],
+  } = route.params || {};
+  console.log("Route params:", route.params);
   const icon = services_categories.find(
-    (category) => category.title === serviceType
+    (category) => category.title === serviceType,
   )?.icon;
   const bannerImage = services_categories.find(
-    (category) => category.title === serviceType
+    (category) => category.title === serviceType,
   )?.bannerImage;
-  const subcategories = services_categories.find(
-    (category) => category.title === serviceType
-  )?.subcategories;
+  const subcategories =
+    services_categories.find((category) => category.title === serviceType)
+      ?.subcategories || [];
+  const dynamicInitial = {
+    ...questions.reduce((acc, q) => {
+      acc[q.key] = 0;
+      return acc;
+    }, {}),
+  };
+  const [openStates, setOpenStates] = useState(
+    Object.keys(dynamicInitial).reduce((acc, key) => {
+      acc[key] = false;
+      return acc;
+    }, {}),
+  );
   const [openUrgency, setOpenUrgency] = useState(false);
   const [openType, setOpenType] = useState(false);
   const [openDuration, setOpenDuration] = useState(false);
@@ -72,8 +111,15 @@ export default function UserBooking() {
   const [openRating, setOpenRating] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const auth = getAuth(app);
   const navigation = useNavigation();
+  const dynamicSchema = questions.reduce((schema, q) => {
+    schema[q.key] = Yup.number()
+      .min(1, `${q.prompt} is required`)
+      .required(`${q.prompt} is required`);
+    return schema;
+  }, {});
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -93,7 +139,7 @@ export default function UserBooking() {
         isCompleted: false,
         duration: null,
         availability: [{ date: "", time: "" }],
-        state: "",
+        // state: "",
         postcode: "",
         address: "",
         gender: "",
@@ -101,6 +147,7 @@ export default function UserBooking() {
         notif: false,
         notes: "",
         status: "pending",
+        ...dynamicInitial,
       }}
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
@@ -110,17 +157,22 @@ export default function UserBooking() {
           Yup.object().shape({
             date: Yup.string().required("Date is required"),
             time: Yup.string().required("Time is required"),
-          })
+          }),
         ),
-        state: Yup.string()
-          .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
-          .required("State is required"),
+        // state: Yup.string()
+        //   .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
+        //   .required("State is required"),
         postcode: Yup.string()
-          .matches(/^\d{6}$/, "Postcode must be 6 digits")
+          .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
+          .test("valid-postcode", "Invalid Singapore postcode", (value) =>
+            postcodes.some((p) => p.postal_code.toString() === value.trim()),
+          )
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
+        ...dynamicSchema,
       })}
       onSubmit={async (values, { resetForm }) => {
+        console.log("Submitting booking with values:", values);
         const {
           type,
           urgency,
@@ -138,23 +190,92 @@ export default function UserBooking() {
         } = values;
 
         try {
-          const bookingRef = await addDoc(collection(db, "booking"), {
-            ...values,
-            createdAt: new Date(),
-            userId: auth.currentUser.uid,
-            price: 30, //assume its a fixed price for now for worker's analysis
+          // create an array for scores
+          const scores = [];
+
+          // collect scores from dropdowns
+          questions.forEach((q) => {
+            if (
+              ["severity", "access", "sizeTier", "floors", "distance"].includes(
+                q.key,
+              )
+            ) {
+              scores.push(values[q.key]);
+            }
           });
 
-          await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
-          Alert.alert(
-            "Success",
-            "Your booking has been successfully submitted!"
-          );
-          resetForm();
-          navigation.goBack();
+          if (values.itemCount != null) {
+            scores.push(bucketItemCount(values.itemCount));
+          }
+          if (values.areaSize != null) {
+            scores.push(bucketAreaSize(values.areaSize));
+          }
+
+          const avgSeverity = scores.length
+            ? scores.reduce((sum, s) => sum + s, 0) / scores.length
+            : 0;
+
+          const { date, time } = values.availability[0];
+
+          const now = new Date();
+          const [h, m] = time.split(":").map(Number);
+          const target = new Date(`${date}T${time}:00`);
+          let lead_time_hours = (target - now) / (1000 * 60 * 60);
+          if (lead_time_hours < 0) lead_time_hours = 0;
+
+          // Build the payload for the pricing API
+          const payload = {
+            service_type: values.serviceType,
+            duration_hours: values.duration,
+            lead_time_hours,
+            postcode: values.postcode,
+            severity_score: avgSeverity,
+            gender_pref: values.gender != "" ? 1 : 0,
+            min_rating_required: isNaN(parseFloat(values.rating))
+              ? 0
+              : parseFloat(values.rating),
+          };
+
+          console.log("Payload for pricing API:", payload);
+
+          setLoading(true);
+
+          const predicted_price = await getPriceEstimate(payload);
+
+          console.log("Predicted price from API:", predicted_price);
+
+          // const bookingRef = await addDoc(collection(db, "booking"), {
+          //   ...values,
+          //   createdAt: new Date(),
+          //   userId: auth.currentUser.uid,
+          //   severity: avgSeverity,
+          //   price: predicted_price, //assume its a fixed price for now for worker's analysis
+          // });
+
+          setLoading(false);
+
+          const bookingDetails = {
+            ...values,
+            userId: auth.currentUser.uid,
+            severity: avgSeverity,
+            price: predicted_price,
+          };
+
+          // await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
+          // Alert.alert(
+          //   "Success",
+          //   "Your booking has been successfully submitted!"
+          // );
+          // console.log(bookingRef);
+          // resetForm();
+          // navigation.goBack();
+
+          navigation.navigate("Order Summary", {
+            tempBookingInfo: bookingDetails,
+          });
         } catch (error) {
-          console.error("Error submitting booking:", error);
-          Alert.alert("Error", "Booking submission failed. Please try again.");
+          console.error("Error processing booking:", error);
+          Alert.alert("Error", "Could not process booking. Please try again.");
         }
       }}
     >
@@ -168,6 +289,19 @@ export default function UserBooking() {
         setFieldValue,
       }) => (
         <View style={{ flex: 1, zIndex: 0, backgroundColor: "#F9F2ED" }}>
+          {loading && (
+            <View
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                backgroundColor: "rgba(255,255,255,0.8)",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+              }}
+            >
+              <ActivityIndicator size="large" />
+            </View>
+          )}
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
@@ -204,8 +338,8 @@ export default function UserBooking() {
                       open={openType}
                       value={values.type}
                       items={subcategories.map((sub) => ({
-                        label: sub,
-                        value: sub,
+                        label: sub.label,
+                        value: sub.label,
                       }))}
                       setOpen={setOpenType}
                       setValue={(val) => setFieldValue("type", val())}
@@ -258,6 +392,54 @@ export default function UserBooking() {
                 {touched.urgency && errors.urgency && (
                   <Text style={styles.error}>{errors.urgency}</Text>
                 )}
+              </View>
+
+              {/* Severity */}
+              <View style={styles.section}>
+                <View style={styles.inputRow}>
+                  <View style={styles.header}>
+                    <FontAwesome name="tasks" size={18} color="#704F38" />
+                    <Text style={styles.input}>Severity</Text>
+                  </View>
+
+                  {/* One box per question */}
+                  {questions.map((q, i) => (
+                    <View
+                      key={q.key}
+                      style={[styles.inputRow, { zIndex: 600 - i }]}
+                    >
+                      <Text style={styles.input}>{q.prompt}</Text>
+                      {q.type === "select" ? (
+                        <DropDownPicker
+                          open={openStates[q.key]}
+                          value={values[q.key]}
+                          items={q.options.map((opt, idx) => ({
+                            label: opt.label,
+                            value: opt.value,
+                          }))}
+                          setOpen={(v) =>
+                            setOpenStates((s) => ({ ...s, [q.key]: v }))
+                          }
+                          setValue={(cb) => setFieldValue(q.key, cb())}
+                          containerStyle={{ zIndex: 600 - i }}
+                          placeholder={`Select ${q.prompt.toLowerCase()}`}
+                          listMode="SCROLLVIEW"
+                        />
+                      ) : (
+                        <TextInput
+                          value={String(values[q.key] ?? "")}
+                          onChangeText={(text) => setFieldValue(q.key, text)}
+                          keyboardType="numeric"
+                          placeholder={q.prompt}
+                          style={styles.numberInput}
+                        />
+                      )}
+                      {touched[q.key] && errors[q.key] && (
+                        <Text style={styles.error}>{errors[q.key]}</Text>
+                      )}
+                    </View>
+                  ))}
+                </View>
               </View>
 
               {/* Time */}
@@ -347,16 +529,16 @@ export default function UserBooking() {
                                       // Extract local date
                                       const year = selectedDate.getFullYear();
                                       const month = String(
-                                        selectedDate.getMonth() + 1
+                                        selectedDate.getMonth() + 1,
                                       ).padStart(2, "0");
                                       const day = String(
-                                        selectedDate.getDate()
+                                        selectedDate.getDate(),
                                       ).padStart(2, "0");
                                       const formatted = `${year}-${month}-${day}`;
 
                                       setFieldValue(
                                         `availability[${index}].date`,
-                                        formatted
+                                        formatted,
                                       );
                                     }}
                                   />
@@ -396,7 +578,7 @@ export default function UserBooking() {
                                     value={
                                       slot.time
                                         ? new Date(
-                                            `2025-05-301T${slot.time}:00`
+                                            `2025-05-301T${slot.time}:00`,
                                           )
                                         : new Date()
                                     }
@@ -414,10 +596,10 @@ export default function UserBooking() {
 
                                       const year = now.getFullYear();
                                       const month = String(
-                                        now.getMonth() + 1
+                                        now.getMonth() + 1,
                                       ).padStart(2, "0");
                                       const day = String(
-                                        now.getDate()
+                                        now.getDate(),
                                       ).padStart(2, "0");
                                       const today = `${year}-${month}-${day}`;
                                       const isToday =
@@ -434,7 +616,7 @@ export default function UserBooking() {
                                       if (isPastTime) {
                                         Alert.alert(
                                           "Invalid Time",
-                                          "You cannot select a time in the past."
+                                          "You cannot select a time in the past.",
                                         );
                                         return;
                                       }
@@ -443,7 +625,7 @@ export default function UserBooking() {
                                         .slice(0, 5);
                                       setFieldValue(
                                         `availability[${index}].time`,
-                                        formatted
+                                        formatted,
                                       );
                                     }}
                                   />
@@ -463,7 +645,7 @@ export default function UserBooking() {
                                   if (values.availability.length === 1) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "At least one time slot must be chosen."
+                                      "At least one time slot must be chosen.",
                                     );
                                   } else {
                                     remove(index);
@@ -479,7 +661,7 @@ export default function UserBooking() {
                                   if (values.availability.length >= 3) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "You can only choose up to 3 time slots."
+                                      "You can only choose up to 3 time slots.",
                                     );
                                   } else {
                                     push({ date: "", time: "" });
@@ -503,7 +685,7 @@ export default function UserBooking() {
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Location</Text>
 
-                {/* State */}
+                {/* State
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
                     <Entypo name="location-pin" size={20} color="#704F38" />
@@ -527,7 +709,7 @@ export default function UserBooking() {
                   {touched.state && errors.state && (
                     <Text style={styles.error}>{errors.state}</Text>
                   )}
-                </View>
+                </View> */}
 
                 {/* Postcode*/}
                 <View style={styles.inputRow}>
@@ -704,3 +886,10 @@ export default function UserBooking() {
     </Formik>
   );
 }
+
+export {
+  calculateEndTime,
+  bucketItemCount,
+  bucketAreaSize,
+  handleBookingSubmit,
+};

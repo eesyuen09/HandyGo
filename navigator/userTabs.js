@@ -5,6 +5,7 @@ import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import UserHome from "../screen/user_home";
 import UserActivity from "../screen/user_activity";
 import Signup from "../screen/signup";
+import EditProfile from "../screen/both_editprofile";
 import { colours } from "../components/style_loginsignup";
 
 const Tab = createBottomTabNavigator();
@@ -61,12 +62,12 @@ export default function UserTabs() {
                 <Ionicons name="chatbubble-outline" size={24} color={color} />
               ),
               tabBarLabel: "",
-            }} 
+            }}
           /> */}
 
       <Tab.Screen
-        name="Profile"
-        component={Signup} // placeholder
+        name="Edit Profile"
+        component={EditProfile} // placeholder
         options={{
           tabBarIcon: ({ color }) => (
             <Feather name="user" size={24} color={color} />

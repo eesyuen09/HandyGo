@@ -14,6 +14,8 @@ import Biz_urgentTask from "../screen/biz_urgenttask";
 import Login from "../screen/login"; // placeholder
 import Signup from "../screen/signup"; // placeholder
 import FinanceScreen from "../screen/biz_finance";
+import EditProfile from "../screen/both_editprofile";
+
 
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
@@ -82,8 +84,8 @@ export default function WorkerTabs() {
         }}
       />
       <Tab.Screen
-        name="Profile"
-        component={Signup} // placeholder
+        name="Edit Profile"
+        component={EditProfile} // placeholder
         options={{
           tabBarIcon: ({ color }) => (
             <Feather name="user" size={24} color={color} />

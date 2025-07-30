@@ -55,13 +55,15 @@ export const styles = StyleSheet.create({
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: light_coco,
+    // backgroundColor: light_coco,
     borderRadius: 30,
     paddingHorizontal: 26,
+    borderColor: white,
+    borderWidth: 1,
     // paddingVertical: 8,
     marginHorizontal: 25,
-    marginBottom: 8,
-    height: 45,
+    // marginBottom: 8,
+    // height: 45,
   },
 
   searchIcon: {
@@ -77,8 +79,8 @@ export const styles = StyleSheet.create({
     // lineHeight: 25,
     fontSize: 15,
     flex: 1,
-    zIndex: 100,
-    lineHeight: 25,
+    zIndex: 1000,
+    lineHeight: 30,
   },
 
   section: {
@@ -114,11 +116,14 @@ export const styles = StyleSheet.create({
   },
 
   iconRow: {
-    // flexDirection: 'row',
+    flexDirection: "row",
     // justifyContent: 'space-between',
     alignItems: "baseline",
     paddingHorizontal: 16,
     gap: 23,
+    // backgroundColor: darkest_coco,
+    minWidth: Dimensions.get("window").width + 10,
+    zIndex: 1000,
     // marginBottom: 0,
   },
 
@@ -141,7 +146,7 @@ export const styles = StyleSheet.create({
     resizeMode: "cover",
     height: imageHeight,
     width: imageWidth,
-    marginBottom: 25,
+    marginBottom: 50,
     borderRadius: 8,
   },
 
@@ -157,5 +162,28 @@ export const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
     zIndex: 1,
+  },
+
+  suggestionBox: {
+    backgroundColor: colours.beige,
+    borderRadius: 5,
+    marginTop: 4,
+    marginHorizontal: 10,
+    elevation: 3,
+    // shadowColor: colours.grey,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+
+  suggestionItem: {
+    padding: 10,
+    borderBottomColor: colours.darkest_coco,
+    borderBottomWidth: 1,
+  },
+
+  suggestionText: {
+    fontSize: 14,
+    color: colours.darkest_coco,
   },
 });
