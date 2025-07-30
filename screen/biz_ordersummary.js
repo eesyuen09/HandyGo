@@ -38,8 +38,6 @@ const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
 
 export default function OrderSummary({ navigation }) {
-  console.log("OrderSummary mounted, params =", useRoute().params);
-
   const [booking, setBooking] = useState([]);
   const [openDate, setOpenDate] = useState(false);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -48,7 +46,7 @@ export default function OrderSummary({ navigation }) {
 
   const route = useRoute();
   const params = route?.params ?? {};
-  const { orderID, userID, tempBookingInfo } = params || {};
+  const { orderID, userID, tempBookingInfo } = route.params || {};
 
   const [bookingData, setBookingData] = useState(null); // reused booking snapshot
 
@@ -96,7 +94,7 @@ export default function OrderSummary({ navigation }) {
     openDate,
     setOpenDate,
     selectedTime,
-    setSelectedTime
+    setSelectedTime,
   ) => {
     const isAvailabilityCard = item.type === "availability";
     //convert availability array to dropdown items
@@ -203,7 +201,7 @@ export default function OrderSummary({ navigation }) {
       await setDoc(
         bookingRef,
         { orderID: bookingRef.id },
-        { merge: true }
+        { merge: true },
       ).catch((err) => {
         console.error("Failed to merge orderID:", err);
       });
@@ -215,6 +213,7 @@ export default function OrderSummary({ navigation }) {
       Alert.alert("Error", "Failed to confirm booking.");
     }
   }
+
   const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
       if (!selectedTime) {
@@ -223,48 +222,42 @@ export default function OrderSummary({ navigation }) {
       }
 
       //Prevent double booking
-      // helper: pad a number or string to two digits
-      const pad2 = (x) => String(x).padStart(2, "0");
-
-      // normalize any “YYYY-M-D H:mm” into “YYYY-MM-DD HH:mm”
-      function normalizeTimestamp(ts) {
-        let [dp, tp] = ts.split(" ");
-        let [y, m, d] = dp.split("-").map(pad2);
-        let [h, min] = tp.split(":").map(pad2);
-        return `${y}-${m}-${d} ${h}:${min}`;
-      }
-
-      // in acceptBooking…
+      //1. abstract new slots start and end date as date obj
       const [datePart, timePart] = selectedTime.split(" ");
       const startOfDay = `${datePart} 00:00`;
       const endOfDay = `${datePart} 23:59`;
-      const schedRef = collection(db, "users", currentWorkerId, "schedules");
+      const newStart = new Date(`${datePart}T${timePart}:00`);
+      const durationHours = bookingData.duration; // e.g. 2
+      const newEnd = new Date(newStart.getTime() + durationHours * 3600e3);
+      console.log("start, end", newStart, newEnd);
 
-      // build your range query (still as strings)
+      //2. query this workers schedules for the same day
+      const schedRef = collection(db, "users", currentWorkerId, "schedules");
       const dayQuery = query(
         schedRef,
         where("availability", ">=", startOfDay),
         where("availability", "<=", endOfDay),
-        orderBy("availability") // ← Firestore requires you to order by the same field
       );
+      const snap = await getDocs(dayQuery);
 
-      // then later, when you loop through the returned docs…
-      for (let docSnap of (await getDocs(dayQuery)).docs) {
-        const rec = docSnap.data();
-        // normalize the stored string into exactly the same shape
-        const avail = normalizeTimestamp(rec.availability);
-        const [exDate, exTime] = avail.split(" ");
-
+      //3. check each existing schedule overlap
+      for (let doc of snap.docs) {
+        const rec = doc.data();
+        const availStr = rec.availability;
+        const [exDate, exTime] = availStr.split(" ");
         const existingStart = new Date(`${exDate}T${exTime}:00`);
         const existingEnd = new Date(
-          existingStart.getTime() + rec.duration * 3600e3
+          existingStart.getTime() + rec.duration * 3600e3,
         );
 
-        if (newStart <= existingEnd && existingStart <= newEnd) {
+        console.log("existing:", existingStart, "->", existingEnd);
+
+        if (newStart < existingEnd && existingStart < newEnd) {
           Alert.alert(
             "Time Conflict",
-            "You already have a booking at that time. Please choose another slot."
+            "You already have a booking at that time. Please choose another slot.",
           );
+          navigation.goBack();
           return;
         }
       }
@@ -310,7 +303,7 @@ export default function OrderSummary({ navigation }) {
           type: "category",
           title: tempBookingInfo.type,
           image: services_categories.find(
-            (cat) => cat.title === tempBookingInfo.serviceType
+            (cat) => cat.title === tempBookingInfo.serviceType,
           )?.bannerImage,
         },
         {
@@ -385,7 +378,7 @@ export default function OrderSummary({ navigation }) {
       setIsCompleted(data.isCompleted || false);
 
       const matched_cat = services_categories.find(
-        (cat) => cat.title === data.serviceType
+        (cat) => cat.title === data.serviceType,
       );
       const image = matched_cat?.bannerImage;
 
@@ -472,7 +465,7 @@ export default function OrderSummary({ navigation }) {
                 openDate,
                 setOpenDate,
                 selectedTime,
-                setSelectedTime
+                setSelectedTime,
               )
             }
             keyExtractor={(item, index) => index.toString()}
