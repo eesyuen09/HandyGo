@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  StyleSheet,
   Alert,
+  ActivityIndicator,
   Switch,
   KeyboardAvoidingView,
   Platform,
@@ -109,6 +111,7 @@ export default function UserBooking() {
   const [openRating, setOpenRating] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(false);
   const auth = getAuth(app);
   const navigation = useNavigation();
   const dynamicSchema = questions.reduce((schema, q) => {
@@ -235,6 +238,8 @@ export default function UserBooking() {
 
           console.log("Payload for pricing API:", payload);
 
+          setLoading(true);
+
           const predicted_price = await getPriceEstimate(payload);
 
           console.log("Predicted price from API:", predicted_price);
@@ -246,6 +251,8 @@ export default function UserBooking() {
           //   severity: avgSeverity,
           //   price: predicted_price, //assume its a fixed price for now for worker's analysis
           // });
+
+          setLoading(false);
 
           const bookingDetails = {
             ...values,
@@ -282,9 +289,19 @@ export default function UserBooking() {
         setFieldValue,
       }) => (
         <View style={{ flex: 1, zIndex: 0, backgroundColor: "#F9F2ED" }}>
-          {/* <Text style={{ color: "red", padding: 10, fontSize: 12 }}>
-            {JSON.stringify({ errors, touched }, null, 2)}
-          </Text> */}
+          {loading && (
+            <View
+              style={{
+                ...StyleSheet.absoluteFillObject,
+                backgroundColor: "rgba(255,255,255,0.8)",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 1000,
+              }}
+            >
+              <ActivityIndicator size="large" />
+            </View>
+          )}
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}

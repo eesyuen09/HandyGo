@@ -1,5 +1,10 @@
 // src/api/pricing.js
-const API_URL = "https://handygo-ae37.onrender.com";
+import Constants from "expo-constants";
+
+const API_URL =
+  process.env.REACT_NATIVE_API_URL || // for Create React App/EAS builds
+  process.env.API_URL || // for plain Node
+  "https://handygo-ae37.onrender.com";
 
 export async function getPriceEstimate(payload) {
   try {
