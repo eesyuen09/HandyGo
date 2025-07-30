@@ -23,10 +23,7 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth,db } from "../firebaseConfig";
-
-
-
+import { auth, db } from "../firebaseConfig";
 
 export default function Signup({ navigation }) {
   const [hidePassword, setHidePassword] = useState(true);

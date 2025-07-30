@@ -103,7 +103,7 @@ export default function Biz_activitypage({ navigation }) {
     }
     return colours.darkest_coco;
   }
-  
+
 
 
   const renderUpcomingTask = ({ item }) => {
@@ -163,7 +163,7 @@ export default function Biz_activitypage({ navigation }) {
       );
       const recentTasksSnap = await getDocs(recentsTasksRef);
       const snapshot = await getDocs(recentsTasksRef);
-      console.log("snapshot size:", snapshot.size); 
+      console.log("snapshot size:", snapshot.size);
 
       snapshot.forEach(doc => {
         console.log("Doc:", doc.id, doc.data());
@@ -204,7 +204,7 @@ export default function Biz_activitypage({ navigation }) {
         });
       });
       upcomingTasksList.sort((a, b) => new Date(a.time) - new Date(b.time));
-      
+
       setUpcomingTasks(upcomingTasksList);
 
       const marked = {};
@@ -268,7 +268,7 @@ export default function Biz_activitypage({ navigation }) {
                   },
                   text: {
                     color: colours.white,
-                  
+
                   },
                 },
               },
@@ -301,7 +301,7 @@ export default function Biz_activitypage({ navigation }) {
             style={{ width: 360 }}
           />
         {/* Scrollable area */}
-        
+
         </View>
         {/* Recent Section */}
         <Text style={style.subHeader}>Recent</Text>
@@ -311,7 +311,7 @@ export default function Biz_activitypage({ navigation }) {
           keyExtractor={(item) => item.orderID}
           renderItem={renderUpcomingTask}
           scrollEnabled={false}
-          
+
         />
 
 
