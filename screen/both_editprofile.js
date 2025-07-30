@@ -17,12 +17,8 @@ import { Picker } from "@react-native-picker/picker";
 import { services_categories } from "../constants/category_constant";
 import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { useNavigation } from "@react-navigation/native";
-import { signOut } from 'firebase/auth';
 
-
-export default function EditProfile() {
-  const navigation = useNavigation();
+export default function EditProfile({ navigation }) {
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
     Inter: require("../assets/fonts/Inter-regular.ttf"),
@@ -35,17 +31,7 @@ export default function EditProfile() {
   const [subcategory, setSubcategory] = useState([]);
   const [showPickerIndex, setShowPickerIndex] = useState(null);
   const [show, setShow] = useState(false);
-  const handleSignOut = async () => {
-      try {
-        await signOut(auth);
-        // Replace the whole stack so back-button can’t take them back in
-        navigation.replace('Login');
-      } catch (error) {
-        console.error('Error signing out:', error);
-        Alert.alert('Sign Out Error', error.message);
-      }
-    }
-    ;
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -392,10 +378,6 @@ export default function EditProfile() {
 
         <TouchableOpacity style={style.button} onPress={handleSave}>
           <Text style={style.buttonText}>Save Changes</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style = {style.button} onPress={() => handleSignOut()}>
-          <Text style = {style.buttonText}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>
