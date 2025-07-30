@@ -94,7 +94,7 @@ export default function OrderSummary({ navigation }) {
     openDate,
     setOpenDate,
     selectedTime,
-    setSelectedTime
+    setSelectedTime,
   ) => {
     const isAvailabilityCard = item.type === "availability";
     //convert availability array to dropdown items
@@ -201,7 +201,7 @@ export default function OrderSummary({ navigation }) {
       await setDoc(
         bookingRef,
         { orderID: bookingRef.id },
-        { merge: true }
+        { merge: true },
       ).catch((err) => {
         console.error("Failed to merge orderID:", err);
       });
@@ -236,7 +236,7 @@ export default function OrderSummary({ navigation }) {
       const dayQuery = query(
         schedRef,
         where("availability", ">=", startOfDay),
-        where("availability", "<=", endOfDay)
+        where("availability", "<=", endOfDay),
       );
       const snap = await getDocs(dayQuery);
 
@@ -247,7 +247,7 @@ export default function OrderSummary({ navigation }) {
         const [exDate, exTime] = availStr.split(" ");
         const existingStart = new Date(`${exDate}T${exTime}:00`);
         const existingEnd = new Date(
-          existingStart.getTime() + rec.duration * 3600e3
+          existingStart.getTime() + rec.duration * 3600e3,
         );
 
         console.log("existing:", existingStart, "->", existingEnd);
@@ -255,7 +255,7 @@ export default function OrderSummary({ navigation }) {
         if (newStart < existingEnd && existingStart < newEnd) {
           Alert.alert(
             "Time Conflict",
-            "You already have a booking at that time. Please choose another slot."
+            "You already have a booking at that time. Please choose another slot.",
           );
           navigation.goBack();
           return;
@@ -303,7 +303,7 @@ export default function OrderSummary({ navigation }) {
           type: "category",
           title: tempBookingInfo.type,
           image: services_categories.find(
-            (cat) => cat.title === tempBookingInfo.serviceType
+            (cat) => cat.title === tempBookingInfo.serviceType,
           )?.bannerImage,
         },
         {
@@ -378,7 +378,7 @@ export default function OrderSummary({ navigation }) {
       setIsCompleted(data.isCompleted || false);
 
       const matched_cat = services_categories.find(
-        (cat) => cat.title === data.serviceType
+        (cat) => cat.title === data.serviceType,
       );
       const image = matched_cat?.bannerImage;
 
@@ -465,7 +465,7 @@ export default function OrderSummary({ navigation }) {
                 openDate,
                 setOpenDate,
                 selectedTime,
-                setSelectedTime
+                setSelectedTime,
               )
             }
             keyExtractor={(item, index) => index.toString()}

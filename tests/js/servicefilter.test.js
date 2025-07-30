@@ -53,7 +53,7 @@ describe("useToggleSubcategory hook", () => {
     // add X
     fireEvent.press(getByText("Toggle X"));
     expect(getByTestId("current").props.children).toBe(
-      JSON.stringify(["A", "X"])
+      JSON.stringify(["A", "X"]),
     );
 
     // toggle A off
@@ -85,7 +85,7 @@ describe("doApplyFilters()", () => {
       "Business Scheduled Task",
       {
         filter: {},
-      }
+      },
     );
   });
 });

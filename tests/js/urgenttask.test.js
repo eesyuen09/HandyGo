@@ -107,7 +107,7 @@ describe("urgenttask helpers", () => {
                 state: "S",
                 duration: 2,
               },
-            ]
+            ],
           ),
         });
 
@@ -122,7 +122,7 @@ describe("urgenttask helpers", () => {
       // expect we called collection, where, orderBy twice
       expect(mockCollection).toHaveBeenCalledWith(
         expect.any(Object),
-        "booking"
+        "booking",
       );
       expect(mockWhere).toHaveBeenCalled();
       expect(mockOrderBy).toHaveBeenCalled();

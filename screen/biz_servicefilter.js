@@ -174,8 +174,8 @@ export default function FilterScreen({ navigation }) {
               setMaxPrice(max);
             }}
             min={20}
-            max={200}
-            step={10}
+            max={1000}
+            step={50}
             selectedStyle={{ backgroundColor: colours.main_coco }}
             unselectedStyle={{ backgroundColor: colours.grey }}
             markerStyle={{

@@ -105,7 +105,7 @@ describe("ScheduledTask helpers", () => {
                 state: "S",
                 duration: 3,
               },
-            ]
+            ],
           ),
         });
 
@@ -119,7 +119,7 @@ describe("ScheduledTask helpers", () => {
 
       expect(mockCollection).toHaveBeenCalledWith(
         expect.any(Object),
-        "booking"
+        "booking",
       );
       expect(mockWhere).toHaveBeenCalled();
       expect(mockOrderBy).toHaveBeenCalled();
