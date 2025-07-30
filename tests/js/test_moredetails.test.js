@@ -110,12 +110,12 @@ describe("<Moredetails />", () => {
     render(
       <Moredetails
         navigation={{ replace: mockReplace, navigate: mockNavigate }}
-      />
+      />,
     );
 
     await waitFor(() => {
       expect(firestore.getDoc).toHaveBeenCalledWith(
-        firestore.doc(db, "users", "user-uid")
+        firestore.doc(db, "users", "user-uid"),
       );
       expect(mockReplace).toHaveBeenCalledWith("WorkerTabs");
     });
@@ -145,7 +145,7 @@ describe("handleBusinessDetailsSubmit()", () => {
     await handleBusinessDetailsSubmit(bad, mockNavigation);
     expect(Alert.alert).toHaveBeenCalledWith(
       "Error",
-      "Please fill in all required fields."
+      "Please fill in all required fields.",
     );
   });
 
@@ -155,7 +155,7 @@ describe("handleBusinessDetailsSubmit()", () => {
     await handleBusinessDetailsSubmit(bad, mockNavigation);
     expect(Alert.alert).toHaveBeenCalledWith(
       "Invalid Contact",
-      "Contact number must not contain letters."
+      "Contact number must not contain letters.",
     );
   });
 
@@ -165,7 +165,7 @@ describe("handleBusinessDetailsSubmit()", () => {
     await handleBusinessDetailsSubmit(bad, mockNavigation);
     expect(Alert.alert).toHaveBeenCalledWith(
       "Invalid NRIC/Passport",
-      "Only letters and numbers allowed."
+      "Only letters and numbers allowed.",
     );
   });
 
@@ -175,7 +175,7 @@ describe("handleBusinessDetailsSubmit()", () => {
     await handleBusinessDetailsSubmit(bad, mockNavigation);
     expect(Alert.alert).toHaveBeenCalledWith(
       "Invalid Bank Number",
-      "Bank number must contain digits only."
+      "Bank number must contain digits only.",
     );
   });
 
@@ -185,7 +185,7 @@ describe("handleBusinessDetailsSubmit()", () => {
     await handleBusinessDetailsSubmit(bad, mockNavigation);
     expect(Alert.alert).toHaveBeenCalledWith(
       "Error",
-      "Please select at least one category and subcategory."
+      "Please select at least one category and subcategory.",
     );
   });
 
@@ -200,19 +200,19 @@ describe("handleBusinessDetailsSubmit()", () => {
       expect.objectContaining({
         contact: valuesTemplate.contact,
         address: valuesTemplate.address,
-      })
+      }),
     );
 
     // categoryToWorker update
     expect(firestore.updateDoc).toHaveBeenCalledWith(
       firestore.doc(db, "categoryToWorker", "Cat1"),
-      { workers: expect.any(Object) }
+      { workers: expect.any(Object) },
     );
 
     // subcategoryToWorker update
     expect(firestore.updateDoc).toHaveBeenCalledWith(
       firestore.doc(db, "subcategoryToWorker", "Sub1"),
-      { workers: expect.any(Object) }
+      { workers: expect.any(Object) },
     );
 
     expect(global.alert).toHaveBeenCalledWith("Data saved successfully!");
@@ -234,7 +234,7 @@ describe("Internal helper functions", () => {
       },
       (fn) => {
         subState = fn(subState);
-      }
+      },
     );
     expect(catState).toEqual([""]);
     expect(subState).toEqual([""]);
@@ -247,7 +247,7 @@ describe("Internal helper functions", () => {
       },
       (fn) => {
         subState = fn(subState);
-      }
+      },
     );
     expect(catState).toEqual([]);
     expect(subState).toEqual([]);

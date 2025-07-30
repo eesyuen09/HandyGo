@@ -101,7 +101,7 @@ export async function handleBusinessDetailsSubmit(values) {
   if (!category.length || !subcategory.length) {
     Alert.alert(
       "Error",
-      "Please select at least one category and subcategory."
+      "Please select at least one category and subcategory.",
     );
     return;
   }
@@ -192,7 +192,7 @@ export default function Moredetails({ navigation }) {
     if (/[a-zA-Z]/.test(contact)) {
       Alert.alert(
         "Invalid Contact",
-        "Contact number must not contain letters."
+        "Contact number must not contain letters.",
       );
       return;
     }
@@ -205,7 +205,7 @@ export default function Moredetails({ navigation }) {
     if (/[a-zA-Z]/.test(bankNumber)) {
       Alert.alert(
         "Invalid Bank Number",
-        "Bank number must contain digits only."
+        "Bank number must contain digits only.",
       );
       return;
     }
@@ -213,7 +213,7 @@ export default function Moredetails({ navigation }) {
     if (!category.length || !subcategory.length) {
       Alert.alert(
         "Error",
-        "Please select at least one category and subcategory."
+        "Please select at least one category and subcategory.",
       );
       return;
     }
@@ -471,8 +471,8 @@ export default function Moredetails({ navigation }) {
                     cat,
                     index,
                     setFieldValue,
-                    values.subcategory
-                  )
+                    values.subcategory,
+                  ),
                 )}
                 <TouchableOpacity
                   onPress={() => addEmptyCategory(setCategory, setSubcategory)}
