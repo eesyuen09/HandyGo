@@ -73,7 +73,7 @@ export default function WorkerTabs() {
           tabBarLabel: "",
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Chat"
         component={Login} // placeholder
         options={{
@@ -82,7 +82,7 @@ export default function WorkerTabs() {
           ),
           tabBarLabel: "",
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Edit Profile"
         component={EditProfile} // placeholder
