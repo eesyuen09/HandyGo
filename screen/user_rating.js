@@ -59,20 +59,20 @@ export default function UserRating() {
         return;
       }
       const workerData = workerSnap.data();
-      console.log("🧠 workerData:", workerData);
-      console.log("➡️ totalRating:", workerData.totalRating);
-      console.log("➡️ ratingCount:", workerData.ratingCount);
+      console.log("workerData:", workerData);
+      console.log("otalRating:", workerData.totalRating);
+      console.log("ratingCount:", workerData.ratingCount);
       const newReview = {
         orderId,
         userId,
         rating,
         review,
-        type:type ||" ",
+        type: type || " ",
         timestamp: new Date(),
       };
 
       const reviewsRef = collection(db, "users", workerId, "reviews");
-      console.log("🔥 reviewsRef.path:", reviewsRef.path);
+      console.log("reviewsRef.path:", reviewsRef.path);
       await addDoc(reviewsRef, newReview);
 
       const updatedTotal = (workerData.totalRating || 0) + rating;
@@ -80,6 +80,7 @@ export default function UserRating() {
       const updatedAverage = updatedTotal / updatedCount;
 
       await updateDoc(workerRef, {
+        totalRating: updatedTotal,
         averageRating: updatedAverage,
         ratingCount: updatedCount,
       });
