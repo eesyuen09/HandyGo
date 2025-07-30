@@ -1,3 +1,7 @@
+jest.mock("../../constants/postcodes", () => ({
+  postcodes: [{ postal_code: 12345 }, { postal_code: 67890 }],
+}));
+import { postcodes } from "../../constants/postcodes";
 import React from "react";
 import { render } from "@testing-library/react-native";
 import { Alert } from "react-native";
@@ -10,7 +14,6 @@ import UserBooking, {
 } from "../../screen/user_booking";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { app } from "../../firebaseConfig";
-import { postcodes } from "../../constants/postcodes";
 import { getPriceEstimate } from "../../src/api/pricing";
 
 jest.mock("firebase/auth", () => ({
@@ -21,20 +24,6 @@ jest.spyOn(Alert, "alert").mockImplementation(() => {});
 jest.mock("expo-constants", () => ({
   manifest: { scheme: "app" },
 }));
-jest.mock("@expo/vector-icons", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  return {
-    FontAwesome5: (props) => React.createElement(Text, null, "Fa5"),
-    AntDesign: (props) => React.createElement(Text, null, "AD"),
-    MaterialIcons: (props) => React.createElement(Text, null, "MI"),
-    Entypo: (props) => React.createElement(Text, null, "Ent"),
-    FontAwesome: (props) => React.createElement(Text, null, "FA"),
-    Feather: (props) => React.createElement(Text, null, "Fea"),
-    FontAwesome6: (props) => React.createElement(Text, null, "FA6"),
-  };
-});
-
 jest.mock("@react-navigation/native", () => ({
   useNavigation: () => ({ navigate: jest.fn() }),
   useRoute: () => ({ params: {} }),
