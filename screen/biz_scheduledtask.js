@@ -36,151 +36,80 @@ import { useRoute } from "@react-navigation/native";
 //extract data from firebase
 
 import { db } from "../firebaseConfig";
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 
 
 
-
-export default function UrgentTask() {
-  const navigation = useNavigation();
-  const [tasks, setTasks] = useState([]);
-
-  const debouncedFetch = React.useCallback(debounce((params) => {
-    fetchFilteredBookings(params).then(setResults);
-  }, 500), // Wait 500ms between calls
-
-  useFocusEffect(
-    React.useCallback(() => {
-      if (Object.keys(filter).length) {
-        debouncedFetch({ minDuration, maxDuration });
-      }
-    }, [minDuration, maxDuration])
-  ),
-)
-
-
-useFocusEffect(
-  React.useCallback(() => {
-    if (Object.keys(filter).length) {
-      debouncedFetch({ minDuration, maxDuration });
-    }
-  }, [minDuration, maxDuration])
-);
-  //filter
-  const route = useRoute();
-  const filter = route.params?.filter || {};
-
-  const {
+async function fetchFilteredBookings({
+    minPrice,
+    maxPrice,
     subcategory = [],
-    priceRange = [0, Infinity],
-    durationRange = [0, Infinity],
+    minDuration,
+    maxDuration,
+  }) {
+    const baseFilters = [
+      where("status", "==", "pending"),
+      where("urgency", "==", false),
+    ];
 
-  } = filter;
-  const [minPrice, maxPrice] = priceRange;
-  const { minDuration, maxDuration } = React.useMemo(() => ({
-    minDuration: durationRange[0], 
-    maxDuration: durationRange[1]
-  }), [durationRange[0], durationRange[1]]);
+    if (subcategory.length > 0) {
+      baseFilters.push(where("type", "in", subcategory));
+    }
 
-  const [fontsLoaded] = useFonts({
-    Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
-    Inter: require("../assets/fonts/Inter-regular.ttf"),
-  });
+    // 1) Query A: price range
+    const priceQ = query(
+      collection(db, "booking"),
+      ...baseFilters,
+      where("price", ">=", minPrice),
+      where("price", "<=", maxPrice),
+      orderBy("price", "desc"),
+    );
 
-  if (!fontsLoaded) return null;
+    // 2) Query B: duration range
+    const durationQ = query(
+      collection(db, "booking"),
+      ...baseFilters,
+      where("duration", ">=", minDuration),
+      where("duration", "<=", maxDuration),
+      orderBy("duration", "asc"),
+    );
 
-  // add search logic
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredTasks, setFilteredTasks] = useState([]);
-  const setResults = results => {
-    setTasks(results);
-    setFilteredTasks(results);
+    try {
+      // Run both in parallel
+      const [priceSnap, durationSnap] = await Promise.all([
+        getDocs(priceQ),
+        getDocs(durationQ),
+      ]);
+
+      // Build set of IDs matching price
+      const priceIds = new Set(priceSnap.docs.map((d) => d.id));
+
+      // Intersect: only keep duration docs whose ID is in priceIds
+      const intersected = durationSnap.docs
+        .filter((d) => priceIds.has(d.id))
+        .map((docSnap) => docSnap.data());
+
+      // Format for your UI
+      return intersected.map((data) => {
+        const iconData = getIcon(data.serviceType);
+        return {
+          id: data.orderID || data.id,
+          category: data.type || "Unknown",
+          time: `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
+          location: `${data.state || ""}, ${data.postcode || ""}`,
+          price: data.price || "N/A",
+          icon: iconData.name,
+          iconFamily: iconData.family,
+        };
+      });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      Alert.alert("Error", "Failed to load tasks");
+      return [];
+    }
   };
-  useFocusEffect(
-    React.useCallback(() => {
-    if (Object.keys(filter).length) {
-      // use the local min/max vars, not the raw priceRange array
-      fetchFilteredBookings({
-        minPrice,   maxPrice,
-        subcategory,
-        minDuration, maxDuration,
 
-      }).then(setResults);
-      } else {
-        fetchScheduledTasks().then(setResults);
-      }
-    }, [])  // stringify so React re-runs whenever filters change
-  );
-
-  async function fetchFilteredBookings({
-  minPrice, maxPrice,
-  subcategory = [], 
-  minDuration, maxDuration
-}) {
-  const baseFilters = [
-    where("status",  "==", "pending"),
-    where("urgency", "==", false)
-  ];
-
-  if (subcategory.length > 0) {
-    baseFilters.push(where("type", "in", subcategory));
-  }
-
-  // 1) Query A: price range
-  const priceQ = query(
-    collection(db, "booking"),
-    ...baseFilters,
-    where("price", ">=", minPrice),
-    where("price", "<=", maxPrice),
-    orderBy("price", "desc")
-  );
-
-  // 2) Query B: duration range
-  const durationQ = query(
-    collection(db, "booking"),
-    ...baseFilters,
-    where("duration", ">=", minDuration),
-    where("duration", "<=", maxDuration),
-    orderBy("duration", "asc")
-  );
-
-  try {
-    // Run both in parallel
-    const [priceSnap, durationSnap] = await Promise.all([
-      getDocs(priceQ),
-      getDocs(durationQ)
-    ]);
-
-    // Build set of IDs matching price
-    const priceIds = new Set(priceSnap.docs.map(d => d.id));
-
-    // Intersect: only keep duration docs whose ID is in priceIds
-    const intersected = durationSnap.docs
-      .filter(d => priceIds.has(d.id))
-      .map(docSnap => docSnap.data());
-
-    // Format for your UI
-    return intersected.map(data => {
-      const iconData = getIcon(data.serviceType);
-      return {
-        id:        data.orderID || data.id,
-        category:  data.type     || "Unknown",
-        time:      `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
-        location:  `${data.state || ""}, ${data.postcode || ""}`,
-        price:     data.price    || "N/A",
-        icon:      iconData.name,
-        iconFamily:iconData.family,
-      };
-    });
-  } catch (error) {
-    console.error("Error fetching tasks:", error);
-    Alert.alert("Error", "Failed to load tasks");
-    return [];
-  }
-}
-
-
-  const fetchScheduledTasks = async () => {
+ const fetchScheduledTasks = async () => {
     const user = auth.currentUser;
     if (!user) return;
 
@@ -220,6 +149,7 @@ useFocusEffect(
     return formatted;
   };
 
+
   function handleSearch(text) {
     if (text.trim() === "") {
       setFilteredTasks(tasks);
@@ -233,10 +163,9 @@ useFocusEffect(
         item.time.toLowerCase().includes(text.toLowerCase()),
     );
     setFilteredTasks(filtered);
-  }
+  };
 
-
-  const getIcon = (serviceType) => {
+const getIcon = (serviceType) => {
     switch (serviceType) {
       case "Cleaning":
         return { name: "cleaning-services", family: "MaterialIcons" };
@@ -272,6 +201,98 @@ useFocusEffect(
         return <Feather name="alert-circle" size={size} color={color} />;
     }
   };
+
+
+export { fetchFilteredBookings, fetchScheduledTasks, handleSearch, getIcon, renderIcon };
+
+
+
+
+
+
+
+
+export default function UrgentTask() {
+  const navigation = useNavigation();
+  const [tasks, setTasks] = useState([]);
+
+  const debouncedFetch = React.useCallback(
+  debounce((params) => {
+    fetchFilteredBookings(params).then(setResults);
+  }, 500),
+  [],
+); // Wait 500ms between calls
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Object.keys(filter).length) {
+        debouncedFetch({ minDuration, maxDuration });
+      }
+    }, [minDuration, maxDuration]),
+  );
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Object.keys(filter).length) {
+        debouncedFetch({ minDuration, maxDuration });
+      }
+    }, [minDuration, maxDuration]),
+  );
+  //filter
+  const route = useRoute();
+  const filter = route.params?.filter || {};
+
+  const {
+    subcategory = [],
+    priceRange = [0, Infinity],
+    durationRange = [0, Infinity],
+  } = filter;
+  const [minPrice, maxPrice] = priceRange;
+  const { minDuration, maxDuration } = React.useMemo(
+    () => ({
+      minDuration: durationRange[0],
+      maxDuration: durationRange[1],
+    }),
+    [durationRange[0], durationRange[1]],
+  );
+
+  const [fontsLoaded] = useFonts({
+    Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
+    Inter: require("../assets/fonts/Inter-regular.ttf"),
+  });
+
+  if (!fontsLoaded) return null;
+
+  // add search logic
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredTasks, setFilteredTasks] = useState([]);
+  const setResults = (results) => {
+    setTasks(results);
+    setFilteredTasks(results);
+  };
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Object.keys(filter).length) {
+        // use the local min/max vars, not the raw priceRange array
+        fetchFilteredBookings({
+          minPrice,
+          maxPrice,
+          subcategory,
+          minDuration,
+          maxDuration,
+        }).then(setResults);
+      } else {
+        fetchScheduledTasks().then(setResults);
+      }
+    }, []), // stringify so React re-runs whenever filters change
+  );
+
+
+ 
+
+
+
+  
 
   const showTask = ({ item }) => (
     <View style={style.card}>
@@ -319,7 +340,7 @@ useFocusEffect(
       <View style={style.container}>
         <View style={style.header}>
           <TouchableOpacity
-            onPress={() => navigation.navigate('Business Home Page')}
+            onPress={() => navigation.navigate("Business Home Page")}
             style={style.backButton}
           >
             <Ionicons
@@ -344,7 +365,11 @@ useFocusEffect(
               handleSearch(text);
             }}
           />
-          <TouchableOpacity onPress={() => navigation.navigate("FilterScreen", {urgency: false})}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate("FilterScreen", { urgency: false })
+            }
+          >
             <Feather name="filter" size={20} color={colours.darkest_coco} />
           </TouchableOpacity>
         </View>
