@@ -164,9 +164,6 @@ export default function UserBooking() {
             time: Yup.string().required("Time is required"),
           })
         ),
-        state: Yup.string()
-          .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
-          .required("State is required"),
         postcode: Yup.string()
           .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
           .test("valid-postcode", "Invalid Singapore postcode", (value) =>
