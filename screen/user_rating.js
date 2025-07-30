@@ -60,7 +60,7 @@ export default function UserRating() {
       }
       const workerData = workerSnap.data();
       console.log("workerData:", workerData);
-      console.log("otalRating:", workerData.totalRating);
+      console.log("totalRating:", workerData.totalRating);
       console.log("ratingCount:", workerData.ratingCount);
       const newReview = {
         orderId,
