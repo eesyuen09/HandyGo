@@ -13,15 +13,17 @@ import { useRoute, useNavigation } from "@react-navigation/native";
 import { doc, updateDoc, collection, getDoc, addDoc } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { styles } from "../components/style_u_rating";
+import { getAuth } from "firebase/auth";
 
 export default function UserRating() {
+  auth = getAuth();
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const route = useRoute();
   const navigation = useNavigation();
-  const { orderId, workerId, userId } = route.params || {};
+  const { orderId, workerId, userId, type } = route.params || {};
 
   const handleRatingSubmit = async () => {
     if (rating === 0) {
@@ -35,6 +37,14 @@ export default function UserRating() {
       //Update booking document
       console.log({ orderId, workerId, userId, rating, review });
       const bookingRef = doc(db, "booking", orderId);
+
+      const bookingSnap = await getDoc(bookingRef);
+      if (!bookingSnap.exists()) {
+        console.error("Booking not found:", orderId);
+        return;
+      }
+      console.log("Booking data:", bookingSnap.data());
+      console.log("auth UID:", auth.currentUser?.uid);
       await updateDoc(bookingRef, {
         rating,
         review,
@@ -49,15 +59,20 @@ export default function UserRating() {
         return;
       }
       const workerData = workerSnap.data();
+      console.log("workerData:", workerData);
+      console.log("totalRating:", workerData.totalRating);
+      console.log("ratingCount:", workerData.ratingCount);
       const newReview = {
         orderId,
         userId,
         rating,
         review,
+        type: type || " ",
         timestamp: new Date(),
       };
 
       const reviewsRef = collection(db, "users", workerId, "reviews");
+      console.log("reviewsRef.path:", reviewsRef.path);
       await addDoc(reviewsRef, newReview);
 
       const updatedTotal = (workerData.totalRating || 0) + rating;
@@ -65,6 +80,7 @@ export default function UserRating() {
       const updatedAverage = updatedTotal / updatedCount;
 
       await updateDoc(workerRef, {
+        totalRating: updatedTotal,
         averageRating: updatedAverage,
         ratingCount: updatedCount,
       });

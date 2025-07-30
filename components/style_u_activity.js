@@ -222,4 +222,10 @@ export const style = StyleSheet.create({
     alignSelf: "center",
     paddingVertical: 8,
   },
+  retryRow: {
+    marginTop: 4,
+    justifyContent: "flex-end",
+    alignItems: "flex-end",
+    paddingRight: 20,
+  },
 });

@@ -80,6 +80,12 @@ export default function UserBooking() {
     subcategory,
     description,
     price,
+    duration,
+    postcode,
+    address,
+    gender,
+    rating,
+    notes,
     questions = [],
   } = route.params || {};
   console.log("Route params:", route.params);
@@ -137,15 +143,14 @@ export default function UserBooking() {
         type: subcategory,
         urgency: false,
         isCompleted: false,
-        duration: null,
+        duration: duration || null,
         availability: [{ date: "", time: "" }],
-        // state: "",
-        postcode: "",
-        address: "",
-        gender: "",
-        rating: "",
+        postcode: postcode || "",
+        address: address || "",
+        gender: gender || "",
+        rating: rating || "",
         notif: false,
-        notes: "",
+        notes: notes || "",
         status: "pending",
         ...dynamicInitial,
       }}
@@ -159,9 +164,6 @@ export default function UserBooking() {
             time: Yup.string().required("Time is required"),
           }),
         ),
-        // state: Yup.string()
-        //   .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
-        //   .required("State is required"),
         postcode: Yup.string()
           .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
           .test("valid-postcode", "Invalid Singapore postcode", (value) =>
@@ -684,32 +686,6 @@ export default function UserBooking() {
               {/* Location */}
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Location</Text>
-
-                {/* State
-                <View style={styles.inputRow}>
-                  <View style={styles.header}>
-                    <Entypo name="location-pin" size={20} color="#704F38" />
-                    <Text style={styles.input}>State</Text>
-                  </View>
-
-                  <TextInput
-                    value={values.state}
-                    onChangeText={handleChange("state")}
-                    onBlur={handleBlur("state")}
-                    style={{
-                      fontFamily: "Sora",
-                      fontSize: 14,
-                      color: "#704F38",
-                      padding: 10,
-                      marginLeft: 10,
-                    }}
-                    placeholder="Enter your state"
-                  />
-
-                  {touched.state && errors.state && (
-                    <Text style={styles.error}>{errors.state}</Text>
-                  )}
-                </View> */}
 
                 {/* Postcode*/}
                 <View style={styles.inputRow}>
