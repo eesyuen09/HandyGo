@@ -24,7 +24,6 @@ import {
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../firebaseConfig";
-import { getFirestore } from "firebase/firestore";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -103,7 +102,7 @@ export default function Login({ navigation }) {
                 const userCredential = await signInWithEmailAndPassword(
                   auth,
                   email,
-                  password
+                  password,
                 );
                 const user = userCredential.user;
                 await user.reload();
@@ -111,7 +110,7 @@ export default function Login({ navigation }) {
                 if (!user.emailVerified) {
                   Alert.alert(
                     "Email Not Verified",
-                    "Please verify your email before logging in."
+                    "Please verify your email before logging in.",
                   );
                   return;
                 }

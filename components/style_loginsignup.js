@@ -132,12 +132,6 @@ export const globalStyles = StyleSheet.create({
     fontFamily: "Inter",
   },
 
-  rightIconRow: {
-    marginLeft: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
   // Google Sign In Button Content
   googleButtonContent: {
     flexDirection: "row",

@@ -12,11 +12,6 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
-    "fonts": {
-      "Sora-Regular": "./assets/fonts/Sora-VariableFont_wght.ttf",
-      "Inter-Regular": "./assets/fonts/Inter-Regular.ttf"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.eesyuen.HandyGo",

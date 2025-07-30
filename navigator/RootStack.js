@@ -1,13 +1,10 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  SafeAreaView,
-  Platform,
-  StatusBar,
-  TouchableOpacity,
-} from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebaseConfig";
+import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import {
   FontAwesome5,
@@ -21,7 +18,7 @@ import {
 } from "@expo/vector-icons";
 
 import { colours } from "../components/style_loginsignup";
-import { useNavigation } from "@react-navigation/native";
+
 const Stack = createNativeStackNavigator();
 
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
@@ -43,8 +40,7 @@ import ForgotPassword from "../screen/forgotpassword";
 import Biz_ordersummary from "../screen/biz_ordersummary";
 import UserTabs from "./userTabs";
 import WorkerTabs from "./workerTabs";
-import UserRating from "../screen/user_rating";
-import FilterScreen from "../screen/biz_servicefilter";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -72,7 +68,7 @@ const RootStack = () => {
           <>
             <Stack.Screen name="Login" component={Login} />
             <Stack.Screen name="Signup" component={Signup} />
-
+            
           </>
         ) : role === "business" ? (
           <Stack.Screen name="workerTabs" component={workerTabs} />
@@ -91,44 +87,16 @@ const RootStack = () => {
           name="UserBooking"
           component={UserBooking}
           options={{
-            header: () => {
-              const navigation = useNavigation();
-              return (
-                <SafeAreaView
-                  style={{
-                    backgroundColor: "white",
-                    paddingTop:
-                      Platform.OS === "android" ? StatusBar.currentHeight : 0,
-                  }}
-                >
-                  <View
-                    style={{
-                      height: 60,
-                      paddingHorizontal: 16,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      borderBottomWidth: 1,
-                      borderBottomColor: "#eee",
-                    }}
-                  >
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                      <Ionicons name="arrow-back" size={24} color="#704F38" />
-                    </TouchableOpacity>
-                    <Text
-                      style={{
-                        fontSize: 18,
-                        fontFamily: "Sora",
-                        color: "#704F38",
-                      }}
-                    >
-                      Booking
-                    </Text>
-                    <View style={{ width: 24 }} />{" "}
-                    {/* Spacer to balance layout */}
-                  </View>
-                </SafeAreaView>
-              );
+            headerTitle: "Booking",
+            headerTransparent: false,
+            headerStyle: {
+              backgroundColor: "white",
+            },
+            headerTintColor: main_coco,
+            headerTitleStyle: {
+              fontFamily: "Sora",
+              fontSize: 18,
+              color: darkest_coco,
             },
           }}
         />
@@ -149,7 +117,6 @@ const RootStack = () => {
             },
           }}
         />
-        <Stack.Screen name="UserRating" component={UserRating} />
         <Stack.Screen name="Business Home Page" component={Biz_homepage} />
         <Stack.Screen name="Add Details" component={Biz_adddetails} />
         <Stack.Screen name="Business Urgent Task" component={Biz_urgentTask} />
@@ -157,7 +124,6 @@ const RootStack = () => {
           name="Business Scheduled Task"
           component={Biz_scheduledTask}
         />
-        <Stack.Screen name="FilterScreen" component={FilterScreen} />
         <Stack.Screen name="Forgot Password" component={ForgotPassword} />
         <Stack.Screen name="Order Summary" component={Biz_ordersummary} />
       </Stack.Navigator>
