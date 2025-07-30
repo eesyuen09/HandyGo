@@ -18,17 +18,59 @@ import MultiSlider from "@ptomasroos/react-native-multi-slider";
 import { max } from "moment";
 import { useRoute } from "@react-navigation/native";
 
+export function useToggleSubcategory(initial = []) {
+  const [selectedSubcategory, setSelectedSubcategory] = useState(initial);
+
+  const toggleSubcategory = useCallback((item) => {
+    setSelectedSubcategory((prev) =>
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
+    );
+  }, []);
+
+  return { selectedSubcategory, toggleSubcategory, setSelectedSubcategory };
+}
+export function doApplyFilters(
+  navigation,
+  urgency,
+  selectedSubcategory,
+  minPrice,
+  maxPrice,
+  minDuration,
+  maxDuration,
+) {
+  const filter = {};
+
+  if (selectedSubcategory.length > 0) {
+    filter.subcategory = selectedSubcategory;
+  }
+  if (minPrice !== 0 || maxPrice !== 0) {
+    filter.priceRange = [minPrice, maxPrice];
+  }
+  if (minDuration !== 0 || maxDuration !== 0) {
+    filter.durationRange = [minDuration, maxDuration];
+  }
+
+  // now trigger the right screen
+  if (urgency) {
+    navigation.navigate("Business Urgent Task", { filter });
+  } else {
+    navigation.navigate("Business Scheduled Task", { filter });
+  }
+}
+
 export default function FilterScreen({ navigation }) {
   const route = useRoute();
   const { urgency } = route.params;
-  console.log(urgency);
+  //   console.log(urgency);
+  const { selectedSubcategory, toggleSubcategory, setSelectedSubcategory } =
+    useToggleSubcategory([]);
 
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [minDuration, setMinDuration] = useState(0);
   const [maxDuration, setMaxDuration] = useState(0);
   const [subcategory, setSubcategory] = useState([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState([]);
+  //   const [selectedSubcategory, setSelectedSubcategory] = useState([]);
   // const [orderByDate, setOrderByDate] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
@@ -60,14 +102,6 @@ export default function FilterScreen({ navigation }) {
     }, []),
   );
 
-  const toggleSubcategory = (item) => {
-    if (selectedSubcategory.includes(item)) {
-      setSelectedSubcategory((prev) => prev.filter((i) => i !== item));
-    } else {
-      setSelectedSubcategory((prev) => [...prev, item]);
-    }
-  };
-
   const renderSubcategory = ({ item }) => (
     <TouchableOpacity
       onPress={() => toggleSubcategory(item)}
@@ -85,28 +119,15 @@ export default function FilterScreen({ navigation }) {
   );
 
   const applyFilters = () => {
-    const filter = {};
-    if (selectedSubcategory.length > 0) {
-      filter.subcategory = selectedSubcategory;
-    }
-
-    if (minPrice != 0 || maxPrice != 0) {
-      filter.priceRange = [minPrice, maxPrice];
-    }
-
-    if (minDuration != 0 || maxDuration != 0) {
-      filter.durationRange = [minDuration, maxDuration];
-    }
-
-    // if (orderByDate) {
-    //     filter.orderByDate = orderByDate;
-    // }
-    if (urgency) {
-      navigation.navigate("Business Urgent Task", { filter });
-    } else {
-      navigation.navigate("Business Scheduled Task", { filter });
-    }
-    console.log(filter);
+    doApplyFilters(
+      navigation,
+      urgency,
+      selectedSubcategory,
+      minPrice,
+      maxPrice,
+      minDuration,
+      maxDuration,
+    );
   };
 
   return (

@@ -38,190 +38,185 @@ import { useRoute } from "@react-navigation/native";
 import { db } from "../firebaseConfig";
 import { debounce } from "lodash";
 
-
-
 async function fetchFilteredBookings({
-    minPrice,
-    maxPrice,
-    subcategory = [],
-    minDuration,
-    maxDuration,
-  }) {
-    const baseFilters = [
-      where("status", "==", "pending"),
-      where("urgency", "==", false),
-    ];
+  minPrice,
+  maxPrice,
+  subcategory = [],
+  minDuration,
+  maxDuration,
+}) {
+  const baseFilters = [
+    where("status", "==", "pending"),
+    where("urgency", "==", false),
+  ];
 
-    if (subcategory.length > 0) {
-      baseFilters.push(where("type", "in", subcategory));
-    }
+  if (subcategory.length > 0) {
+    baseFilters.push(where("type", "in", subcategory));
+  }
 
-    // 1) Query A: price range
-    const priceQ = query(
-      collection(db, "booking"),
-      ...baseFilters,
-      where("price", ">=", minPrice),
-      where("price", "<=", maxPrice),
-      orderBy("price", "desc"),
-    );
+  // 1) Query A: price range
+  const priceQ = query(
+    collection(db, "booking"),
+    ...baseFilters,
+    where("price", ">=", minPrice),
+    where("price", "<=", maxPrice),
+    orderBy("price", "desc"),
+  );
 
-    // 2) Query B: duration range
-    const durationQ = query(
-      collection(db, "booking"),
-      ...baseFilters,
-      where("duration", ">=", minDuration),
-      where("duration", "<=", maxDuration),
-      orderBy("duration", "asc"),
-    );
+  // 2) Query B: duration range
+  const durationQ = query(
+    collection(db, "booking"),
+    ...baseFilters,
+    where("duration", ">=", minDuration),
+    where("duration", "<=", maxDuration),
+    orderBy("duration", "asc"),
+  );
 
-    try {
-      // Run both in parallel
-      const [priceSnap, durationSnap] = await Promise.all([
-        getDocs(priceQ),
-        getDocs(durationQ),
-      ]);
+  try {
+    // Run both in parallel
+    const [priceSnap, durationSnap] = await Promise.all([
+      getDocs(priceQ),
+      getDocs(durationQ),
+    ]);
 
-      // Build set of IDs matching price
-      const priceIds = new Set(priceSnap.docs.map((d) => d.id));
+    // Build set of IDs matching price
+    const priceIds = new Set(priceSnap.docs.map((d) => d.id));
 
-      // Intersect: only keep duration docs whose ID is in priceIds
-      const intersected = durationSnap.docs
-        .filter((d) => priceIds.has(d.id))
-        .map((docSnap) => docSnap.data());
+    // Intersect: only keep duration docs whose ID is in priceIds
+    const intersected = durationSnap.docs
+      .filter((d) => priceIds.has(d.id))
+      .map((docSnap) => docSnap.data());
 
-      // Format for your UI
-      return intersected.map((data) => {
-        const iconData = getIcon(data.serviceType);
-        return {
-          id: data.orderID || data.id,
-          category: data.type || "Unknown",
-          time: `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
-          location: `${data.state || ""}, ${data.postcode || ""}`,
-          price: data.price || "N/A",
-          icon: iconData.name,
-          iconFamily: iconData.family,
-        };
-      });
-    } catch (error) {
-      console.error("Error fetching tasks:", error);
-      Alert.alert("Error", "Failed to load tasks");
-      return [];
-    }
-  };
-
- const fetchScheduledTasks = async () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
-    if (!userSnap.exists()) return [];
-
-    const userData = userSnap.data();
-    const workerCategories = userData.subcategory || [];
-
-    const q = query(
-      collection(db, "booking"),
-      where("status", "==", "pending"),
-      where("urgency", "==", false),
-    );
-    const querySnapshot = await getDocs(q);
-
-    const formatted = [];
-
-    querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      if (workerCategories.includes(data.type)) {
-        const iconData = getIcon(data.serviceType);
-        formatted.push({
-          id: data.orderID || docSnap.id,
-          category: data.type || "Unknown",
-          time: `${data.availability?.[0]?.date || "N/A"} | ${
-            data.availability?.[0]?.time || "N/A"
-          }`,
-          location: `${data.state || ""}, ${data.postcode || ""}`,
-          price: data.price || "35.99",
-          icon: iconData.name,
-          iconFamily: iconData.family,
-        });
-      }
+    // Format for your UI
+    return intersected.map((data) => {
+      const iconData = getIcon(data.serviceType);
+      return {
+        id: data.orderID || data.id,
+        category: data.type || "Unknown",
+        time: `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
+        location: `${data.state || ""}, ${data.postcode || ""}`,
+        price: data.price || "N/A",
+        icon: iconData.name,
+        iconFamily: iconData.family,
+      };
     });
-    return formatted;
-  };
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    Alert.alert("Error", "Failed to load tasks");
+    return [];
+  }
+}
 
+const fetchScheduledTasks = async () => {
+  const user = auth.currentUser;
+  if (!user) return;
 
-  function handleSearch(text) {
-    if (text.trim() === "") {
-      setFilteredTasks(tasks);
-      return;
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) return [];
+
+  const userData = userSnap.data();
+  const workerCategories = userData.subcategory || [];
+
+  const q = query(
+    collection(db, "booking"),
+    where("status", "==", "pending"),
+    where("urgency", "==", false),
+  );
+  const querySnapshot = await getDocs(q);
+
+  const formatted = [];
+
+  querySnapshot.forEach((docSnap) => {
+    const data = docSnap.data();
+    if (workerCategories.includes(data.type)) {
+      const iconData = getIcon(data.serviceType);
+      formatted.push({
+        id: data.orderID || docSnap.id,
+        category: data.type || "Unknown",
+        time: `${data.availability?.[0]?.date || "N/A"} | ${
+          data.availability?.[0]?.time || "N/A"
+        }`,
+        location: `${data.state || ""}, ${data.postcode || ""}`,
+        price: data.price || "35.99",
+        icon: iconData.name,
+        iconFamily: iconData.family,
+      });
     }
+  });
+  return formatted;
+};
 
-    const filtered = tasks.filter(
-      (item) =>
-        item.category.toLowerCase().includes(text.toLowerCase()) ||
-        item.location.toLowerCase().includes(text.toLowerCase()) ||
-        item.time.toLowerCase().includes(text.toLowerCase()),
-    );
-    setFilteredTasks(filtered);
-  };
+function handleSearch(text) {
+  if (text.trim() === "") {
+    setFilteredTasks(tasks);
+    return;
+  }
+
+  const filtered = tasks.filter(
+    (item) =>
+      item.category.toLowerCase().includes(text.toLowerCase()) ||
+      item.location.toLowerCase().includes(text.toLowerCase()) ||
+      item.time.toLowerCase().includes(text.toLowerCase()),
+  );
+  setFilteredTasks(filtered);
+}
 
 const getIcon = (serviceType) => {
-    switch (serviceType) {
-      case "Cleaning":
-        return { name: "cleaning-services", family: "MaterialIcons" };
-      case "Repair":
-        return { name: "tool", family: "Feather" };
-      case "Maintenance":
-        return { name: "hands-holding", family: "FontAwesome6" };
-      case "Moving":
-        return { name: "truck-moving", family: "FontAwesome5" };
-      case "Outdoor Services":
-        return { name: "tree", family: "FontAwesome5" };
-      default:
-        return { name: "wrench", family: "MaterialCommunityIcons" };
-    }
-  };
-  const renderIcon = (iconName, iconFamily, color, size) => {
-    switch (iconFamily) {
-      case "MaterialCommunityIcons":
-        return (
-          <MaterialCommunityIcons name={iconName} size={size} color={color} />
-        );
-      case "MaterialIcons":
-        return <MaterialIcons name={iconName} size={size} color={color} />;
-      case "FontAwesome5":
-        return <FontAwesome5 name={iconName} size={size} color={color} />;
-      case "FontAwesome6":
-        return <FontAwesome6 name={iconName} size={size} color={color} />;
-      case "Feather":
-        return <Feather name={iconName} size={size} color={color} />;
-      case "Ionicons":
-        return <Ionicons name={iconName} size={size} color={color} />;
-      default:
-        return <Feather name="alert-circle" size={size} color={color} />;
-    }
-  };
+  switch (serviceType) {
+    case "Cleaning":
+      return { name: "cleaning-services", family: "MaterialIcons" };
+    case "Repair":
+      return { name: "tool", family: "Feather" };
+    case "Maintenance":
+      return { name: "hands-holding", family: "FontAwesome6" };
+    case "Moving":
+      return { name: "truck-moving", family: "FontAwesome5" };
+    case "Outdoor Services":
+      return { name: "tree", family: "FontAwesome5" };
+    default:
+      return { name: "wrench", family: "MaterialCommunityIcons" };
+  }
+};
+const renderIcon = (iconName, iconFamily, color, size) => {
+  switch (iconFamily) {
+    case "MaterialCommunityIcons":
+      return (
+        <MaterialCommunityIcons name={iconName} size={size} color={color} />
+      );
+    case "MaterialIcons":
+      return <MaterialIcons name={iconName} size={size} color={color} />;
+    case "FontAwesome5":
+      return <FontAwesome5 name={iconName} size={size} color={color} />;
+    case "FontAwesome6":
+      return <FontAwesome6 name={iconName} size={size} color={color} />;
+    case "Feather":
+      return <Feather name={iconName} size={size} color={color} />;
+    case "Ionicons":
+      return <Ionicons name={iconName} size={size} color={color} />;
+    default:
+      return <Feather name="alert-circle" size={size} color={color} />;
+  }
+};
 
-
-export { fetchFilteredBookings, fetchScheduledTasks, handleSearch, getIcon, renderIcon };
-
-
-
-
-
-
-
+export {
+  fetchFilteredBookings,
+  fetchScheduledTasks,
+  handleSearch,
+  getIcon,
+  renderIcon,
+};
 
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
 
   const debouncedFetch = React.useCallback(
-  debounce((params) => {
-    fetchFilteredBookings(params).then(setResults);
-  }, 500),
-  [],
-); // Wait 500ms between calls
+    debounce((params) => {
+      fetchFilteredBookings(params).then(setResults);
+    }, 500),
+    [],
+  ); // Wait 500ms between calls
 
   useFocusEffect(
     React.useCallback(() => {
@@ -286,13 +281,6 @@ export default function UrgentTask() {
       }
     }, []), // stringify so React re-runs whenever filters change
   );
-
-
- 
-
-
-
-  
 
   const showTask = ({ item }) => (
     <View style={style.card}>
