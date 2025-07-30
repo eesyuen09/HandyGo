@@ -24,17 +24,16 @@ jest.mock("../../firebaseConfig", () => ({
 
 // Native and component mocks
 jest.mock("expo-status-bar", () => ({ StatusBar: () => null }));
-jest.mock("expo-constants", () => ({ manifest: { scheme: "app" } }));
 jest.mock("@expo/vector-icons", () => {
   const React = require("react");
   const { Text } = require("react-native");
   const make = (name) => (props) => React.createElement(Text, {}, name);
   return { Octicons: make("Octicons"), Ionicons: make("Ionicons") };
 });
-jest.mock("../../components/KeyboardAvoidingWrapper", () => {
-  const React = require("react");
-  return ({ children }) => React.createElement(">{children}", {}, children);
-});
+// jest.mock("../../components/KeyboardAvoidingWrapper", () => {
+//   const React = require("react");
+//   return ({ children }) => React.createElement(">{children}", {}, children);
+// });
 jest.mock("@react-native-community/datetimepicker", () => {
   const React = require("react");
   return (props) => {
