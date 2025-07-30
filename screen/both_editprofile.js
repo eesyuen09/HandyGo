@@ -35,9 +35,7 @@ export default function EditProfile() {
   const [subcategory, setSubcategory] = useState([]);
   const [showPickerIndex, setShowPickerIndex] = useState(null);
   const [show, setShow] = useState(false);
-
-
-    const handleSignOut = async () => {
+  const handleSignOut = async () => {
       try {
         await signOut(auth);
         // Replace the whole stack so back-button can’t take them back in
@@ -48,11 +46,6 @@ export default function EditProfile() {
       }
     }
     ;
-
-
-  
-
-
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -72,7 +65,7 @@ export default function EditProfile() {
               setSubcategory(
                 Array.isArray(data.subcategory)
                   ? data.subcategory.filter((s) => s.trim() !== "")
-                  : []
+                  : [],
               );
             }
           }
@@ -118,10 +111,10 @@ export default function EditProfile() {
 
   const renderCategoryBlock = (cat, index) => {
     //cat is the current category name, index is the index of this category in the category array
-    
+
     const selectedCategory = services_categories.find(
-      (c) => c.title === category[index]
-    );// find full category obj(cat+ subcat)
+      (c) => c.title === category[index],
+    ); // find full category obj(cat+ subcat)
 
     return (
       <View key={index} style={style.inputGroup}>
@@ -135,13 +128,13 @@ export default function EditProfile() {
             label: catObj.title,
             value: catObj.title,
           }))}
-          setOpen={(open) => setShowPickerIndex(open ? index: null)}
+          setOpen={(open) => setShowPickerIndex(open ? index : null)}
           setValue={(callback) => {
             const selectedValue = callback(category[index]);
             updateTitle(index, selectedValue); // update category[index]
-        }}  
+          }}
           setItems={() => {}}
-          placeholder= "Select category"
+          placeholder="Select category"
           zIndex={1000 - index}
           listMode="SCROLLVIEW"
         />
@@ -157,7 +150,7 @@ export default function EditProfile() {
                   flexDirection: "row",
                   alignItems: "center",
                   marginVertical: 6,
-                  alignSelf: 'flex-start',
+                  alignSelf: "flex-start",
                 }}
               >
                 <View
@@ -172,7 +165,7 @@ export default function EditProfile() {
                       : "transparent",
                   }}
                 />
-                <Text style = {{textAlign: 'left'}}>{subtitle}</Text>
+                <Text style={{ textAlign: "left" }}>{subtitle}</Text>
               </TouchableOpacity>
             ))}
           </>
@@ -185,10 +178,8 @@ export default function EditProfile() {
     const user = auth.currentUser;
     if (!user) return;
 
-
     const docRef = doc(db, "users", user.uid);
     const form = role === "worker" ? workerForm : clientForm;
-
 
     // Attach selected categories and subcategories
     if (role === "worker") {
@@ -196,7 +187,13 @@ export default function EditProfile() {
       form.subcategory = subcategory;
 
       // validation check
-      const requiredFields = ["contact", "address", "NRIC", "bankNumber", 'fullName'];
+      const requiredFields = [
+        "contact",
+        "address",
+        "NRIC",
+        "bankNumber",
+        "fullName",
+      ];
       for (let field of requiredFields) {
         if (!form[field]) {
           Alert.alert("Error", `Please fill in your ${field}`);
@@ -205,42 +202,50 @@ export default function EditProfile() {
       }
       //format check
       if (/[a-zA-Z]/.test(form.contact)) {
-      Alert.alert("Invalid Contact", "Contact number must not contain letters.");
-      return;
-    }
+        Alert.alert(
+          "Invalid Contact",
+          "Contact number must not contain letters.",
+        );
+        return;
+      }
 
-    if (!/^[a-zA-Z0-9]+$/.test(form.NRIC)) {
-      Alert.alert("Invalid NRIC/Passport", "Only letters and numbers allowed.");
-      return;
-    }
+      if (!/^[a-zA-Z0-9]+$/.test(form.NRIC)) {
+        Alert.alert(
+          "Invalid NRIC/Passport",
+          "Only letters and numbers allowed.",
+        );
+        return;
+      }
 
-    if (/[a-zA-Z]/.test(form.bankNumber)) {
-      Alert.alert("Invalid Bank Number", "Bank number must contain digits only.");
-      return;
-    }
+      if (/[a-zA-Z]/.test(form.bankNumber)) {
+        Alert.alert(
+          "Invalid Bank Number",
+          "Bank number must contain digits only.",
+        );
+        return;
+      }
 
-    if (!category.length || !subcategory.length) {
-      Alert.alert("Error", "Please select at least one category and one subcategory.");
-      return;
-    }
-  }else{
-    const requiredFields = ['dob','fullName']
-    for (let field of requiredFields) {
+      if (!category.length || !subcategory.length) {
+        Alert.alert(
+          "Error",
+          "Please select at least one category and one subcategory.",
+        );
+        return;
+      }
+    } else {
+      const requiredFields = ["dob", "fullName"];
+      for (let field of requiredFields) {
         if (!form[field]) {
           Alert.alert("Error", `Please fill in your ${field}`);
           return;
         }
       }
-  }
-
-
-
-    
+    }
 
     try {
       await updateDoc(docRef, form);
       console.log("Saved changes:", form);
-      Alert.alert('Successfully Save Changes');
+      Alert.alert("Successfully Save Changes");
     } catch (error) {
       console.error("Error updating document:", error);
     }
@@ -284,16 +289,20 @@ export default function EditProfile() {
           <View key={field.key} style={style.inputGroup}>
             <Text style={style.inputLabel}>{field.label}</Text>
             <View style={style.inputWrapper}>
-              {field.key === 'dob' ? (
+              {field.key === "dob" ? (
                 <>
                   <TouchableOpacity onPress={() => setShow(true)}>
                     <TextInput
-                      style = {style.textInput}
-                      value = {form.dob ? new Date(form[field.key]).toISOString().slice(0, 10): ''}
+                      style={style.textInput}
+                      value={
+                        form.dob
+                          ? new Date(form[field.key]).toISOString().slice(0, 10)
+                          : ""
+                      }
                       placeholder={field.label}
-                      editable ={false}
+                      editable={false}
                       pointerEvents="none"
-                      />
+                    />
                   </TouchableOpacity>
                   {show && (
                     <DateTimePicker
@@ -304,26 +313,23 @@ export default function EditProfile() {
                         setShow(false);
                         if (selectedDate) {
                           handleChange("dob", selectedDate.toISOString());
-                }
-              }}
-              />
-            )}
-
-                 
+                        }
+                      }}
+                    />
+                  )}
                 </>
-              
-          ):(
-              <TextInput
-                style={[style.textInput, field.multiline && style.textArea]}            
-                value= {form[field.key]}
-                onChangeText={(val) => handleChange(field.key, val)}
-                editable={field.editable !== false}
-                secureTextEntry={field.secure || false}
-                multiline={field.multiline || false}
-                placeholder={field.label}
-                placeholderTextColor="#888"
-              />
-          )}
+              ) : (
+                <TextInput
+                  style={[style.textInput, field.multiline && style.textArea]}
+                  value={form[field.key]}
+                  onChangeText={(val) => handleChange(field.key, val)}
+                  editable={field.editable !== false}
+                  secureTextEntry={field.secure || false}
+                  multiline={field.multiline || false}
+                  placeholder={field.label}
+                  placeholderTextColor="#888"
+                />
+              )}
               <Ionicons
                 name="create-outline"
                 size={20}
@@ -336,52 +342,53 @@ export default function EditProfile() {
 
         {/* Category & Subcategory Blocks */}
         {role === "worker" &&
-          category.map((cat, index) =>
-            renderCategoryBlock(cat, index)
-          )}
+          category.map((cat, index) => renderCategoryBlock(cat, index))}
 
         {/* Add category button */}
         {role === "worker" && (
           <>
-          <TouchableOpacity
-            onPress={() => setCategory([...category, ""])}
-            style={[style.button, { marginVertical: 10 }]}
-          >
-            <Text style={style.buttonText}>+ Add Category</Text>
-          </TouchableOpacity>
-
-          {category.length > 0 && (
             <TouchableOpacity
-              onPress={() => {
-                const updated = [...category];
-                updated.pop(); // remove last category
-                setCategory(updated);
-
-                // clean up subcategories
-                setSubcategory((prev) =>
-                  prev.filter((sub) =>
-                    updated.some((cat) =>
-                      services_categories.find((c) => c.title === cat)?.subcategories.includes(sub)
-                    )
-                  )
-                );
-              }}
-              style={[style.button, { marginBottom: 20, backgroundColor: "#C94A4A" }]}
+              onPress={() => setCategory([...category, ""])}
+              style={[style.button, { marginVertical: 10 }]}
             >
-              <Text style={style.buttonText}>− Delete Category</Text>
+              <Text style={style.buttonText}>+ Add Category</Text>
             </TouchableOpacity>
-          )}
-          </>
 
-  
+            {category.length > 0 && (
+              <TouchableOpacity
+                onPress={() => {
+                  const updated = [...category];
+                  updated.pop(); // remove last category
+                  setCategory(updated);
+
+                  // clean up subcategories
+                  setSubcategory((prev) =>
+                    prev.filter((sub) =>
+                      updated.some((cat) =>
+                        services_categories
+                          .find((c) => c.title === cat)
+                          ?.subcategories.includes(sub),
+                      ),
+                    ),
+                  );
+                }}
+                style={[
+                  style.button,
+                  { marginBottom: 20, backgroundColor: "#C94A4A" },
+                ]}
+              >
+                <Text style={style.buttonText}>− Delete Category</Text>
+              </TouchableOpacity>
+            )}
+          </>
         )}
 
-         <TouchableOpacity
-            onPress={() => navigation.navigate("Forgot Password")}
-            style={style.button}
-          >
-            <Text style={style.buttonText}>Change Password</Text>
-          </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Forgot Password")}
+          style={style.button}
+        >
+          <Text style={style.buttonText}>Change Password</Text>
+        </TouchableOpacity>
 
         <TouchableOpacity style={style.button} onPress={handleSave}>
           <Text style={style.buttonText}>Save Changes</Text>

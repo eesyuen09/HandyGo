@@ -15,27 +15,123 @@ import { colours, style } from "../components/style_adddetails";
 import { useFonts } from "expo-font";
 
 //firebase storage
-import { updateDoc, doc, arrayRemove, arrayUnion } from "firebase/firestore";
+import { updateDoc, doc, getDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 //category import
-import { categoryMap } from "../constants/categorymap";
 import { services_categories } from "../constants/category_constant";
 
 import { auth } from "../firebaseConfig";
 
-const uid = auth.currentUser?.uid;
-
-//keyboardavoidingwrapper\
+//keyboardavoidingwrapper
 import KeyboardAvoidingWrapper from "../components/KeyboardAvoidingWrapper";
-import { Octicons, Ionicons, FontAwesome } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 
+export function addEmptyCategory(setCategory, setSubcategory) {
+  setCategory((prev) => [...prev, ""]);
+  setSubcategory((prev) => [...prev, ""]);
+}
+
+export function deleteEmptyCategory(setCategory, setSubcategory) {
+  setCategory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+  setSubcategory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
+}
+
+export function updateTitle(setCategory, index, newTitle, setFieldValue) {
+  setCategory((prev) => {
+    const updated = [...prev];
+    if (updated.includes(newTitle) && updated[index] !== newTitle) {
+      Alert.alert("Category already selected.");
+      return updated;
+    }
+    updated[index] = newTitle;
+    setFieldValue("category", updated);
+    return updated;
+  });
+}
+
+export function addSubtitle(setSubcategory, subtitle, setFieldValue) {
+  setSubcategory((prev) => {
+    let updated;
+    if (prev.includes(subtitle)) {
+      updated = prev.filter((item) => item !== subtitle);
+    } else {
+      updated = [...prev, subtitle];
+    }
+    setFieldValue("subcategory", updated);
+    return updated;
+  });
+}
+
+export async function handleBusinessDetailsSubmit(values) {
+  const navigation = useNavigation();
+  const user = auth.currentUser;
+  if (!user) {
+    Alert.alert("Error", "User not logged in");
+    return;
+  }
+  const uid = user.uid;
+  const {
+    contact,
+    address,
+    NRIC,
+    bankName,
+    bankNumber,
+    category,
+    subcategory,
+    introduction,
+  } = values;
+  if (!contact || !address || !NRIC || !bankName || !bankNumber) {
+    Alert.alert("Error", "Please fill in all required fields.");
+    return;
+  }
+  if (/[a-zA-Z]/.test(contact)) {
+    Alert.alert("Invalid Contact", "Contact number must not contain letters.");
+    return;
+  }
+  if (!/^[a-zA-Z0-9]+$/.test(NRIC)) {
+    Alert.alert("Invalid NRIC/Passport", "Only letters and numbers allowed.");
+    return;
+  }
+  if (/[a-zA-Z]/.test(bankNumber)) {
+    Alert.alert("Invalid Bank Number", "Bank number must contain digits only.");
+    return;
+  }
+  if (!category.length || !subcategory.length) {
+    Alert.alert(
+      "Error",
+      "Please select at least one category and subcategory.",
+    );
+    return;
+  }
+  await updateDoc(doc(db, "users", uid), {
+    contact,
+    address,
+    NRIC,
+    bankName,
+    bankNumber,
+    category,
+    subcategory,
+    introduction,
+  });
+  for (const cat of category) {
+    await updateDoc(doc(db, "categoryToWorker", cat), {
+      workers: arrayUnion(uid),
+    });
+  }
+  for (const sub of subcategory) {
+    await updateDoc(doc(db, "subcategoryToWorker", sub), {
+      workers: arrayUnion(uid),
+    });
+  }
+  alert("Data saved successfully!");
+  navigation.navigate("Business Home Page");
+}
+
 // route: contain parameters passed from the previous screen
 export default function Moredetails({ navigation }) {
-  const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
-    colours;
+  const { darkest_coco } = colours;
 
   useEffect(() => {
     const checkIfDetailsExist = async () => {
@@ -83,7 +179,6 @@ export default function Moredetails({ navigation }) {
       bankNumber,
       category,
       subcategory,
-      introduction,
     } = values;
 
     {
@@ -161,12 +256,9 @@ export default function Moredetails({ navigation }) {
     }
   };
 
-  const [step, setStep] = useState("title");
   const [showPickerIndex, setShowPickerIndex] = useState(null);
-
   const [category, setCategory] = useState([]);
-  const [subcategory, setSubcategory] = useState([]);
-  const [selectedBank, setSelectedBank] = useState("");
+  const [, setSubcategory] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
@@ -175,59 +267,12 @@ export default function Moredetails({ navigation }) {
   if (!fontsLoaded) {
     return null;
   }
-  //function for categories
-  function addEmptyCategory() {
-    setCategory((prev) => [...prev, ""]);
-    setSubcategory((prev) => [...prev, ""]);
-  }
-
-  function deleteEmptyCategory() {
-    setCategory((prev) =>
-      prev.length > 1 ? prev.slice(0, prev.length - 1) : prev,
-    );
-    setSubcategory((prev) =>
-      prev.length > 1 ? prev.slice(0, prev.length - 1) : prev,
-    );
-  }
-  function updateTitle(index, newTitle, setFieldValue) {
-    setCategory((prev) => {
-      const updated = [...prev];
-      if (updated.includes(newTitle) && updated[index] !== newTitle) {
-        Alert.alert("Category already selected.");
-        return updated;
-      } else {
-        updated[index] = newTitle; // replace selected one
-        setFieldValue("category", updated);
-        return updated;
-      }
-    });
-  }
-  function addSubtitle(subtitle, setFieldValue) {
-    setSubcategory((prev) => {
-      let updated;
-
-      if (prev.includes(subtitle)) {
-        // remove subtitle
-        updated = prev.filter((item) => item !== subtitle);
-      } else {
-        if (prev.length === 0) {
-          updated = [subtitle];
-        } else {
-          // add subtitle
-          updated = [...prev, subtitle];
-        }
-      }
-
-      setFieldValue("subcategory", updated);
-      return updated;
-    });
-  }
   // cat = titles
   function renderCategoryBlock(cat, index, setFieldValue, subcategory) {
     const selectedCategory = services_categories.find((c) => c.title === cat);
 
     return (
-      <View key={cat} style={style.inputGroup}>
+      <View key={`category-${index}`} style={style.inputGroup}>
         <Text style={style.inputLabel}>Service Category</Text>
         <TouchableOpacity
           style={style.dropdown}
@@ -241,8 +286,8 @@ export default function Moredetails({ navigation }) {
           <Picker
             selectedValue={cat}
             onValueChange={(value) => {
-              updateTitle(index, value, setFieldValue);
-              setShowPickerIndex(null); // hide picker after selection
+              updateTitle(setCategory, index, value, setFieldValue);
+              setShowPickerIndex(null);
             }}
           >
             <Picker.Item label="Select..." value="" />
@@ -260,13 +305,15 @@ export default function Moredetails({ navigation }) {
         {selectedCategory && (
           <>
             <Text style={{ marginTop: 10 }}>Select subcategories</Text>
-            {selectedCategory.subcategories.map((subtitle) => (
+            {selectedCategory.subcategories.map((subObj) => (
               <TouchableOpacity
-                key={subtitle}
-                onPress={() => addSubtitle(subtitle, setFieldValue)}
+                key={subObj.label}
+                onPress={() =>
+                  addSubtitle(setSubcategory, subObj.label, setFieldValue)
+                }
                 style={{
                   flexDirection: "row",
-                  alignItems: "Center",
+                  alignItems: "center",
                   marginVertical: 6,
                 }}
               >
@@ -277,12 +324,12 @@ export default function Moredetails({ navigation }) {
                     borderWidth: 1,
                     borderRadius: 4,
                     marginRight: 10,
-                    backgroundColor: subcategory.includes(subtitle)
+                    backgroundColor: subcategory.includes(subObj.label)
                       ? "#9A5A3C"
                       : "transparent",
                   }}
                 />
-                <Text>{subtitle}</Text>
+                <Text>{subObj.label}</Text>
               </TouchableOpacity>
             ))}
           </>
@@ -428,13 +475,15 @@ export default function Moredetails({ navigation }) {
                   ),
                 )}
                 <TouchableOpacity
-                  onPress={addEmptyCategory}
+                  onPress={() => addEmptyCategory(setCategory, setSubcategory)}
                   style={style.add_delete_c}
                 >
                   <Text style={style.add_delete_t}>+ Add More Category</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  onPress={deleteEmptyCategory}
+                  onPress={() =>
+                    deleteEmptyCategory(setCategory, setSubcategory)
+                  }
                   style={style.add_delete_c}
                 >
                   <Text style={style.add_delete_t}>- Delete Category</Text>
