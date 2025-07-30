@@ -36,7 +36,7 @@ export const style = StyleSheet.create({
     marginBottom: 30,
   },
   sectionTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontFamily: "Sora",
     padding: 16,
     fontWeight: "bold",
@@ -44,7 +44,7 @@ export const style = StyleSheet.create({
     marginBottom: 10,
   },
   bigTitle: {
-    fontSize: 30,
+    fontSize: 34,
     fontFamily: "Sora",
     paddingLeft: 16,
     fontWeight: "bold",
@@ -83,7 +83,6 @@ export const style = StyleSheet.create({
   taskMeta: {
     flexDirection: "column",
     alignItems: "flex-end",
-    flex: 5,
     // gap: 15,
   },
   taskDetails: {
@@ -108,7 +107,7 @@ export const style = StyleSheet.create({
     alignItems: "center",
   },
   viewText: {
-    fontSize: 12,
+    fontSize: 14,
     color: colours.main_coco,
     fontFamily: "Sora",
     textDecorationLine: "underline",
@@ -131,7 +130,7 @@ export const style = StyleSheet.create({
     marginLeft: 10,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: "bold",
     color: colours.darkest_coco,
     fontFamily: "Sora",
@@ -176,8 +175,8 @@ export const style = StyleSheet.create({
     textAlign: "center",
   },
 
-  statusConfirmed: {
-    backgroundColor: "#CEEBD6",
+  statusScheduled: {
+    backgroundColor: "#B5EAC2",
   },
   statusPending: {
     backgroundColor: "#F8E4A1",
@@ -189,7 +188,7 @@ export const style = StyleSheet.create({
     backgroundColor: "#D1D1F7",
   },
   statusCancelled: {
-    backgroundColor: "#D2CFF2",
+    backgroundColor: "#E2E2E2",
   },
 
   textScheduled: {

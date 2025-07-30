@@ -138,7 +138,6 @@ export const styles = StyleSheet.create({
 
   input: {
     marginLeft: 10,
-    padding: 10,
     color: "#704F38",
     fontFamily: "Sora",
     fontSize: 14,

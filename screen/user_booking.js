@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
-  StyleSheet,
   Alert,
-  ActivityIndicator,
   Switch,
   KeyboardAvoidingView,
   Platform,
@@ -25,7 +23,7 @@ import {
   Feather,
   FontAwesome6,
 } from "@expo/vector-icons";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
 import { Formik, FieldArray } from "formik";
 import * as Yup from "yup";
@@ -34,8 +32,6 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { addDoc, collection, setDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db, app } from "../firebaseConfig";
-import { getPriceEstimate } from "../src/api/pricing.js";
-import { postcodes } from "../constants/postcodes.js";
 
 const handleBookingSubmit = (values) => {
   console.log("Booking submitted:", values);
@@ -56,54 +52,18 @@ const calculateEndTime = (startTime, duration) => {
   return end.toTimeString().slice(0, 5);
 };
 
-function bucketItemCount(count) {
-  if (count <= 1) {
-    return 1;
-  }
-  if (count <= 3) {
-    return 2;
-  } else {
-    return 3;
-  }
-}
-
-function bucketAreaSize(m2) {
-  if (m2 <= 20) return 1;
-  if (m2 <= 50) return 2;
-  return 3;
-}
-
 export default function UserBooking() {
   const route = useRoute();
-  const {
-    serviceType,
-    subcategory,
-    description,
-    price,
-    questions = [],
-  } = route.params || {};
-  console.log("Route params:", route.params);
+  const { serviceType, subcategory, description, price } = route.params || {};
   const icon = services_categories.find(
     (category) => category.title === serviceType,
   )?.icon;
   const bannerImage = services_categories.find(
     (category) => category.title === serviceType,
   )?.bannerImage;
-  const subcategories =
-    services_categories.find((category) => category.title === serviceType)
-      ?.subcategories || [];
-  const dynamicInitial = {
-    ...questions.reduce((acc, q) => {
-      acc[q.key] = 0;
-      return acc;
-    }, {}),
-  };
-  const [openStates, setOpenStates] = useState(
-    Object.keys(dynamicInitial).reduce((acc, key) => {
-      acc[key] = false;
-      return acc;
-    }, {}),
-  );
+  const subcategories = services_categories.find(
+    (category) => category.title === serviceType,
+  )?.subcategories;
   const [openUrgency, setOpenUrgency] = useState(false);
   const [openType, setOpenType] = useState(false);
   const [openDuration, setOpenDuration] = useState(false);
@@ -111,15 +71,7 @@ export default function UserBooking() {
   const [openRating, setOpenRating] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(false);
   const auth = getAuth(app);
-  const navigation = useNavigation();
-  const dynamicSchema = questions.reduce((schema, q) => {
-    schema[q.key] = Yup.number()
-      .min(1, `${q.prompt} is required`)
-      .required(`${q.prompt} is required`);
-    return schema;
-  }, {});
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -136,10 +88,9 @@ export default function UserBooking() {
         serviceType: serviceType,
         type: subcategory,
         urgency: false,
-        isCompleted: false,
-        duration: null,
+        duration: "",
         availability: [{ date: "", time: "" }],
-        // state: "",
+        state: "",
         postcode: "",
         address: "",
         gender: "",
@@ -147,32 +98,26 @@ export default function UserBooking() {
         notif: false,
         notes: "",
         status: "pending",
-        ...dynamicInitial,
       }}
       validationSchema={Yup.object({
         type: Yup.string().required("Type is required"),
         urgency: Yup.string().required("Urgency is required"),
-        duration: Yup.number().required("duration is required"),
+        duration: Yup.string().required("duration is required"),
         availability: Yup.array().of(
           Yup.object().shape({
             date: Yup.string().required("Date is required"),
             time: Yup.string().required("Time is required"),
           }),
         ),
-        // state: Yup.string()
-        //   .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
-        //   .required("State is required"),
+        state: Yup.string()
+          .matches(/^[A-Za-z\s]+$/, "State can only contain letters")
+          .required("State is required"),
         postcode: Yup.string()
-          .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
-          .test("valid-postcode", "Invalid Singapore postcode", (value) =>
-            postcodes.some((p) => p.postal_code.toString() === value.trim()),
-          )
+          .matches(/^[0-9]+$/, "Postcode can only contain numbers")
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
-        ...dynamicSchema,
       })}
       onSubmit={async (values, { resetForm }) => {
-        console.log("Submitting booking with values:", values);
         const {
           type,
           urgency,
@@ -186,96 +131,24 @@ export default function UserBooking() {
           notif,
           notes,
           status,
-          isCompleted,
         } = values;
 
         try {
-          // create an array for scores
-          const scores = [];
-
-          // collect scores from dropdowns
-          questions.forEach((q) => {
-            if (
-              ["severity", "access", "sizeTier", "floors", "distance"].includes(
-                q.key,
-              )
-            ) {
-              scores.push(values[q.key]);
-            }
-          });
-
-          if (values.itemCount != null) {
-            scores.push(bucketItemCount(values.itemCount));
-          }
-          if (values.areaSize != null) {
-            scores.push(bucketAreaSize(values.areaSize));
-          }
-
-          const avgSeverity = scores.length
-            ? scores.reduce((sum, s) => sum + s, 0) / scores.length
-            : 0;
-
-          const { date, time } = values.availability[0];
-
-          const now = new Date();
-          const [h, m] = time.split(":").map(Number);
-          const target = new Date(`${date}T${time}:00`);
-          let lead_time_hours = (target - now) / (1000 * 60 * 60);
-          if (lead_time_hours < 0) lead_time_hours = 0;
-
-          // Build the payload for the pricing API
-          const payload = {
-            service_type: values.serviceType,
-            duration_hours: values.duration,
-            lead_time_hours,
-            postcode: values.postcode,
-            severity_score: avgSeverity,
-            gender_pref: values.gender != "" ? 1 : 0,
-            min_rating_required: isNaN(parseFloat(values.rating))
-              ? 0
-              : parseFloat(values.rating),
-          };
-
-          console.log("Payload for pricing API:", payload);
-
-          setLoading(true);
-
-          const predicted_price = await getPriceEstimate(payload);
-
-          console.log("Predicted price from API:", predicted_price);
-
-          // const bookingRef = await addDoc(collection(db, "booking"), {
-          //   ...values,
-          //   createdAt: new Date(),
-          //   userId: auth.currentUser.uid,
-          //   severity: avgSeverity,
-          //   price: predicted_price, //assume its a fixed price for now for worker's analysis
-          // });
-
-          setLoading(false);
-
-          const bookingDetails = {
+          const bookingRef = await addDoc(collection(db, "booking"), {
             ...values,
+            createdAt: new Date(),
             userId: auth.currentUser.uid,
-            severity: avgSeverity,
-            price: predicted_price,
-          };
-
-          // await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
-          // Alert.alert(
-          //   "Success",
-          //   "Your booking has been successfully submitted!"
-          // );
-          // console.log(bookingRef);
-          // resetForm();
-          // navigation.goBack();
-
-          navigation.navigate("Order Summary", {
-            tempBookingInfo: bookingDetails,
           });
+
+          await setDoc(bookingRef, { orderID: bookingRef.id }, { merge: true });
+          Alert.alert(
+            "Success",
+            "Your booking has been successfully submitted!",
+          );
+          resetForm();
         } catch (error) {
-          console.error("Error processing booking:", error);
-          Alert.alert("Error", "Could not process booking. Please try again.");
+          console.error("Error submitting booking:", error);
+          Alert.alert("Error", "Booking submission failed. Please try again.");
         }
       }}
     >
@@ -289,19 +162,6 @@ export default function UserBooking() {
         setFieldValue,
       }) => (
         <View style={{ flex: 1, zIndex: 0, backgroundColor: "#F9F2ED" }}>
-          {loading && (
-            <View
-              style={{
-                ...StyleSheet.absoluteFillObject,
-                backgroundColor: "rgba(255,255,255,0.8)",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 1000,
-              }}
-            >
-              <ActivityIndicator size="large" />
-            </View>
-          )}
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
             style={{ flex: 1 }}
@@ -328,7 +188,7 @@ export default function UserBooking() {
                 {/* Type */}
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
-                    {icon && icon}
+                    {icon}
                     <Text style={styles.input}>Service Type</Text>
                   </View>
 
@@ -338,8 +198,8 @@ export default function UserBooking() {
                       open={openType}
                       value={values.type}
                       items={subcategories.map((sub) => ({
-                        label: sub.label,
-                        value: sub.label,
+                        label: sub,
+                        value: sub,
                       }))}
                       setOpen={setOpenType}
                       setValue={(val) => setFieldValue("type", val())}
@@ -394,54 +254,6 @@ export default function UserBooking() {
                 )}
               </View>
 
-              {/* Severity */}
-              <View style={styles.section}>
-                <View style={styles.inputRow}>
-                  <View style={styles.header}>
-                    <FontAwesome name="tasks" size={18} color="#704F38" />
-                    <Text style={styles.input}>Severity</Text>
-                  </View>
-
-                  {/* One box per question */}
-                  {questions.map((q, i) => (
-                    <View
-                      key={q.key}
-                      style={[styles.inputRow, { zIndex: 600 - i }]}
-                    >
-                      <Text style={styles.input}>{q.prompt}</Text>
-                      {q.type === "select" ? (
-                        <DropDownPicker
-                          open={openStates[q.key]}
-                          value={values[q.key]}
-                          items={q.options.map((opt, idx) => ({
-                            label: opt.label,
-                            value: opt.value,
-                          }))}
-                          setOpen={(v) =>
-                            setOpenStates((s) => ({ ...s, [q.key]: v }))
-                          }
-                          setValue={(cb) => setFieldValue(q.key, cb())}
-                          containerStyle={{ zIndex: 600 - i }}
-                          placeholder={`Select ${q.prompt.toLowerCase()}`}
-                          listMode="SCROLLVIEW"
-                        />
-                      ) : (
-                        <TextInput
-                          value={String(values[q.key] ?? "")}
-                          onChangeText={(text) => setFieldValue(q.key, text)}
-                          keyboardType="numeric"
-                          placeholder={q.prompt}
-                          style={styles.numberInput}
-                        />
-                      )}
-                      {touched[q.key] && errors[q.key] && (
-                        <Text style={styles.error}>{errors[q.key]}</Text>
-                      )}
-                    </View>
-                  ))}
-                </View>
-              </View>
-
               {/* Time */}
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Time</Text>
@@ -457,15 +269,15 @@ export default function UserBooking() {
                       style={styles.dropdownContainer}
                       open={openDuration}
                       value={values.duration}
-                      items={[...Array(7)].map((_, i) => ({
+                      items={[...Array(15)].map((_, i) => ({
                         label: `${i + 1} hour${i + 1 > 1 ? "s" : ""}`,
-                        value: i + 1,
+                        value: `${i + 1}`,
                       }))}
                       setOpen={setOpenDuration}
                       setValue={(val) => setFieldValue("duration", val())}
                       setItems={() => {}}
                       placeholder="Select Duration"
-                      containerStyle={{ zIndex: 800 }}
+                      ontainerStyle={{ zIndex: 800 }}
                       zIndex={800}
                       listMode="SCROLLVIEW"
                     />
@@ -685,7 +497,7 @@ export default function UserBooking() {
               <View style={styles.section}>
                 <Text style={styles.sectionLabel}>Location</Text>
 
-                {/* State
+                {/* State */}
                 <View style={styles.inputRow}>
                   <View style={styles.header}>
                     <Entypo name="location-pin" size={20} color="#704F38" />
@@ -709,7 +521,7 @@ export default function UserBooking() {
                   {touched.state && errors.state && (
                     <Text style={styles.error}>{errors.state}</Text>
                   )}
-                </View> */}
+                </View>
 
                 {/* Postcode*/}
                 <View style={styles.inputRow}>
@@ -887,9 +699,4 @@ export default function UserBooking() {
   );
 }
 
-export {
-  calculateEndTime,
-  bucketItemCount,
-  bucketAreaSize,
-  handleBookingSubmit,
-};
+export { calculateEndTime, handleBookingSubmit };
