@@ -34,7 +34,7 @@ export default function ForgotPassword({ navigation }) {
     try {
       await sendPasswordResetEmail(auth, email);
       Alert.alert(
-        "Success. If a user with that email exists, a password reset email has been sent! Please check your inbox and spam folder."
+        "Success. If a user with that email exists, a password reset email has been sent! Please check your inbox and spam folder.",
       );
       setEmail("");
       navigation.goBack();
@@ -49,7 +49,7 @@ export default function ForgotPassword({ navigation }) {
         // This prevents an attacker from enumerating valid email addresses.
         Alert.alert(
           "Success",
-          "If a user with that email exists, a password reset email has been sent! Please check your inbox and spam folder."
+          "If a user with that email exists, a password reset email has been sent! Please check your inbox and spam folder.",
         );
 
         setEmail("");

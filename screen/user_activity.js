@@ -80,7 +80,7 @@ export default function UserActivity({ navigation }) {
     try {
       const q = query(
         collection(db, "booking"),
-        where("userId", "==", user.uid)
+        where("userId", "==", user.uid),
       );
       const querySnapshot = await getDocs(q);
 
@@ -266,7 +266,7 @@ export default function UserActivity({ navigation }) {
               onPress={() =>
                 Alert.alert(
                   "All booking history",
-                  "This feature is not available yet."
+                  "This feature is not available yet.",
                 )
               }
             >

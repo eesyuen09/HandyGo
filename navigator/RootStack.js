@@ -44,6 +44,7 @@ import Biz_ordersummary from "../screen/biz_ordersummary";
 import UserTabs from "./userTabs";
 import WorkerTabs from "./workerTabs";
 import UserRating from "../screen/user_rating";
+import FilterScreen from "../screen/biz_servicefilter";
 
 const stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -156,6 +157,7 @@ const RootStack = () => {
           name="Business Scheduled Task"
           component={Biz_scheduledTask}
         />
+        <Stack.Screen name="FilterScreen" component={FilterScreen} />
         <Stack.Screen name="Forgot Password" component={ForgotPassword} />
         <Stack.Screen name="Order Summary" component={Biz_ordersummary} />
       </Stack.Navigator>
