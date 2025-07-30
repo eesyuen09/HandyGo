@@ -60,7 +60,7 @@ async function fetchFilteredBookings({
     ...baseFilters,
     where("price", ">=", minPrice),
     where("price", "<=", maxPrice),
-    orderBy("price", "desc"),
+    orderBy("price", "desc")
   );
 
   // 2) Query B: duration range
@@ -69,7 +69,7 @@ async function fetchFilteredBookings({
     ...baseFilters,
     where("duration", ">=", minDuration),
     where("duration", "<=", maxDuration),
-    orderBy("duration", "asc"),
+    orderBy("duration", "asc")
   );
 
   try {
@@ -93,7 +93,9 @@ async function fetchFilteredBookings({
       return {
         id: data.orderID || data.id,
         category: data.type || "Unknown",
-        time: `${data.availability?.[0]?.date || "N/A"} | ${data.availability?.[0]?.time || "N/A"}`,
+        time: `${data.availability?.[0]?.date || "N/A"} | ${
+          data.availability?.[0]?.time || "N/A"
+        }`,
         location: `${data.state || ""}, ${data.postcode || ""}`,
         price: data.price || "N/A",
         icon: iconData.name,
@@ -121,7 +123,7 @@ const fetchScheduledTasks = async () => {
   const q = query(
     collection(db, "booking"),
     where("status", "==", "pending"),
-    where("urgency", "==", false),
+    where("urgency", "==", false)
   );
   const querySnapshot = await getDocs(q);
 
@@ -157,7 +159,7 @@ function handleSearch(text) {
     (item) =>
       item.category.toLowerCase().includes(text.toLowerCase()) ||
       item.location.toLowerCase().includes(text.toLowerCase()) ||
-      item.time.toLowerCase().includes(text.toLowerCase()),
+      item.time.toLowerCase().includes(text.toLowerCase())
   );
   setFilteredTasks(filtered);
 }
@@ -215,7 +217,7 @@ export default function UrgentTask() {
     debounce((params) => {
       fetchFilteredBookings(params).then(setResults);
     }, 500),
-    [],
+    []
   ); // Wait 500ms between calls
 
   useFocusEffect(
@@ -223,7 +225,7 @@ export default function UrgentTask() {
       if (Object.keys(filter).length) {
         debouncedFetch({ minDuration, maxDuration });
       }
-    }, [minDuration, maxDuration]),
+    }, [minDuration, maxDuration])
   );
 
   useFocusEffect(
@@ -231,7 +233,7 @@ export default function UrgentTask() {
       if (Object.keys(filter).length) {
         debouncedFetch({ minDuration, maxDuration });
       }
-    }, [minDuration, maxDuration]),
+    }, [minDuration, maxDuration])
   );
   //filter
   const route = useRoute();
@@ -248,7 +250,7 @@ export default function UrgentTask() {
       minDuration: durationRange[0],
       maxDuration: durationRange[1],
     }),
-    [durationRange[0], durationRange[1]],
+    [durationRange[0], durationRange[1]]
   );
 
   const [fontsLoaded] = useFonts({
@@ -279,7 +281,7 @@ export default function UrgentTask() {
       } else {
         fetchScheduledTasks().then(setResults);
       }
-    }, []), // stringify so React re-runs whenever filters change
+    }, []) // stringify so React re-runs whenever filters change
   );
 
   const showTask = ({ item }) => (

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
 
 //firebase storage
-import { updateDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 
 //category import
@@ -37,6 +37,15 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import { Picker } from "@react-native-picker/picker";
+
+function shuffleArray(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 
 export default function UserHome({ navigation }) {
   const services = [
@@ -82,30 +91,22 @@ export default function UserHome({ navigation }) {
     // { icon: <FontAwesome6 name="border-all" size={30} color = {colours.darkest_coco}/>, label: 'All' },
   ];
 
-  // const iconMap = {
-  //     'cleaning.png': require('../assets/icons/cleaning.png'),
-  //     'organizing.png': require('../assets/icons/organizing.png'),
-  //     'repair_icon.png': require('../assets/icons/repair_icon.png'),
-  //     'all.png': require('../assets/icons/all.png'),
+  const serviceBanners = services_categories.flatMap((cat) =>
+    cat.subcategories.map((sub) => ({
+      label: sub.label,
+      bannerImage: sub.bannerImage,
+      serviceType: cat.title,
+    })),
+  );
+
+  // const bannerImageMap = {
+  //   "Moving.png": require("../assets/images/Moving.png"),
+  //   "home_organization.png": require("../assets/images/home_organization.png"),
+  //   "aircond_repair.png": require("../assets/images/aircond_repair.png"),
+  //   "cleaning_banner.png": require("../assets/images/cleaning_banner.png"),
+  //   "gasleak.png": require("../assets/images/gasleak.png"),
+  //   "outdoor_banner.png": require("../assets/images/outdoor_banner.png"),
   // };
-
-  const serviceBanners = [
-    { image: "cleaning_banner.png", label: "Deep Cleaning" },
-    { image: "home_organization.png", label: "Home Organizing" },
-    { image: "aircond_repair.png", label: "Air Conditioner Repair" },
-    { image: "Moving.png", label: "House Moving" },
-    { image: "gasleak.png", label: "Gas Leak Detection" },
-    { image: "outdoor_banner.png", label: "Gardening" },
-  ];
-
-  const bannerImageMap = {
-    "Moving.png": require("../assets/images/Moving.png"),
-    "home_organization.png": require("../assets/images/home_organization.png"),
-    "aircond_repair.png": require("../assets/images/aircond_repair.png"),
-    "cleaning_banner.png": require("../assets/images/cleaning_banner.png"),
-    "gasleak.png": require("../assets/images/gasleak.png"),
-    "outdoor_banner.png": require("../assets/images/outdoor_banner.png"),
-  };
 
   // category press
   const handleCategoryPress = (serviceType) => {
@@ -115,9 +116,10 @@ export default function UserHome({ navigation }) {
     console.log(serviceData);
     navigation.navigate("UserBooking", {
       serviceType: serviceData.title,
-      subcategory: serviceData.subcategories[0],
+      subcategory: serviceData.subcategories[0].label,
       description: serviceData.description,
       price: serviceData.price,
+      questions: serviceData.questions,
       // bannerImage: serviceData.bannerImage,
       // icon: serviceData.icon,
     });
@@ -126,7 +128,7 @@ export default function UserHome({ navigation }) {
   // subcategory press
   const handleSubcategoryPress = (subcategory) => {
     const serviceData = services_categories.find((category) =>
-      category.subcategories.includes(subcategory),
+      category.subcategories.some((s) => s.label === subcategory),
     );
 
     if (!serviceData) {
@@ -139,6 +141,7 @@ export default function UserHome({ navigation }) {
       subcategory: subcategory,
       description: serviceData.description,
       price: serviceData.price,
+      questions: serviceData.questions,
       // bannerImage: serviceData.bannerImage,
       // icon: serviceData.icon,
     });
@@ -146,6 +149,49 @@ export default function UserHome({ navigation }) {
   const searchInputRef = useRef(null);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+  const [randomBanners, setRandomBanners] = useState([]);
+
+  useEffect(() => {
+    setRandomBanners(shuffleArray(serviceBanners));
+  }, []);
+
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) {
+      setSuggestions([]);
+      return;
+    }
+
+    const matches = [];
+
+    for (const category of services_categories) {
+      if (category.title.toLowerCase().includes(query)) {
+        matches.push({
+          type: "category",
+          title: category.title,
+          description: category.description,
+          price: category.price,
+          subcategory: category.subcategories[0].label,
+        });
+      }
+
+      for (const sub of category.subcategories) {
+        const subLabel = sub.label;
+        if (subLabel.toLowerCase().includes(query)) {
+          matches.push({
+            type: "subcategory",
+            title: category.title,
+            subcategory: subLabel,
+            description: category.description,
+            price: category.price,
+          });
+        }
+      }
+    }
+
+    setSuggestions(matches);
+  }, [searchQuery]);
 
   const handleSearch = () => {
     const query = searchQuery.trim().toLowerCase();
@@ -154,7 +200,7 @@ export default function UserHome({ navigation }) {
       if (category.title.toLowerCase().includes(query)) {
         navigation.navigate("UserBooking", {
           serviceType: category.title,
-          subcategory: category.subcategories[0],
+          subcategory: category.subcategories[0].label,
           description: category.description,
           price: category.price,
         });
@@ -162,10 +208,10 @@ export default function UserHome({ navigation }) {
       }
 
       for (const sub of category.subcategories) {
-        if (sub.toLowerCase().includes(query)) {
+        if (sub.label.toLowerCase().includes(query)) {
           navigation.navigate("UserBooking", {
             serviceType: category.title,
-            subcategory: sub,
+            subcategory: sub.label,
             description: category.description,
             price: category.price,
           });
@@ -205,6 +251,32 @@ export default function UserHome({ navigation }) {
                 onSubmitEditing={handleSearch}
               />
             </View>
+
+            {/* Suggestions List */}
+            {suggestions.length > 0 && (
+              <View style={styles.suggestionBox}>
+                {suggestions.map((item, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      navigation.navigate("UserBooking", {
+                        serviceType: item.title,
+                        subcategory: item.label,
+                        description: item.description,
+                        price: item.price,
+                      });
+                      setSuggestions([]);
+                      setSearchQuery("");
+                    }}
+                    style={styles.suggestionItem}
+                  >
+                    <Text style={styles.suggestionText}>
+                      {item.label ?? item.subcategory} ({item.title})
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
           </SafeAreaView>
         </TouchableWithoutFeedback>
 
@@ -232,7 +304,7 @@ export default function UserHome({ navigation }) {
         {/* Services You May Like Section */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}> Service You May Like </Text>
-          {serviceBanners.map((item, index) => (
+          {/* {serviceBanners.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={styles.serviceBanner}
@@ -246,9 +318,21 @@ export default function UserHome({ navigation }) {
                 />
               </View>
             </TouchableOpacity>
+          ))} */}
+          {randomBanners.map((item, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.serviceBanner}
+              onPress={() => handleSubcategoryPress(item.label)}
+            >
+              <Image source={item.bannerImage} style={styles.serviceBanner} />
+              <Text style={styles.bannerLabel}>{item.label}</Text>
+            </TouchableOpacity>
           ))}
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
+
+export { shuffleArray };

@@ -62,7 +62,7 @@ export default function UserTabs() {
                 <Ionicons name="chatbubble-outline" size={24} color={color} />
               ),
               tabBarLabel: "",
-            }} 
+            }}
           /> */}
 
       <Tab.Screen

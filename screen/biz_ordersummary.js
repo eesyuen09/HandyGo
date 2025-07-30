@@ -7,6 +7,8 @@ import {
   Alert,
   ImageBackground,
 } from "react-native";
+import { colours, styles } from "../components/style_u_booking.js";
+//for date time dropdown picker
 import DropDownPicker from "react-native-dropdown-picker";
 import { FontAwesome5, Feather, Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
@@ -18,24 +20,33 @@ import {
   onSnapshot,
   collection,
   setDoc,
-  deleteField,
+  getDocs,
+  query,
+  where,
+  addDoc,
+  orderBy,
 } from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from "../assets/bg_UrgentTask.png";
-import { style, colours } from "../components/style_b_ordersummary.js";
+import { style } from "../components/style_b_ordersummary.js";
 import { FlatList } from "react-native";
+
+//colours
+
+const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
+  colours;
 
 export default function OrderSummary({ navigation }) {
   const [booking, setBooking] = useState([]);
   const [openDate, setOpenDate] = useState(false);
   const [selectedTime, setSelectedTime] = useState(null);
   const [isCompleted, setIsCompleted] = useState(false);
-
-  const [role, setRole] = useState(null);
+  const [isTemp, setIsTemp] = useState(false);
 
   const route = useRoute();
-  const { orderID, userID } = route.params || {};
+  const params = route?.params ?? {};
+  const { orderID, userID, tempBookingInfo } = route.params || {};
 
   const [bookingData, setBookingData] = useState(null); // reused booking snapshot
 
@@ -83,7 +94,7 @@ export default function OrderSummary({ navigation }) {
     openDate,
     setOpenDate,
     selectedTime,
-    setSelectedTime,
+    setSelectedTime
   ) => {
     const isAvailabilityCard = item.type === "availability";
     //convert availability array to dropdown items
@@ -99,105 +110,68 @@ export default function OrderSummary({ navigation }) {
     return (
       <View style={style.cardContainer}>
         <View style={style.taskIconWrap}>
-          <FontAwesome5 name={item.icon} size={18} color={colours.main_coco} />
+          <FontAwesome5 name={item.icon} size={18} color={main_coco} />
         </View>
         <View style={style.taskInfo}>
           <Text style={style.cardTitle}>{item.title}</Text>
-          {/* {isAvailabilityCard && Array.isArray(item.content) && bookingData?.status !== 'accepted' ? (
-                <DropDownPicker
-                    open={openDate}
-                    value={selectedTime}
-                    items={availabilityOptions}
-                    setOpen={setOpenDate}
-                    setValue={setSelectedTime}
-                    setItems={() => {}}
-                    placeholder="Select a time slot"
-                    zIndex={1000}
-                    style={style.dropdownContainer}
-                    textStyle={style.cardContent}
-                />
-                ) : isAvailabilityCard ? (
-                // Show selected time string when accepted
-                <Text style={style.cardContent}>
-                {typeof bookingData?.availability === 'object'
-                    ? `${bookingData.availability.date} | ${bookingData.availability.time}`
-                    : bookingData?.availability || "No time selected"}
-                </Text>
-                ) : (
-                // For non-availability items
-                <Text style={style.cardContent}>{item.content}</Text>
-                )} */}
-          {isAvailabilityCard && Array.isArray(item.content) ? (
-            role === "user" && bookingData?.status !== "accepted" ? (
-              // Show all available slots as plain text for users
-              <View>
-                {item.content.map((slot, index) => (
+          {isAvailabilityCard &&
+          Array.isArray(item.content) &&
+          bookingData?.status !== "accepted" &&
+          !isTemp ? (
+            <DropDownPicker
+              open={openDate}
+              value={selectedTime}
+              items={availabilityOptions}
+              setOpen={setOpenDate}
+              setValue={setSelectedTime}
+              setItems={() => {}}
+              placeholder="Select a time slot"
+              zIndex={1000}
+              style={style.dropdownContainer}
+              textStyle={style.cardContent}
+            />
+          ) : isAvailabilityCard ? (
+            // Show selected time string when accepted
+            <View>
+              {Array.isArray(bookingData?.availability) ? (
+                bookingData.availability.map((slot, index) => (
                   <Text key={index} style={style.cardContent}>
                     {slot.date} | {slot.time}
                   </Text>
-                ))}
-              </View>
-            ) : bookingData?.status !== "accepted" ? (
-              // Show dropdown for businesses
-              <DropDownPicker
-                open={openDate}
-                value={selectedTime}
-                items={availabilityOptions}
-                setOpen={setOpenDate}
-                setValue={setSelectedTime}
-                setItems={() => {}}
-                placeholder="Select a time slot"
-                zIndex={1000}
-                style={style.dropdownContainer}
-                textStyle={style.cardContent}
-              />
-            ) : (
-              // Show selected time string once accepted
-              <Text style={style.cardContent}>
-                {typeof bookingData?.availability === "object"
-                  ? `${bookingData.availability.date} | ${bookingData.availability.time}`
-                  : bookingData?.availability || "No time selected"}
-              </Text>
-            )
+                ))
+              ) : typeof bookingData?.availability === "object" ? (
+                <Text style={style.cardContent}>
+                  {bookingData.availability.date} |{" "}
+                  {bookingData.availability.time}
+                </Text>
+              ) : (
+                <Text style={style.cardContent}>
+                  {bookingData?.availability || "No time selected"}
+                </Text>
+              )}
+            </View>
           ) : (
-            // Non-availability items
+            // For non-availability items
             <Text style={style.cardContent}>{item.content}</Text>
           )}
         </View>
       </View>
     );
   };
-  const changeIsComplete = async (bookingId, workerID) => {
+  const changeIsComplete = async (bookingId) => {
     if (!bookingData) {
       Alert.alert("Data not ready yet.");
       return;
     }
-
     if (bookingData.isCompleted) {
       Alert.alert("Error! This booking has already been completed.");
       return;
     }
-
     try {
       const bookingRef = doc(db, "booking", bookingId);
-      const scheduledDocRef = doc(
-        db,
-        "users",
-        workerID,
-        "schedules",
-        bookingId,
-      ); // use bookingId
-
-      // Update booking document
       await updateDoc(bookingRef, {
         isCompleted: true,
         completedAt: new Date(),
-        status: "completed",
-      });
-
-      // Update worker's schedule document
-      await updateDoc(scheduledDocRef, {
-        status: "completed",
       });
 
       Alert.alert("Booking Completed!");
@@ -208,11 +182,84 @@ export default function OrderSummary({ navigation }) {
     }
   };
 
+  async function confirmBooking() {
+    try {
+      if (!tempBookingInfo) {
+        console.error("tempBookingInfo is undefined or null");
+        Alert.alert("Error", "Booking info is missing.");
+        return;
+      }
+
+      console.log("tempBookingInfo:", tempBookingInfo);
+
+      const bookingRef = await addDoc(collection(db, "booking"), {
+        ...tempBookingInfo,
+      });
+
+      console.log("Booking created:", bookingRef.id);
+
+      await setDoc(
+        bookingRef,
+        { orderID: bookingRef.id },
+        { merge: true }
+      ).catch((err) => {
+        console.error("Failed to merge orderID:", err);
+      });
+
+      Alert.alert("Booking confirmed!", "Your booking has been created.");
+      navigation.navigate("UserHome");
+    } catch (err) {
+      console.error("Failed to confirm booking:", err);
+      Alert.alert("Error", "Failed to confirm booking.");
+    }
+  }
+
   const acceptBooking = async (bookingId, currentWorkerId) => {
     try {
       if (!selectedTime) {
         Alert.alert("Please select a time slot before accepting the booking.");
         return;
+      }
+
+      //Prevent double booking
+      //1. abstract new slots start and end date as date obj
+      const [datePart, timePart] = selectedTime.split(" ");
+      const startOfDay = `${datePart} 00:00`;
+      const endOfDay = `${datePart} 23:59`;
+      const newStart = new Date(`${datePart}T${timePart}:00`);
+      const durationHours = bookingData.duration; // e.g. 2
+      const newEnd = new Date(newStart.getTime() + durationHours * 3600e3);
+      console.log("start, end", newStart, newEnd);
+
+      //2. query this workers schedules for the same day
+      const schedRef = collection(db, "users", currentWorkerId, "schedules");
+      const dayQuery = query(
+        schedRef,
+        where("availability", ">=", startOfDay),
+        where("availability", "<=", endOfDay)
+      );
+      const snap = await getDocs(dayQuery);
+
+      //3. check each existing schedule overlap
+      for (let doc of snap.docs) {
+        const rec = doc.data();
+        const availStr = rec.availability;
+        const [exDate, exTime] = availStr.split(" ");
+        const existingStart = new Date(`${exDate}T${exTime}:00`);
+        const existingEnd = new Date(
+          existingStart.getTime() + rec.duration * 3600e3
+        );
+
+        console.log("existing:", existingStart, "->", existingEnd);
+
+        if (newStart < existingEnd && existingStart < newEnd) {
+          Alert.alert(
+            "Time Conflict",
+            "You already have a booking at that time. Please choose another slot."
+          );
+          navigation.goBack();
+          return;
+        }
       }
 
       const bookingRef = doc(db, "booking", bookingId);
@@ -230,7 +277,7 @@ export default function OrderSummary({ navigation }) {
       }
 
       await updateDoc(bookingRef, {
-        status: "scheduled",
+        status: "accepted",
         workerId: currentWorkerId,
         acceptedAt: new Date(),
         availability: selectedTime,
@@ -245,47 +292,93 @@ export default function OrderSummary({ navigation }) {
     }
   };
 
-  const cancelBooking = async (bookingId, role) => {
-    try {
-      const bookingRef = doc(db, "booking", bookingId);
-
-      // Update booking status
-      await updateDoc(bookingRef, {
-        status: "cancelled",
-        cancelledBy: role, // "user" or "business"
-        cancelledAt: new Date(),
-      });
-
-      Alert.alert("Booking Cancelled");
-      navigation.goBack();
-    } catch (err) {
-      console.error("Failed to cancel booking:", err);
-      Alert.alert("Error", "Failed to cancel booking.");
-    }
-  };
-
   useEffect(() => {
+    if (tempBookingInfo) {
+      setBookingData(tempBookingInfo);
+      setIsTemp(true);
+      console.log("istemp", isTemp);
+
+      const formatted = [
+        {
+          type: "category",
+          title: tempBookingInfo.type,
+          image: services_categories.find(
+            (cat) => cat.title === tempBookingInfo.serviceType
+          )?.bannerImage,
+        },
+        {
+          type: "availability",
+          icon: "clock",
+          title: `${tempBookingInfo.duration} hours`,
+          content: Array.isArray(tempBookingInfo.availability)
+            ? tempBookingInfo.availability
+            : [tempBookingInfo.availability],
+        },
+        {
+          type: "location",
+          title: tempBookingInfo.postcode,
+          icon: "map-marker-alt",
+          content: `${tempBookingInfo.address}, ${tempBookingInfo.postcode}`,
+        },
+        {
+          type: "note",
+          title: tempBookingInfo.notes || "No notes",
+          icon: "file-alt",
+          content: tempBookingInfo.notes || "No notes",
+        },
+        {
+          type: "price",
+          title: "Price",
+          icon: "dollar-sign",
+          content: `$${tempBookingInfo.price || "35.99"}`,
+        },
+        {
+          type: "Urgency",
+          title: tempBookingInfo.urgency ? "Urgent" : "Scheduled",
+          icon: tempBookingInfo.urgency ? "exclamation-triangle" : "clock",
+          content: tempBookingInfo.urgency
+            ? "This is an urgent task."
+            : "This is a scheduled task.",
+        },
+        {
+          type: "Notification",
+          title: "Notification",
+          icon: "bell",
+          content: tempBookingInfo.notif
+            ? "You will be notified when a worker accepts your booking."
+            : "You will not be notified when a worker accepts your booking.",
+        },
+
+        {
+          type: "Rating",
+          title: "Rating",
+          icon: "star",
+          content: tempBookingInfo.rating
+            ? `Your worker will has at least${tempBookingInfo.rating} stars.`
+            : " No rating required",
+        },
+
+        {
+          type: "Payment Method",
+          title: "Cash On Delivery",
+          icon: "money-bill-wave",
+          content: "Pay in cash to the worker upon completion of the task.",
+        },
+      ];
+      setBooking(formatted);
+      return;
+    }
     const bookingRef = doc(db, "booking", orderID);
 
-    const unsubscribe = onSnapshot(bookingRef, async (docSnap) => {
+    const unsubscribe = onSnapshot(bookingRef, (docSnap) => {
       if (!docSnap.exists()) return;
       const data = docSnap.data();
 
       setBookingData(data);
       setIsCompleted(data.isCompleted || false);
 
-      //set role
-      const uid = userID || auth.currentUser?.uid;
-      if (uid) {
-        const userRef = doc(db, "users", uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setRole(userSnap.data().role);
-        }
-      }
-
       const matched_cat = services_categories.find(
-        (cat) => cat.title === data.serviceType,
+        (cat) => cat.title === data.serviceType
       );
       const image = matched_cat?.bannerImage;
 
@@ -299,9 +392,9 @@ export default function OrderSummary({ navigation }) {
         },
         {
           type: "location",
-          title: data.state,
+          title: data.postcode,
           icon: "map-marker-alt",
-          content: `${data.address}, ${data.postcode}, ${data.state}`,
+          content: `${data.address}, ${data.postcode}`,
         },
         {
           type: "note",
@@ -314,6 +407,12 @@ export default function OrderSummary({ navigation }) {
           title: "Price",
           icon: "dollar-sign",
           content: `$${data.price || "35.99"}`,
+        },
+        {
+          type: "Payment Method",
+          title: "Cash On Delivery",
+          icon: "money-bill-wave",
+          content: "Pay in cash to the worker upon completion of the task.",
         },
       ];
       setBooking(formatted);
@@ -330,12 +429,12 @@ export default function OrderSummary({ navigation }) {
             onPress={() => navigation.goBack()}
             style={style.backButton}
           >
-            <Ionicons name="chevron-back" size={24} color={colours.black} />
+            <Ionicons name="chevron-back" size={24} color={black} />
           </TouchableOpacity>
 
           <Text style={style.headerTitle}>Order Summary</Text>
           {/* place holder to balance the space*/}
-          <View style={style.backButton} />
+          <View style={styles.backButton} />
         </View>
 
         <ScrollView style={{ flex: 1, padding: 20 }}>
@@ -366,7 +465,7 @@ export default function OrderSummary({ navigation }) {
                 openDate,
                 setOpenDate,
                 selectedTime,
-                setSelectedTime,
+                setSelectedTime
               )
             }
             keyExtractor={(item, index) => index.toString()}
@@ -377,32 +476,30 @@ export default function OrderSummary({ navigation }) {
           {/* Divider */}
           <View style={style.line} />
 
-          {!userID &&
-            bookingData?.status !== "accepted" &&
-            role === "business" && (
-              <TouchableOpacity
-                style={style.button}
-                onPress={() => acceptBooking(orderID, auth.currentUser.uid)}
-              >
-                <Text style={style.buttonText}>Accept Booking</Text>
-              </TouchableOpacity>
-            )}
-
-          {userID && !isCompleted && role === "business" && (
+          {!userID && !isTemp && (
             <TouchableOpacity
               style={style.button}
-              onPress={() => changeIsComplete(orderID, userID)}
+              onPress={() => acceptBooking(orderID, auth.currentUser.uid)}
             >
-              <Text style={style.buttonText}>Completed Task</Text>
+              <Text style={style.buttonText}>Accept Booking</Text>
             </TouchableOpacity>
           )}
 
-          {bookingData?.status === "scheduled" && role === "user" && (
+          {tempBookingInfo && (
             <TouchableOpacity
               style={style.button}
-              onPress={() => cancelBooking(orderID, role)}
+              onPress={() => confirmBooking()}
             >
-              <Text style={style.buttonText}>Cancel Booking</Text>
+              <Text style={style.buttonText}>Confirm Booking</Text>
+            </TouchableOpacity>
+          )}
+
+          {userID && !isCompleted && (
+            <TouchableOpacity
+              style={style.button}
+              onPress={() => changeIsComplete(orderID)}
+            >
+              <Text style={style.buttonText}>Completed Task</Text>
             </TouchableOpacity>
           )}
 
