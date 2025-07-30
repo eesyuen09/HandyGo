@@ -15,8 +15,6 @@ export const colours = {
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
 
-const { height, width } = Dimensions.get("window");
-
 // Global Styles
 export const style = StyleSheet.create({
   background: {

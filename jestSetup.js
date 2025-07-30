@@ -22,6 +22,10 @@ jest.mock("@expo/vector-icons", () => {
   const { Text } = require("react-native");
   return {
     Feather: () => React.createElement(Text, null, "Feather"),
+    Ionicons: () => React.createElement(Text, null, "Ionicons"),
+    MaterialCommunityIcons: () =>
+      React.createElement(Text, null, "MaterialCommunityIcons"),
+    MaterialIcons: () => React.createElement(Text, null, "MaterialIcons"),
     AntDesign: () => React.createElement(Text, null, "AntDesign"),
     Entypo: (props) => React.createElement(Text, null, "Ent"),
     MaterialIcons: () => React.createElement(Text, null, "MaterialIcons"),
