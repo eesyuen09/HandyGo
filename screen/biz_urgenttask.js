@@ -339,7 +339,7 @@ export default function UrgentTask() {
               color={colours.darkest_coco}
             />
           </TouchableOpacity>
-          <Text style={style.headerTitle}>Scheduled Task</Text>
+          <Text style={style.headerTitle}>Urgent Task</Text>
           {/* <View style = {style.backButton}/> */}
         </View>
 
