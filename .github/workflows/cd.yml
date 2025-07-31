@@ -24,12 +24,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Expo CLI
-        run: npm install --global expo-cli
-
       - name: Build Android APK
         env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EAS_ACCESS_TOKEN: ${{ secrets.EAS_ACCESS_TOKEN }}
         run: |
-          # build an APK using Expo's build service
-           npx eas build --platform android --non-interactive --profile production
+          npx eas build --platform android --non-interactive --profile production
