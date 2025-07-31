@@ -17,7 +17,7 @@ import {
 } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import { services_categories } from "../constants/category_constant";
-import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, getDocs, query, where, addDoc, orderBy} from "firebase/firestore";
+import { getDoc, doc, updateDoc, onSnapshot, collection, setDoc, getDocs, query, where, addDoc, orderBy, increment} from "firebase/firestore";
 import { db, app, auth } from "../firebaseConfig";
 
 import BgImage from '../assets/bg_UrgentTask.png';
@@ -173,6 +173,8 @@ function renderCard(
         "schedules",
         bookingId
       ); // use bookingId
+       const userRef = doc(db, "users", workerID);
+
       await updateDoc(bookingRef, {
         isCompleted: true,
         completedAt: new Date(),
@@ -183,6 +185,23 @@ function renderCard(
 
       await updateDoc(scheduledDocRef, {
         status: "completed",
+      });
+
+
+       await updateDoc(scheduledDocRef, {
+        status: "completed",
+      });
+
+      // 3) update earnings on the user record
+      const amount = bookingData.price || 0;
+      const now    = new Date();
+      const monthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+      const svc = bookingData.serviceType || "Unknown";
+
+      await updateDoc(userRef, {
+        totalEarnings:           increment(amount),
+        [`monthlyEarnings.${monthKey}`]: increment(amount),
+        [`pieSummary.${svc}`]:            increment(amount),
       });
 
       Alert.alert("Booking Completed!");

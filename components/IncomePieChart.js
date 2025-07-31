@@ -15,7 +15,7 @@ const sliceColors = {
   Cleaning: '#A76545',
   Repair:   '#DDA853',
   Moving:   '#704F38',
-  Others:   '#E3E3E3',
+  Others:   '#000000',
 };
 
 
@@ -45,7 +45,7 @@ export default function PieChart() {
       const data = Object.entries(pieSummary).map(([label, value]) => ({
         label,
         value,
-        color: sliceColors[label] ?? '#ccccc',
+        color: sliceColors[label] ?? '#000000',
       }));
 
       setPieData(data);
