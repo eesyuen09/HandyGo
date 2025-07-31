@@ -34,6 +34,7 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
           CI: 1
         run: |
-          # publish and capture the JSON output in CI mode
-          PUBLISHED_URL=$(npx expo publish --json | jq -r .url)
+          set -o pipefail
+          PUBLISHED_JSON=$(npx expo publish --json 2>/dev/null)
+          PUBLISHED_URL=$(echo "$PUBLISHED_JSON" | jq -r .url)
           echo "::set-output name=published_url::$PUBLISHED_URL"
