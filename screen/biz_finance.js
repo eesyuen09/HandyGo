@@ -217,7 +217,7 @@ Structure your output like this:
                 heading2: {
                   fontSize: 18,
                   fontWeight: "bold",
-                  color: colours.main_coco,
+                  color: colours.darkest_coco,
                   marginBottom: 6,
                 },
                 heading3: {
@@ -229,7 +229,7 @@ Structure your output like this:
                 },
                 paragraph: {
                   fontSize: 15,
-                  color: colours.darket_coco,
+                  color: colours.darkest_coco,
                   fontFamily: "Sora",
                   fontWeight: "400",
                   marginBottom: 4,
@@ -240,7 +240,7 @@ Structure your output like this:
                 },
                 listItemText: {
                   fontSize: 15,
-                  color: colours.main_coco,
+                  color: colours.darkest_coco,
                   fontFamily: "Sora",
                   marginBottom: 2,
                 },
