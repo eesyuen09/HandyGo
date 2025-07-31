@@ -117,6 +117,7 @@ describe("<UserHome /> interactions", () => {
       subcategory: "Deep Clean",
       description: "CleanDesc",
       price: 10,
+      questions: [],
     });
   });
 
@@ -130,6 +131,7 @@ describe("<UserHome /> interactions", () => {
       subcategory: "Truck Move",
       description: "MoveDesc",
       price: 20,
+      questions: [],
     });
   });
 
@@ -143,6 +145,7 @@ describe("<UserHome /> interactions", () => {
       subcategory: "Quick Clean",
       description: "CleanDesc",
       price: 10,
+      questions: [],
     });
   });
 });

@@ -3,6 +3,9 @@ import "dotenv/config";
 export default {
   expo: {
     extra: {
+      eas: {
+        projectId: "ef2c6889-53df-4a86-bd2b-be15db7bd7c9",
+      },
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
       firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
@@ -11,6 +14,9 @@ export default {
       firebaseAppId: process.env.FIREBASE_APP_ID,
       firebaseMeasurementId: process.env.FIREBASE_MEASUREMENT_ID,
       pricingApiUrl: process.env.PRICING_API_URL,
+    },
+    android: {
+      package: "com.eesyuen.handygo",
     },
   },
 };
