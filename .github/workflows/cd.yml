@@ -32,4 +32,4 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           # build an APK using Expo's build service
-          expo build:android --type apk --non-interactive
+           npx eas build --platform android --non-interactive --profile production

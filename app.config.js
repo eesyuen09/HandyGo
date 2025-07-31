@@ -2,7 +2,13 @@ import "dotenv/config";
 
 export default {
   expo: {
+    android: {
+      package: "com.eesyuen.HandyGo",
+    },
     extra: {
+      eas: {
+        projectId: "ef2c6889-53df-4a86-bd2b-be15db7bd7c9",
+      },
       firebaseApiKey: process.env.FIREBASE_API_KEY,
       firebaseAuthDomain: process.env.FIREBASE_AUTH_DOMAIN,
       firebaseProjectId: process.env.FIREBASE_PROJECT_ID,
