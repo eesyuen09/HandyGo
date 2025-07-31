@@ -23,7 +23,7 @@ export function useToggleSubcategory(initial = []) {
 
   const toggleSubcategory = useCallback((item) => {
     setSelectedSubcategory((prev) =>
-      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]
     );
   }, []);
 
@@ -36,7 +36,7 @@ export function doApplyFilters(
   minPrice,
   maxPrice,
   minDuration,
-  maxDuration,
+  maxDuration
 ) {
   const filter = {};
 
@@ -90,7 +90,7 @@ export default function FilterScreen({ navigation }) {
           if (userSnap.exists()) {
             const data = userSnap.data();
             const filtered = (data.subcategory || []).filter(
-              (item) => item !== "",
+              (item) => item !== ""
             );
             setSubcategory(filtered);
           }
@@ -99,7 +99,7 @@ export default function FilterScreen({ navigation }) {
         }
       };
       fetchSubcategory();
-    }, []),
+    }, [])
   );
 
   const renderSubcategory = ({ item }) => (
@@ -126,7 +126,7 @@ export default function FilterScreen({ navigation }) {
       minPrice,
       maxPrice,
       minDuration,
-      maxDuration,
+      maxDuration
     );
   };
 
