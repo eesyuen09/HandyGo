@@ -47,7 +47,7 @@ async function fetchFilteredBookings({
 }) {
   const baseFilters = [
     where("status", "==", "pending"),
-    where("urgency", "==", false),
+    where("urgency", "==", true),
   ];
 
   if (subcategory.length > 0) {
@@ -109,7 +109,7 @@ async function fetchFilteredBookings({
   }
 }
 
-const fetchUrgentTasks = async () => {
+const fetchScheduledTasks = async () => {
   const user = auth.currentUser;
   if (!user) return;
 
@@ -148,6 +148,7 @@ const fetchUrgentTasks = async () => {
   });
   return formatted;
 };
+
 function handleSearch(text) {
   if (text.trim() === "") {
     setFilteredTasks(tasks);
@@ -202,7 +203,7 @@ const renderIcon = (iconName, iconFamily, color, size) => {
 
 export {
   fetchFilteredBookings,
-  fetchUrgentTasks,
+  fetchScheduledTasks,
   handleSearch,
   getIcon,
   renderIcon,
@@ -215,15 +216,16 @@ export default function UrgentTask() {
   const debouncedFetch = React.useCallback(
     debounce((params) => {
       fetchFilteredBookings(params).then(setResults);
-    }, 500), // Wait 500ms between calls
+    }, 500),
+    [],
+  ); // Wait 500ms between calls
 
-    useFocusEffect(
-      React.useCallback(() => {
-        if (Object.keys(filter).length) {
-          debouncedFetch({ minDuration, maxDuration });
-        }
-      }, [minDuration, maxDuration]),
-    ),
+  useFocusEffect(
+    React.useCallback(() => {
+      if (Object.keys(filter).length) {
+        debouncedFetch({ minDuration, maxDuration });
+      }
+    }, [minDuration, maxDuration]),
   );
 
   useFocusEffect(
@@ -277,7 +279,7 @@ export default function UrgentTask() {
           maxDuration,
         }).then(setResults);
       } else {
-        fetchUrgentTasks().then(setResults);
+        fetchScheduledTasks().then(setResults);
       }
     }, []), // stringify so React re-runs whenever filters change
   );
@@ -337,7 +339,7 @@ export default function UrgentTask() {
               color={colours.darkest_coco}
             />
           </TouchableOpacity>
-          <Text style={style.headerTitle}>Urgent Task</Text>
+          <Text style={style.headerTitle}>Scheduled Task</Text>
           {/* <View style = {style.backButton}/> */}
         </View>
 
