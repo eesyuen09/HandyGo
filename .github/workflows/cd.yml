@@ -4,39 +4,30 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Deploy to Production
+  build-android-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
-    environment:
-      name: Production
-      url: ${{ steps.expo.outputs.published_url }}
-
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Use Node.js 18.x
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: "18.x"
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Publish Expo Update
-        id: expo
+      - name: Install Expo CLI
+        run: npm install --global expo-cli
+
+      - name: Build Android APK
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          CI: 1
         run: |
-          set -o pipefail
-          # authenticate with Expo using CI token
-          npx expo login --token $EXPO_TOKEN
-          PUBLISHED_JSON=$(npx expo publish --json 2>/dev/null)
-          PUBLISHED_URL=$(echo "$PUBLISHED_JSON" | jq -r .url)
-          echo "::set-output name=published_url::$PUBLISHED_URL"
+          # build an APK using Expo's build service
+          expo build:android --apk --non-interactive
