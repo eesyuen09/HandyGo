@@ -30,6 +30,7 @@ import {
   query,
   where,
   orderBy,
+  limit
 } from "firebase/firestore";
 import { useRoute } from "@react-navigation/native";
 
@@ -110,6 +111,7 @@ async function fetchFilteredBookings({
 }
 
 const fetchScheduledTasks = async () => {
+
   const user = auth.currentUser;
   if (!user) return;
 
@@ -124,7 +126,14 @@ const fetchScheduledTasks = async () => {
     collection(db, "booking"),
     where("status", "==", "pending"),
     where("urgency", "==", false),
+    limit(5)
+  
   );
+
+
+  if (startAfterDoc) {
+    q = query(q, startAfter(startAfterDoc));
+  }
   const querySnapshot = await getDocs(q);
 
   const formatted = [];
@@ -209,9 +218,33 @@ export {
   renderIcon,
 };
 
+
+
+
+
+
+
 export default function UrgentTask() {
   const navigation = useNavigation();
   const [tasks, setTasks] = useState([]);
+  const [lastVisible, setLastVisible] = useState(null);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const LIMIT = 5;
+
+
+  const loadMore = async () => {
+  if (isLastPage) return;
+
+  const newTasks = await fetchUrgentTasks(lastVisible);
+  if (newTasks.length > 0) {
+    setTasks((prev) => [...prev, ...newTasks]);
+    setFilteredTasks((prev) => [...prev, ...newTasks]);
+    setLastVisible(newTasks[newTasks.length - 1]._snapshot);
+    if (newTasks.length < LIMIT) setIsLastPage(true);
+  } else {
+    setIsLastPage(true);
+  }
+};
 
   const debouncedFetch = React.useCallback(
     debounce((params) => {
@@ -371,6 +404,12 @@ export default function UrgentTask() {
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingBottom: 100 }}
         />
+
+        <TouchableOpacity onPress={loadMore} disabled={isLastPage} style={{ marginTop: 10 }}>
+          <Text style={{ color: colours.darkest_coco, textAlign: "center" }}>
+            {isLastPage ? "No more tasks" : "Load More"}
+          </Text>
+        </TouchableOpacity>
 
         <View style={style.paginationContainer}>
           <TouchableOpacity>
