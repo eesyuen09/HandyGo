@@ -1,17 +1,14 @@
-name: Continuous Deployment
+name: Deploy with EAS Update
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     branches:
       - main
 
 jobs:
-  build-android-apk:
-    name: Build Android APK
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -24,9 +21,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Android APK
+      - name: Install EAS CLI
+        run: npm install -g eas-cli
+
+      - name: Deploy to Expo via EAS Update
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-          EAS_ACCESS_TOKEN: ${{ secrets.EAS_ACCESS_TOKEN }}
         run: |
-          npx eas build --platform android --non-interactive --profile production
+          eas update --branch production --message "CI deploy from GitHub Actions"
