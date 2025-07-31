@@ -96,7 +96,7 @@ export default function UserHome({ navigation }) {
       label: sub.label,
       bannerImage: sub.bannerImage,
       serviceType: cat.title,
-    })),
+    }))
   );
 
   // const bannerImageMap = {
@@ -111,7 +111,7 @@ export default function UserHome({ navigation }) {
   // category press
   const handleCategoryPress = (serviceType) => {
     const serviceData = services_categories.find(
-      (c) => c.title === serviceType,
+      (c) => c.title === serviceType
     );
     console.log(serviceData);
     navigation.navigate("UserBooking", {
@@ -128,7 +128,7 @@ export default function UserHome({ navigation }) {
   // subcategory press
   const handleSubcategoryPress = (subcategory) => {
     const serviceData = services_categories.find((category) =>
-      category.subcategories.some((s) => s.label === subcategory),
+      category.subcategories.some((s) => s.label === subcategory)
     );
 
     if (!serviceData) {
@@ -203,6 +203,7 @@ export default function UserHome({ navigation }) {
           subcategory: category.subcategories[0].label,
           description: category.description,
           price: category.price,
+          questions: category.questions,
         });
         return;
       }
@@ -214,6 +215,7 @@ export default function UserHome({ navigation }) {
             subcategory: sub.label,
             description: category.description,
             price: category.price,
+            questions: category.questions,
           });
           return;
         }
@@ -264,6 +266,9 @@ export default function UserHome({ navigation }) {
                         subcategory: item.label,
                         description: item.description,
                         price: item.price,
+                        questions: services_categories.find(
+                          (cat) => cat.title === item.title
+                        )?.questions,
                       });
                       setSuggestions([]);
                       setSearchQuery("");

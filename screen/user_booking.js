@@ -35,13 +35,13 @@ import { addDoc, collection, setDoc } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db, app } from "../firebaseConfig";
 import { getPriceEstimate } from "../src/api/pricing.js";
-import { postcodes } from "../constants/postcodes.js";
+import { postcodes } from "../constants/postcodes.stub.js";
 
 const handleBookingSubmit = (values) => {
   console.log("Booking submitted:", values);
   Alert.alert(
     "Booking Submitted",
-    "Your booking has been successfully submitted!",
+    "Your booking has been successfully submitted!"
   );
 };
 
@@ -90,17 +90,21 @@ export default function UserBooking() {
   } = route.params || {};
   console.log("Route params:", route.params);
   const icon = services_categories.find(
-    (category) => category.title === serviceType,
+    (category) => category.title === serviceType
   )?.icon;
   const bannerImage = services_categories.find(
-    (category) => category.title === serviceType,
+    (category) => category.title === serviceType
   )?.bannerImage;
   const subcategories =
     services_categories.find((category) => category.title === serviceType)
       ?.subcategories || [];
   const dynamicInitial = {
     ...questions.reduce((acc, q) => {
-      acc[q.key] = 0;
+      if (q.type === "select" && q.options?.length > 0) {
+        acc[q.key] = q.options[0].value;
+      } else {
+        acc[q.key] = 0;
+      }
       return acc;
     }, {}),
   };
@@ -108,7 +112,7 @@ export default function UserBooking() {
     Object.keys(dynamicInitial).reduce((acc, key) => {
       acc[key] = false;
       return acc;
-    }, {}),
+    }, {})
   );
   const [openUrgency, setOpenUrgency] = useState(false);
   const [openType, setOpenType] = useState(false);
@@ -162,13 +166,17 @@ export default function UserBooking() {
           Yup.object().shape({
             date: Yup.string().required("Date is required"),
             time: Yup.string().required("Time is required"),
-          }),
+          })
         ),
         postcode: Yup.string()
           .matches(/^\d{5,}$/, "Postcode must be at least 5 digits")
-          .test("valid-postcode", "Invalid Singapore postcode", (value) =>
-            postcodes.some((p) => p.postal_code.toString() === value.trim()),
-          )
+          .test("valid-postcode", "Invalid Singapore postcode", (value) => {
+            if (!value) return false;
+            if (!Array.isArray(postcodes)) return true; // skip validation if postcodes is undefined
+            return postcodes.some(
+              (p) => p.postal_code.toString() === value.trim()
+            );
+          })
           .required("Postcode is required"),
         address: Yup.string().required("Address is required"),
         ...dynamicSchema,
@@ -199,7 +207,7 @@ export default function UserBooking() {
           questions.forEach((q) => {
             if (
               ["severity", "access", "sizeTier", "floors", "distance"].includes(
-                q.key,
+                q.key
               )
             ) {
               scores.push(values[q.key]);
@@ -531,16 +539,16 @@ export default function UserBooking() {
                                       // Extract local date
                                       const year = selectedDate.getFullYear();
                                       const month = String(
-                                        selectedDate.getMonth() + 1,
+                                        selectedDate.getMonth() + 1
                                       ).padStart(2, "0");
                                       const day = String(
-                                        selectedDate.getDate(),
+                                        selectedDate.getDate()
                                       ).padStart(2, "0");
                                       const formatted = `${year}-${month}-${day}`;
 
                                       setFieldValue(
                                         `availability[${index}].date`,
-                                        formatted,
+                                        formatted
                                       );
                                     }}
                                   />
@@ -580,7 +588,7 @@ export default function UserBooking() {
                                     value={
                                       slot.time
                                         ? new Date(
-                                            `2025-05-301T${slot.time}:00`,
+                                            `2025-05-301T${slot.time}:00`
                                           )
                                         : new Date()
                                     }
@@ -598,10 +606,10 @@ export default function UserBooking() {
 
                                       const year = now.getFullYear();
                                       const month = String(
-                                        now.getMonth() + 1,
+                                        now.getMonth() + 1
                                       ).padStart(2, "0");
                                       const day = String(
-                                        now.getDate(),
+                                        now.getDate()
                                       ).padStart(2, "0");
                                       const today = `${year}-${month}-${day}`;
                                       const isToday =
@@ -618,7 +626,7 @@ export default function UserBooking() {
                                       if (isPastTime) {
                                         Alert.alert(
                                           "Invalid Time",
-                                          "You cannot select a time in the past.",
+                                          "You cannot select a time in the past."
                                         );
                                         return;
                                       }
@@ -627,7 +635,7 @@ export default function UserBooking() {
                                         .slice(0, 5);
                                       setFieldValue(
                                         `availability[${index}].time`,
-                                        formatted,
+                                        formatted
                                       );
                                     }}
                                   />
@@ -647,7 +655,7 @@ export default function UserBooking() {
                                   if (values.availability.length === 1) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "At least one time slot must be chosen.",
+                                      "At least one time slot must be chosen."
                                     );
                                   } else {
                                     remove(index);
@@ -663,7 +671,7 @@ export default function UserBooking() {
                                   if (values.availability.length >= 3) {
                                     Alert.alert(
                                       "Action Not Allowed",
-                                      "You can only choose up to 3 time slots.",
+                                      "You can only choose up to 3 time slots."
                                     );
                                   } else {
                                     push({ date: "", time: "" });

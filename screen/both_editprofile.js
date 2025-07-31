@@ -17,8 +17,11 @@ import { Picker } from "@react-native-picker/picker";
 import { services_categories } from "../constants/category_constant";
 import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
+import { useNavigation } from "@react-navigation/native";
+import { signOut } from "firebase/auth";
 
-export default function EditProfile({ navigation }) {
+export default function EditProfile() {
+  const navigation = useNavigation();
   const [fontsLoaded] = useFonts({
     Sora: require("../assets/fonts/Sora-VariableFont_wght.ttf"),
     Inter: require("../assets/fonts/Inter-regular.ttf"),
@@ -32,6 +35,16 @@ export default function EditProfile({ navigation }) {
   const [showPickerIndex, setShowPickerIndex] = useState(null);
   const [show, setShow] = useState(false);
 
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      // Replace the whole stack so back-button can’t take them back in
+      navigation.replace("Login");
+    } catch (error) {
+      console.error("Error signing out:", error);
+      Alert.alert("Sign Out Error", error.message);
+    }
+  };
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -51,7 +64,7 @@ export default function EditProfile({ navigation }) {
               setSubcategory(
                 Array.isArray(data.subcategory)
                   ? data.subcategory.filter((s) => s.trim() !== "")
-                  : [],
+                  : []
               );
             }
           }
@@ -99,7 +112,7 @@ export default function EditProfile({ navigation }) {
     //cat is the current category name, index is the index of this category in the category array
 
     const selectedCategory = services_categories.find(
-      (c) => c.title === category[index],
+      (c) => c.title === category[index]
     ); // find full category obj(cat+ subcat)
 
     return (
@@ -130,8 +143,8 @@ export default function EditProfile({ navigation }) {
             <Text style={{ marginTop: 10 }}>Select subcategories</Text>
             {selectedCategory.subcategories.map((subtitle) => (
               <TouchableOpacity
-                key={subtitle}
-                onPress={() => addSubtitle(subtitle)}
+                key={subtitle.label}
+                onPress={() => addSubtitle(subtitle.label)}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -146,12 +159,12 @@ export default function EditProfile({ navigation }) {
                     borderWidth: 1,
                     borderRadius: 4,
                     marginRight: 10,
-                    backgroundColor: subcategory.includes(subtitle)
+                    backgroundColor: subcategory.includes(subtitle.label)
                       ? "#9A5A3C"
                       : "transparent",
                   }}
                 />
-                <Text style={{ textAlign: "left" }}>{subtitle}</Text>
+                <Text style={{ textAlign: "left" }}>{subtitle.label}</Text>
               </TouchableOpacity>
             ))}
           </>
@@ -190,7 +203,7 @@ export default function EditProfile({ navigation }) {
       if (/[a-zA-Z]/.test(form.contact)) {
         Alert.alert(
           "Invalid Contact",
-          "Contact number must not contain letters.",
+          "Contact number must not contain letters."
         );
         return;
       }
@@ -198,7 +211,7 @@ export default function EditProfile({ navigation }) {
       if (!/^[a-zA-Z0-9]+$/.test(form.NRIC)) {
         Alert.alert(
           "Invalid NRIC/Passport",
-          "Only letters and numbers allowed.",
+          "Only letters and numbers allowed."
         );
         return;
       }
@@ -206,7 +219,7 @@ export default function EditProfile({ navigation }) {
       if (/[a-zA-Z]/.test(form.bankNumber)) {
         Alert.alert(
           "Invalid Bank Number",
-          "Bank number must contain digits only.",
+          "Bank number must contain digits only."
         );
         return;
       }
@@ -214,7 +227,7 @@ export default function EditProfile({ navigation }) {
       if (!category.length || !subcategory.length) {
         Alert.alert(
           "Error",
-          "Please select at least one category and one subcategory.",
+          "Please select at least one category and one subcategory."
         );
         return;
       }
@@ -353,9 +366,9 @@ export default function EditProfile({ navigation }) {
                       updated.some((cat) =>
                         services_categories
                           .find((c) => c.title === cat)
-                          ?.subcategories.includes(sub),
-                      ),
-                    ),
+                          ?.subcategories.includes(sub)
+                      )
+                    )
                   );
                 }}
                 style={[
@@ -378,6 +391,10 @@ export default function EditProfile({ navigation }) {
 
         <TouchableOpacity style={style.button} onPress={handleSave}>
           <Text style={style.buttonText}>Save Changes</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={style.button} onPress={() => handleSignOut()}>
+          <Text style={style.buttonText}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </View>

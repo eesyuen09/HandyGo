@@ -162,7 +162,7 @@ export const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     backgroundColor: colours.white,
-    padding: 12,
+    padding: 15,
     borderRadius: 10,
     marginVertical: 8,
   },
@@ -171,6 +171,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginVertical: 10,
+    alignSelf: "center",
+    padding: 10,
   },
 
   buttonRow: {
