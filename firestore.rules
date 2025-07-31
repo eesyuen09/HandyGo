@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Users collection
+    match /users/{userId}/reviews/{reviewId} {
+      allow create: if request.auth != null;
+      allow read: if true;
+    }
+
+    // 1. Users collection
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow delete: if request.auth.uid == userId;
+      allow create: if request.auth != null;
+      allow update: if request.auth != null && (
+        // the user themself can update anything on their own profile
+        request.auth.uid == userId
+        ||
+        // anyone else—but only when they're writing exactly these two fields
+        request.writeFields.hasOnly(["averageRating","ratingCount"])
+      );
+    }
+    
+
+    // 2. CategoryToWorker
+    match /CategoryToWorker/{categoryId} {
+      allow read, write: if false;
+    }
+
+    // 3. SubcategoryToWorker
+    match /SubcategoryToWorker/{subcategoryId} {
+      allow read, write: if false;
+    }
+
+    // 4. InitialisationStatus
+    match /InitialisationStatus/{docId} {
+      allow read: if false;
+      allow create: if
+        !exists(/databases/$(database)/documents/InitialisationStatus/$(docId));
+      allow update, delete: if false;
+    }
+
+    // 5. Worker Schedules
+    match /users/{workerId}/schedules/{scheduleId} {
+      allow read, write: if
+        request.auth != null
+        && request.auth.uid == workerId;
+    }
+
+    // 6. Bookings
+      match /booking/{bookingId} {
+  allow create: if request.auth != null
+    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'user';
+    
+    allow read: if request.auth != null && (
+    resource.data.userId == request.auth.uid
+    || resource.data.workerId == request.auth.uid
+    // any business user can see unassigned bookings
+    || (
+      get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
+      
+    )
+  );
+  
+   allow update: if request.auth != null
+    && (
+      resource.data.userId == request.auth.uid
+      || resource.data.workerId == request.auth.uid
+      || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'business'
+    );
+  
+
+  
+
+  
+}
+
+
+  // 7. earnings
+  match /users/{workerId}/earnings/{earningId} {
+  allow read, write: if request.auth != null
+    && request.auth.uid == workerId;
+}
+
+
+    // 7. Fallback
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

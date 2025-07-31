@@ -13,7 +13,9 @@ import Biz_activitypage from "../screen/biz_activitypage";
 import Biz_urgentTask from "../screen/biz_urgenttask";
 import Login from "../screen/login"; // placeholder
 import Signup from "../screen/signup"; // placeholder
+import FinanceScreen from "../screen/biz_finance";
 import EditProfile from "../screen/both_editprofile";
+
 
 const { darkest_coco, main_coco, beige, grey, white, yellow_brown, black } =
   colours;
@@ -61,8 +63,8 @@ export default function WorkerTabs() {
         }}
       />
       <Tab.Screen
-        name="UrgentTask"
-        component={Biz_urgentTask}
+        name="Finance"
+        component={FinanceScreen}
         options={{
           //options meaning: to customize the tab appearance or behaviour
           tabBarIcon: ({ color }) => (
@@ -71,7 +73,7 @@ export default function WorkerTabs() {
           tabBarLabel: "",
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Chat"
         component={Login} // placeholder
         options={{
@@ -80,7 +82,7 @@ export default function WorkerTabs() {
           ),
           tabBarLabel: "",
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Edit Profile"
         component={EditProfile} // placeholder

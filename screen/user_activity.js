@@ -20,7 +20,6 @@ import {
 import { colours, style } from "../components/style_u_activity.js";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFonts } from "expo-font";
-
 //fetch data from firebase
 import { getAuth } from "firebase/auth";
 import {
@@ -33,6 +32,29 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebaseConfig";
 import { FlatList } from "react-native";
+import { services_categories } from "../constants/category_constant";
+
+function navigateToBooking(navigation, item) {
+  // find service category data by title or subcategory
+  const serviceData = services_categories.find(
+    (cat) => cat.title === item.serviceType
+  );
+  if (!serviceData) {
+    console.error("Service type not found for retry/rebook:", item.category);
+    return;
+  }
+  navigation.navigate("UserBooking", {
+    serviceType: serviceData.title,
+    subcategory: item.category,
+    description: serviceData.description,
+    price: item.price,
+    duration: item.duration,
+    postcode: item.postcode,
+    address: item.address,
+    notes: item.notes || "",
+    questions: serviceData.questions || [],
+  });
+}
 
 export default function UserActivity({ navigation }) {
   const [completedTasks, setCompletedTasks] = useState([]);
@@ -104,13 +126,23 @@ export default function UserActivity({ navigation }) {
         const task = {
           id: data.orderID || docSnap.id,
           category: data.type || "Unknown",
+          serviceType: data.serviceType,
           time: `${date} | ${time}`,
-          location: `${data.state || ""}, ${data.postcode || ""}`,
+          location: `${data.postcode || ""}, ${data.state || ""}`,
           price: data.price || "35.99",
           icon: getIcon(data.serviceType).name,
           iconFamily: getIcon(data.serviceType).family,
           isCompleted: data.isCompleted || false,
           status: data.status || "pending",
+          workerId: data.workerId,
+          userId: data.userId || "unknown",
+          duration: data.duration,
+          address: data.address || "",
+          postcode: data.postcode,
+          gender: data.gender || "",
+          rating: data.rating || 0,
+          notes: data.notes || "",
+          questions: data.questions || [],
         };
 
         if (task.isCompleted) {
@@ -123,7 +155,7 @@ export default function UserActivity({ navigation }) {
 
       setCompletedTasks(completedTasks);
       setIncompleteTasks(incompletedTasks);
-      console.log("completedtask", completedTasks);
+      // console.log("completedtask", completedTasks);
     } catch (err) {
       console.error("Failed to fetch Firestore data:", err.message);
       Alert.alert("Error", "Failed to load your bookings.");
@@ -159,68 +191,76 @@ export default function UserActivity({ navigation }) {
         {/* Price */}
         <View style={style.taskMeta}>
           <Text style={style.cardPrice}>${item.price}</Text>
-        </View>
-      </View>
 
-      {/* Status Row */}
-      {!item.isCompleted && (
-        <View style={style.statusRow}>
-          <View
-            style={[
-              style.statusBadge,
-              item.status === "pending"
-                ? style.statusPending
-                : item.status === "confirmed"
-                  ? style.statusScheduled
-                  : style.statusFailed,
-            ]}
-          >
-            <Text
-              style={[
-                style.statusText,
-                item.status === "pending"
-                  ? style.textPending
-                  : item.status === "confirmed" || item.status === "scheduled"
-                    ? style.textScheduled
-                    : item.status === "cancelled"
-                      ? style.textCancelled
-                      : style.textFailed,
-              ]}
-            >
-              {item.status === "pending"
-                ? "Pending"
-                : item.status === "confirmed" || item.status === "scheduled"
-                  ? "Confirmed"
-                  : item.status === "cancelled"
-                    ? "Cancelled"
-                    : "Failed"}
-            </Text>
-          </View>
+          {!item.isCompleted && (
+            <View style={style.statusRow}>
+              <View
+                style={[
+                  style.statusBadge,
+                  item.status === "pending"
+                    ? style.statusPending
+                    : item.status === "confirmed" || item.status === "scheduled"
+                      ? style.statusConfirmed
+                      : item.status === "cancelled"
+                        ? style.statusCancelled
+                        : style.statusFailed,
+                ]}
+              >
+                <Text
+                  style={[
+                    style.statusText,
+                    item.status === "pending"
+                      ? style.textPending
+                      : item.status === "Confirmed" ||
+                          item.status === "scheduled"
+                        ? style.textScheduled
+                        : item.status === "cancelled"
+                          ? style.textCancelled
+                          : style.textFailed,
+                  ]}
+                >
+                  {item.status === "pending"
+                    ? "Pending"
+                    : item.status === "scheduled"
+                      ? "Scheduled"
+                      : item.status === "cancelled"
+                        ? "Cancelled"
+                        : "Failed"}
+                </Text>
+              </View>
 
-          {item.status === "failed" && (
-            <TouchableOpacity
-              onPress={() => navigation.navigate("UserBooking")}
-            >
-              <Text style={style.viewText}>Retry Booking</Text>
-            </TouchableOpacity>
+              {item.status.toLowerCase() === "failed" ||
+                (item.status.toLowerCase() === "cancelled" && (
+                  <View style={style.retryRow}>
+                    <TouchableOpacity
+                      onPress={() => navigateToBooking(navigation, item)}
+                    >
+                      <Text style={style.viewText}>Retry Booking</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+            </View>
           )}
         </View>
-      )}
+      </View>
 
       {/* Completed Task Actions */}
       {item.isCompleted && (
         <View style={style.buttonRow}>
           <TouchableOpacity
-            onPress={() => Alert.alert("Review Task", "Please leave a review")}
-          >
-            <Text style={style.actionText}>👍 Review</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
             onPress={() =>
-              navigation.navigate("UserBooking", { prefillData: item })
+              navigation.navigate("UserRating", {
+                orderId: item.id,
+                workerId: item.workerId,
+                userId: item.userId,
+                type: item.type,
+              })
             }
           >
+            <Text style={style.actionText}> 👍 Review</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigateToBooking(navigation, item)}>
             <Text style={style.actionText}>🔁 Rebook</Text>
           </TouchableOpacity>
         </View>
