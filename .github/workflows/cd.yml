@@ -35,6 +35,8 @@ jobs:
           CI: 1
         run: |
           set -o pipefail
+          # authenticate with Expo using CI token
+          npx expo login --token $EXPO_TOKEN
           PUBLISHED_JSON=$(npx expo publish --json 2>/dev/null)
           PUBLISHED_URL=$(echo "$PUBLISHED_JSON" | jq -r .url)
           echo "::set-output name=published_url::$PUBLISHED_URL"
