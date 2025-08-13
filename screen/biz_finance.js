@@ -19,6 +19,7 @@ import {
   updateDoc,
   Timestamp,
   getDoc,
+  onSnapshot
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
@@ -58,21 +59,18 @@ export default function FinanceScreen() {
 
   //get total earnings
   useEffect(() => {
-    async function fetchEarningsAndRating() {
-      try {
-        const auth = getAuth();
-        const userRef = doc(db, "users", auth.currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) {
-          setTotalEarnings(userSnap.data().totalEarnings || 0);
-          setAveRating(userSnap.data().averageRating || 0);
-        }
-      } catch (error) {
-        console.warn("Error fetching data", error);
-      }
+  const auth = getAuth();
+  const userRef = doc(db, "users", auth.currentUser.uid);
+
+  const unsubscribe = onSnapshot(userRef, (userSnap) => {
+    if (userSnap.exists()) {
+      setTotalEarnings(userSnap.data().totalEarnings || 0);
+      setAveRating(userSnap.data().averageRating || 0);
     }
-    fetchEarningsAndRating();
-  }, []);
+  });
+
+  return () => unsubscribe(); // cleanup when leaving screen
+}, []);
 
   // Fetch & summarize on mount
   useEffect(() => {
