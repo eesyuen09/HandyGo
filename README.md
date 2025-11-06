@@ -121,8 +121,6 @@ It streamlines booking, improves transparency, and empowers workers to manage th
 
 ## 🖼️ Screenshots
 
-## 🖼️ Screenshots
-
 > Representative app screenshots showcasing both Client and Worker interfaces.
 
 | Client Home | Worker Dashboard |
