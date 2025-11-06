@@ -1,4 +1,4 @@
-# HandyGo — NUS Orbital 2025 (Team #7376, Artemis Level)
+# HandyGo — NUS Orbital 2025 (Artemis Level)
 
 ### A Dual-Interface Home Services Platform with Service Matching & AI-Powered Pricing
 
@@ -41,16 +41,13 @@ It streamlines booking, improves transparency, and empowers workers to manage th
 ---
 
 ## 📚 Table of Contents
-1. [How to Run the Project](#-how-to-run-the-project)
-   - [Option 1: Android Emulator](#option-1-android-emulator)
-   - [Option 2: Android Phone](#option-2-android-phone)
-2. [Features](#-features)
-   - [Client Interface](#client-interface)
-   - [Business/Worker Interface](#businessworker-interface)
-3. [Technology Used](#-technology-used)
-4. [Screenshots](#-screenshots)
-5. [Example Use Case](#-example-use-case)
-6. [License](#-license)
+1. [How to Run the Project](##how-to-run-the-project)
+2. [Features](##features)
+   - [Client Interface](###client-interface)
+   - [Business/Worker Interface](###businessworker-interface)
+3. [Technology Used](##technology-used)
+4. [Screenshots](##screenshots)
+5. [Example Use Case](##example-use-case)
 
 ---
 
@@ -124,15 +121,17 @@ It streamlines booking, improves transparency, and empowers workers to manage th
 
 ## 🖼️ Screenshots
 
-> Insert representative app screenshots here.
+## 🖼️ Screenshots
+
+> Representative app screenshots showcasing both Client and Worker interfaces.
 
 | Client Home | Worker Dashboard |
 |--------------|------------------|
-| ![Client Home](docs/screenshots/client_home.png) | ![Worker Dashboard](docs/screenshots/worker_dashboard.png) |
+| <img src="https://github.com/user-attachments/assets/502d7fd4-0bc7-49cf-ac5d-8572d106df24" alt="Client Home" width="250" height="550"> | <img src="https://github.com/user-attachments/assets/6adb98dc-b0ef-4e70-9aff-bef59a8d19a7" alt="Worker Dashboard" width="205" height="502"> |
 
-| Booking Flow | Earnings Analytics |
-|---------------|--------------------|
-| ![Booking Flow](docs/screenshots/booking_flow.png) | ![Earnings Analytics](docs/screenshots/earnings_chart.png) |
+| Booking Flow | Earnings Analytics | Schedule Tracking |
+|---------------|--------------------|-------------------|
+| <img src="https://github.com/user-attachments/assets/c0d91a40-a09d-439e-8cba-3e7c3ebfb180" alt="Booking Flow" width="208" height="461"> | <img src="https://github.com/user-attachments/assets/ae0b0c74-c3c7-4476-95db-9d788172b2e3" alt="Earnings Analytics" width="578" height="355"> | <img src="https://github.com/user-attachments/assets/9029a1ce-0c6d-4502-ab91-964794f7e63d" alt="Schedule Tracking" width="163" height="353"> |
 
 ---
 
