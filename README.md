@@ -41,13 +41,13 @@ It streamlines booking, improves transparency, and empowers workers to manage th
 ---
 
 ## 📚 Table of Contents
-1. [How to Run the Project](##how-to-run-the-project)
-2. [Features](##features)
-   - [Client Interface](###client-interface)
-   - [Business/Worker Interface](###businessworker-interface)
-3. [Technology Used](##technology-used)
-4. [Screenshots](##screenshots)
-5. [Example Use Case](##example-use-case)
+1. [How to Run the Project](#%EF%B8%8F-how-to-run-the-project)
+2. [Features](#-features)
+   - [Client Interface](#-client-interface)
+   - [Business/Worker Interface](#-businessworker-interface)
+3. [Technology Used](#-technology-used)
+4. [Screenshots](#-screenshots)
+5. [Example Use Case](#-example-use-case)
 
 ---
 
